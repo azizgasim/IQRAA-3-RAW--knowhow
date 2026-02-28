@@ -1,0 +1,9 @@
+[project]
+name = "iqra12-operations"
+version = "1.0.0"
+description = "IQRA-12 Core Operations Layer"
+requires-python = ">=3.11"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

@@ -1,0 +1,353 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#                    IQRA-12 Text Atomization Model
+#                        نموذج تقطيع النصوص
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# "الدليل يحتاج موقع دقيق، لا إشارة لكتاب"
+#
+# الدروس الحاكمة:
+# - Eugene Garfield: التوثيق = شبكة تشير لمواضع دقيقة
+# - Sarah Bowen Savant: التوريق الرقمي وفصل المتن عن الحاشية
+# - Maxim Romanov: mARkdown والوسم الآلي
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+metadata:
+  component: "Text Atomization Model"
+  component_ar: "نموذج تقطيع النصوص"
+  version: "1.0.0"
+  purpose: "تقسيم النصوص إلى وحدات قابلة للاستشهاد والربط"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              المبادئ الحاكمة
+# ═══════════════════════════════════════════════════════════════════════════════
+
+governing_principles:
+
+  principle_1:
+    name: "Evidence Requires Precise Location"
+    name_ar: "الدليل يحتاج موقع دقيق"
+    source: "Eugene Garfield"
+    field: "Citation Indexing & Bibliometrics"
+    rule: |
+      التوثيق ليس قائمة مراجع، بل شبكة تشير لمواضع دقيقة.
+      الربط بالفقرة لا بالكتاب.
+    implementation: |
+      كل evidence_item يحمل:
+      - doc_id
+      - passage_id
+      - char_start
+      - char_end
+      - page_ref (إن توفر)
+      
+  principle_2:
+    name: "Hierarchical Decomposition"
+    name_ar: "التفكيك الهرمي"
+    rule: |
+      النص يُقطَّع إلى مستويات هرمية:
+      Document → Section → Passage → Sentence
+      كل مستوى له معرّف ويمكن الاستشهاد به.
+      
+  principle_3:
+    name: "Context Preservation"
+    name_ar: "الحفاظ على السياق"
+    rule: |
+      كل وحدة نصية تحمل سياقها (قبل/بعد).
+      البحث الدقيق لا يعني فقدان السياق.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              مستويات التقطيع
+# ═══════════════════════════════════════════════════════════════════════════════
+
+atomization_levels:
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # المستوى 1: الوثيقة
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  level_1_document:
+    name: "Document"
+    name_ar: "الوثيقة"
+    description: "وحدة الاقتناء الأساسية: مجلد، كتاب، مقال"
+    
+    fields:
+      - doc_id: "معرّف الوثيقة"
+      - work_id: "معرّف العمل الأصلي (إن وجد)"
+      - edition_id: "معرّف الطبعة (إن وجد)"
+      - source_id: "مصدر الاقتناء"
+      - title: "العنوان"
+      - total_chars: "عدد الأحرف الكلي"
+      - total_pages: "عدد الصفحات (إن توفر)"
+      - language: "اللغة"
+      - script: "نظام الكتابة"
+      - acquisition_date: "تاريخ الاقتناء"
+      - corpus_version: "إصدار الكوربس"
+      - quality_level: "مستوى الجودة (A/B/C/D)"
+      - rights_status: "حالة الحقوق"
+      
+  # ═══════════════════════════════════════════════════════════════════════════
+  # المستوى 2: الأقسام الهيكلية
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  level_2_structural:
+    name: "Structural Block"
+    name_ar: "الكتلة الهيكلية"
+    description: "باب، فصل، مبحث، عنوان"
+    
+    types:
+      - KITAB: "كتاب (داخل مجموع)"
+      - BAB: "باب"
+      - FASL: "فصل"
+      - MABHATH: "مبحث"
+      - MASALA: "مسألة"
+      - FARA: "فرع"
+      
+    fields:
+      - section_id: "معرّف القسم"
+      - doc_id: "معرّف الوثيقة"
+      - parent_section_id: "القسم الأب"
+      - section_type: "نوع القسم"
+      - title: "العنوان"
+      - level: "المستوى في الشجرة"
+      - sequence: "الترتيب"
+      - char_start: "بداية الأحرف"
+      - char_end: "نهاية الأحرف"
+      - page_start: "صفحة البداية"
+      - page_end: "صفحة النهاية"
+      
+    lessons:
+      - source: "Sarah Bowen Savant"
+        lesson: |
+          التوريق الرقمي: استخدام الخوارزميات لفصل 
+          المتن عن الحاشية عن التعليق في الصفحة الواحدة.
+        implementation: "Semantic chunking with layer detection"
+        
+  # ═══════════════════════════════════════════════════════════════════════════
+  # المستوى 3: المقاطع الدلالية
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  level_3_passage:
+    name: "Passage"
+    name_ar: "المقطع"
+    description: "وحدة دلالية متماسكة (فقرة أو مقطع مُقنن)"
+    
+    sizing_rules:
+      min_chars: 100
+      max_chars: 2000
+      ideal_chars: 500
+      rule: |
+        التقطيع حسب المعنى أولاً، ثم الحجم.
+        لا تقطع في منتصف جملة أو فكرة.
+        
+    fields:
+      - passage_id: "معرّف المقطع"
+      - doc_id: "معرّف الوثيقة"
+      - section_id: "معرّف القسم"
+      - sequence_in_section: "الترتيب داخل القسم"
+      - text: "نص المقطع"
+      - char_start: "بداية الأحرف"
+      - char_end: "نهاية الأحرف"
+      - page_ref: "مرجع الصفحة"
+      - language: "اللغة"
+      - script: "نظام الكتابة"
+      - normalization_profile: "ملف التطبيع المستخدم"
+      - context_before: "السياق السابق (اختياري)"
+      - context_after: "السياق اللاحق (اختياري)"
+      - quality_flags: "علامات الجودة"
+      - corpus_version: "إصدار الكوربس"
+      
+    quality_flags:
+      - OCR_ERROR_SUSPECTED: "اشتباه خطأ OCR"
+      - ENCODING_ISSUE: "مشكلة ترميز"
+      - INCOMPLETE: "ناقص"
+      - NEEDS_REVIEW: "يحتاج مراجعة"
+      
+  # ═══════════════════════════════════════════════════════════════════════════
+  # المستوى 4: الجمل
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  level_4_sentence:
+    name: "Sentence"
+    name_ar: "الجملة"
+    description: "أصغر وحدة للبحث الدقيق"
+    
+    fields:
+      - sentence_id: "معرّف الجملة"
+      - passage_id: "معرّف المقطع"
+      - sequence_in_passage: "الترتيب داخل المقطع"
+      - text: "نص الجملة"
+      - char_start: "بداية الأحرف (نسبي للمقطع)"
+      - char_end: "نهاية الأحرف"
+      
+    notes: |
+      الجمل تُولَّد عند الطلب، لا تُخزَّن دائماً.
+      للنصوص العربية: استخدام tokenizers متخصصة.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              التطبيع والترميز
+# ═══════════════════════════════════════════════════════════════════════════════
+
+normalization:
+
+  description: |
+    معايير تطبيع النص العربي.
+    
+  profiles:
+    
+    standard:
+      name: "التطبيع القياسي"
+      operations:
+        - "توحيد الهمزات"
+        - "توحيد الألفات (ا، أ، إ، آ → ا)"
+        - "إزالة التشكيل"
+        - "توحيد التاء المربوطة والهاء"
+        
+    minimal:
+      name: "التطبيع الأدنى"
+      operations:
+        - "توحيد المسافات فقط"
+        - "إزالة الأحرف غير المرئية"
+        
+    scholarly:
+      name: "التطبيع العلمي"
+      operations:
+        - "الحفاظ على التشكيل"
+        - "الحفاظ على الهمزات"
+        - "توحيد المسافات فقط"
+        
+  fields:
+    - text_original: "النص الأصلي"
+    - text_normalized: "النص المطبّع"
+    - normalization_profile: "ملف التطبيع"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              الوسم الآلي (mARkdown)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+auto_tagging:
+
+  description: |
+    الوسم الآلي للكيانات داخل النص.
+    
+  source: "Maxim Romanov"
+  field: "OpenITI mARkdown"
+  
+  entity_tags:
+    - PERSON:
+        pattern: "@{person_uri}@"
+        example: "@0505Ghazali@"
+    - PLACE:
+        pattern: "#{place_uri}#"
+        example: "#Baghdad#"
+    - WORK:
+        pattern: "${work_uri}$"
+        example: "$IhyaUlumDin$"
+    - DATE:
+        pattern: "~{date}~"
+        example: "~505AH~"
+        
+  structural_tags:
+    - CHAPTER: "### |"
+    - SECTION: "## |"
+    - PARAGRAPH: "# |"
+    - HADITH: "@ |"
+    - VERSE: "% |"
+    
+  lessons:
+    - source: "Maxim Romanov"
+      lesson: |
+        الوسم الآلي: تعليم الوكيل استخراج 
+        (الأعلام، الأماكن، الكتب) ووسمها آلياً في النص.
+      implementation: "Arabic NER + mARkdown tagging"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              طبقات النص
+# ═══════════════════════════════════════════════════════════════════════════════
+
+text_layers:
+
+  description: |
+    التمييز بين طبقات النص المختلفة.
+    
+  layers:
+    - MATN:
+        name_ar: "المتن"
+        description: "النص الأصلي للمؤلف"
+        priority: 1
+        
+    - SHARH:
+        name_ar: "الشرح"
+        description: "شرح الشارح"
+        priority: 2
+        
+    - HASHIYA:
+        name_ar: "الحاشية"
+        description: "تعليق على الشرح"
+        priority: 3
+        
+    - TALIQ:
+        name_ar: "تعليق"
+        description: "تعليقات إضافية"
+        priority: 4
+        
+    - TAHQIQ:
+        name_ar: "تحقيق"
+        description: "ملاحظات المحقق"
+        priority: 5
+        
+  lessons:
+    - source: "Sarah Bowen Savant"
+      lesson: |
+        تعليم الوكيل التفريق بين النص الأصلي 
+        وتعليق الشارح في التحليل لتجنب الخلط في العزو.
+      implementation: "Layer detection algorithm"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              جداول BigQuery
+# ═══════════════════════════════════════════════════════════════════════════════
+
+bigquery_tables:
+
+  documents:
+    description: "جدول الوثائق"
+    partition_by: "acquisition_date"
+    cluster_by: ["source_id", "language", "quality_level"]
+    
+  sections:
+    description: "جدول الأقسام الهيكلية"
+    cluster_by: ["doc_id", "section_type", "level"]
+    
+  passages:
+    description: "جدول المقاطع (الجدول الرئيسي)"
+    partition_by: "corpus_version"
+    cluster_by: ["doc_id", "section_id", "language"]
+    notes: |
+      هذا هو الجدول الأكثر استخداماً.
+      يحتوي على مئات الملايين من السجلات.
+      
+  passage_embeddings:
+    description: "تمثيلات المقاطع (vectors)"
+    cluster_by: ["doc_id"]
+    notes: |
+      للبحث الدلالي (Semantic Search).
+      يُخزَّن بشكل منفصل للكفاءة.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              مؤشرات الجودة
+# ═══════════════════════════════════════════════════════════════════════════════
+
+quality_metrics:
+
+  passage_level:
+    - offsets_valid: "صحة الـ offsets"
+    - encoding_clean: "نظافة الترميز"
+    - length_in_range: "الطول ضمن النطاق"
+    - context_available: "توفر السياق"
+    
+  document_level:
+    - completeness: "اكتمال النص"
+    - structure_extracted: "استخراج البنية"
+    - metadata_complete: "اكتمال الميتاداتا"
+    - quality_level_assigned: "تعيين مستوى الجودة"
+
+# ═══════════════════════════════════════════════════════════════════════════════

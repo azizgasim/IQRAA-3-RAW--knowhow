@@ -1,0 +1,67 @@
+{
+  "version": "1.0",
+  "dataset": "iqraa_12_dataset",
+  "total_tables": 134,
+  "categories": {
+    "01_fiqh": {
+      "tables": ["01_fiqh_rulings", "02_fiqh_fatwas", "03_fiqh_nawazil"],
+      "keywords": ["فقه", "حكم", "فتوى", "حلال", "حرام", "مسألة"]
+    },
+    "02_hadith": {
+      "tables": ["04_hadith_texts", "05_hadith_chains", "06_hadith_narrators", "07_hadith_rulings"],
+      "keywords": ["حديث", "رواية", "سند", "متن", "راوي", "إسناد"]
+    },
+    "03_tafsir": {
+      "tables": ["08_tafsir_verses", "09_tafsir_explanations"],
+      "keywords": ["تفسير", "آية", "سورة", "قرآن", "معنى"]
+    },
+    "04_aqeedah": {
+      "tables": ["10_aqeedah_texts", "04_kalam_schools"],
+      "keywords": ["عقيدة", "إيمان", "توحيد", "كلام", "أشاعرة", "ماتريدية"]
+    },
+    "05_history": {
+      "tables": ["11_rulers_segments", "12_events_timeline", "13_biographies"],
+      "keywords": ["تاريخ", "سيرة", "خليفة", "سلطان", "معركة", "فتح"]
+    },
+    "06_literature": {
+      "tables": ["14_poetry", "15_prose", "16_rhetoric"],
+      "keywords": ["شعر", "أدب", "بلاغة", "نثر", "قصيدة", "بيت"]
+    },
+    "07_philosophy": {
+      "tables": ["17_falsafa_texts", "18_mantiq", "19_ethics"],
+      "keywords": ["فلسفة", "منطق", "أخلاق", "حكمة", "عقل"]
+    },
+    "08_sufism": {
+      "tables": ["20_tasawwuf_texts", "21_tariqas", "22_spiritual_terms"],
+      "keywords": ["تصوف", "طريقة", "ولي", "زهد", "مقام", "حال"]
+    },
+    "09_language": {
+      "tables": ["23_nahw", "24_sarf", "25_balagha", "26_lexicons"],
+      "keywords": ["نحو", "صرف", "لغة", "معجم", "إعراب"]
+    },
+    "10_medicine": {
+      "tables": ["27_tibb_texts", "28_treatments", "29_anatomy"],
+      "keywords": ["طب", "علاج", "مرض", "دواء", "تشريح"]
+    },
+    "11_science": {
+      "tables": ["30_astronomy", "31_mathematics", "32_geography"],
+      "keywords": ["فلك", "رياضيات", "جغرافيا", "حساب", "هندسة"]
+    },
+    "12_law": {
+      "tables": ["33_qada", "34_siyasa_shariyya", "35_contracts"],
+      "keywords": ["قضاء", "سياسة شرعية", "عقد", "شهادة", "حد"]
+    },
+    "13_manuscripts": {
+      "tables": ["36_manuscript_catalog", "37_copyists", "38_libraries"],
+      "keywords": ["مخطوط", "نسخة", "ناسخ", "مكتبة", "فهرس"]
+    },
+    "14_education": {
+      "tables": ["39_madrasas", "40_ijazas", "41_scholarly_chains"],
+      "keywords": ["مدرسة", "إجازة", "تلميذ", "شيخ", "طلب العلم"]
+    },
+    "15_indexes": {
+      "tables": ["text_segments_micro_index", "book_metadata_registry", "authors_index"],
+      "keywords": ["فهرس", "كتاب", "مؤلف", "عنوان"]
+    }
+  }
+}

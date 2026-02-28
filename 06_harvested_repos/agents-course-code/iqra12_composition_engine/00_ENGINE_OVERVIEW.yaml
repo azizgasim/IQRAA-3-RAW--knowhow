@@ -1,0 +1,411 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#                    IQRA-12 Dynamic Composition Engine
+#                    محرك التكوين الديناميكي
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# المبدأ المركزي:
+# "الوكيل ليس كياناً ثابتاً، بل تركيبة ديناميكية تتشكل من السؤال"
+#
+# هذا المحرك يحول سؤال الباحث إلى Pipeline من العمليات الذرية
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+metadata:
+  component: "Dynamic Composition Engine"
+  version: "1.0.0"
+  purpose: "تحويل سؤال الباحث إلى pipeline قابل للتنفيذ"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              المعمارية العامة
+# ═══════════════════════════════════════════════════════════════════════════════
+
+architecture:
+  overview: |
+    ┌─────────────────────────────────────────────────────────────────────────┐
+    │                        سؤال الباحث (Input)                              │
+    └─────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼
+    ┌─────────────────────────────────────────────────────────────────────────┐
+    │                    1. Question Parser (محلل الأسئلة)                    │
+    │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐       │
+    │  │ Question    │ │ Entity      │ │ Scope       │ │ Output      │       │
+    │  │ Classifier  │ │ Extractor   │ │ Detector    │ │ Detector    │       │
+    │  └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘       │
+    └─────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼
+                          ┌───────────────────────┐
+                          │   Parsed Question     │
+                          │   (سؤال محلل)         │
+                          └───────────────────────┘
+                                      │
+                                      ▼
+    ┌─────────────────────────────────────────────────────────────────────────┐
+    │                  2. Pipeline Builder (باني الـ Pipeline)                │
+    │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐       │
+    │  │ Operation   │ │ Dependency  │ │ Pipeline    │ │ Cost        │       │
+    │  │ Selector    │ │ Resolver    │ │ Optimizer   │ │ Estimator   │       │
+    │  └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘       │
+    └─────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼
+                          ┌───────────────────────┐
+                          │   Execution Plan      │
+                          │   (خطة التنفيذ)       │
+                          └───────────────────────┘
+                                      │
+                                      ▼
+    ┌─────────────────────────────────────────────────────────────────────────┐
+    │                  3. Pipeline Executor (منفذ الـ Pipeline)               │
+    │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐       │
+    │  │ Operation   │ │ State       │ │ Error       │ │ Progress    │       │
+    │  │ Runner      │ │ Manager     │ │ Handler     │ │ Tracker     │       │
+    │  └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘       │
+    └─────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼
+    ┌─────────────────────────────────────────────────────────────────────────┐
+    │                        النتيجة (Output)                                 │
+    └─────────────────────────────────────────────────────────────────────────┘
+
+  components:
+    - name: "Question Parser"
+      file: "01_question_parser.yaml"
+      purpose: "تحليل وفهم سؤال الباحث"
+      
+    - name: "Pipeline Builder"
+      file: "02_pipeline_builder.yaml"
+      purpose: "بناء خطة التنفيذ من العمليات"
+      
+    - name: "Pipeline Executor"
+      file: "03_pipeline_executor.yaml"
+      purpose: "تنفيذ الخطة وإدارة الحالة"
+      
+    - name: "Operation Registry"
+      file: "04_operation_registry.yaml"
+      purpose: "سجل العمليات وتبعياتها"
+      
+    - name: "Recipe Library"
+      file: "05_recipe_library.yaml"
+      purpose: "قوالب جاهزة لأسئلة شائعة"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              تدفق البيانات
+# ═══════════════════════════════════════════════════════════════════════════════
+
+data_flow:
+  
+  step_1_input:
+    name: "سؤال الباحث"
+    type: "ResearchQuestion"
+    example: "كيف انتقل مفهوم 'الجوهر' من أرسطو إلى علم الكلام الإسلامي؟"
+    
+  step_2_parsed:
+    name: "سؤال محلل"
+    type: "ParsedQuestion"
+    contains:
+      - question_type
+      - entities
+      - concepts
+      - temporal_scope
+      - geographic_scope
+      - expected_output
+      - complexity_estimate
+      
+  step_3_plan:
+    name: "خطة التنفيذ"
+    type: "ExecutionPlan"
+    contains:
+      - operations_sequence
+      - dependencies_graph
+      - parallelization_options
+      - estimated_cost
+      - checkpoints
+      
+  step_4_output:
+    name: "النتيجة"
+    type: "ResearchOutput"
+    contains:
+      - primary_output
+      - supporting_evidence
+      - provenance_chain
+      - quality_metrics
+      - execution_log
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              أنواع الأسئلة المدعومة
+# ═══════════════════════════════════════════════════════════════════════════════
+
+question_types:
+  
+  TRACING:
+    name_ar: "سؤال التتبع"
+    pattern: "كيف انتقل|من أين جاء|ما أصل|تطور|رحلة"
+    typical_operations: [E1, E2, E3, L2, T1, T2, T3, S1]
+    examples:
+      - "كيف انتقل مفهوم الجوهر من اليونانية إلى العربية؟"
+      - "ما أصل كلمة 'فلسفة' في العربية؟"
+      - "تتبع رحلة فكرة 'العدالة' من أرسطو إلى الفارابي"
+      
+  COMPARATIVE:
+    name_ar: "سؤال المقارنة"
+    pattern: "ما الفرق|قارن|كيف يختلف|التشابه"
+    typical_operations: [E1, E2, E3, E6, A3, A6, S5]
+    examples:
+      - "قارن بين موقف الأشاعرة والمعتزلة من الصفات"
+      - "ما الفرق بين القياس عند أرسطو والقياس الفقهي؟"
+      
+  INFLUENCE:
+    name_ar: "سؤال التأثير"
+    pattern: "هل أثر|ما تأثير|العلاقة بين"
+    typical_operations: [E1, E2, E4, L4, L5, T2, T3, A1, C1, C2]
+    examples:
+      - "هل أثر المنطق اليوناني على أصول الفقه؟"
+      - "ما تأثير الغزالي على الفلسفة اللاتينية؟"
+      
+  POSITION:
+    name_ar: "سؤال الموقف"
+    pattern: "ما موقف|رأي|كيف نظر"
+    typical_operations: [E1, E2, E5, A6, C1]
+    examples:
+      - "ما موقف ابن رشد من التوفيق بين الفلسفة والشريعة؟"
+      - "كيف نظر الغزالي إلى الفلاسفة؟"
+      
+  DEFINITION:
+    name_ar: "سؤال التعريف"
+    pattern: "ما معنى|ما هو|تعريف|المقصود بـ"
+    typical_operations: [E1, E6, T1, C5]
+    examples:
+      - "ما معنى 'الماهية' في الفلسفة الإسلامية؟"
+      - "ما المقصود بـ 'الكسب' عند الأشاعرة؟"
+      
+  NETWORK:
+    name_ar: "سؤال الشبكة"
+    pattern: "من تلاميذ|شيوخ|سلسلة|شبكة"
+    typical_operations: [E3, E4, L1, T3, S3]
+    examples:
+      - "من هم تلاميذ الغزالي الرئيسيون؟"
+      - "ارسم شبكة المتكلمين في القرن الخامس"
+      
+  TIMELINE:
+    name_ar: "سؤال الجدول الزمني"
+    pattern: "متى|ترتيب|تسلسل|مراحل"
+    typical_operations: [E1, E3, T2, T5, S4]
+    examples:
+      - "ما مراحل تطور علم الكلام؟"
+      - "رتب أحداث حياة ابن سينا"
+      
+  GAP_DISCOVERY:
+    name_ar: "سؤال اكتشاف الفجوات"
+    pattern: "ما المهمل|غير المدروس|الفجوات"
+    typical_operations: [A5, E1, E2]
+    examples:
+      - "ما المواضيع المهملة في دراسة المعتزلة؟"
+      - "أين الفجوات في أبحاث الفلسفة الإسلامية؟"
+      
+  SYNTHESIS:
+    name_ar: "سؤال التركيب"
+    pattern: "اكتب|لخص|أعد تقريراً|مراجعة"
+    typical_operations: [E1, E2, C1, C2, C4, S1, S2, W1, W2, V1, V2]
+    examples:
+      - "اكتب ورقة عن انتقال الفلسفة اليونانية إلى العربية"
+      - "لخص الجدل حول خلق القرآن"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              مثال شامل
+# ═══════════════════════════════════════════════════════════════════════════════
+
+complete_example:
+  
+  input:
+    question: "كيف انتقل مفهوم 'الجوهر' (οὐσία) من أرسطو إلى علم الكلام الإسلامي؟"
+    user_context:
+      expertise_level: "graduate"
+      preferred_output: "detailed_report"
+      
+  parsing_result:
+    question_type: "TRACING"
+    confidence: 0.95
+    
+    entities_extracted:
+      - entity: "أرسطو"
+        type: "PERSON"
+        role: "origin"
+        canonical_id: "aristotle_001"
+        
+      - entity: "علم الكلام"
+        type: "DOMAIN"
+        role: "destination"
+        
+    concepts_extracted:
+      - concept: "الجوهر"
+        original: "οὐσία"
+        domain: "metaphysics"
+        role: "traced_concept"
+        
+    temporal_scope:
+      start: "-350"  # أرسطو
+      end: "500 AH"  # علم الكلام المتقدم
+      
+    geographic_scope:
+      origin: "اليونان"
+      destination: "العالم الإسلامي"
+      intermediaries: ["سوريا", "العراق"]
+      
+    expected_output:
+      type: "NARRATIVE_WITH_EVIDENCE"
+      format: "detailed_report"
+      
+    complexity_estimate:
+      level: "HIGH"
+      estimated_operations: 12
+      estimated_tokens: 50000
+      
+  pipeline_generated:
+    id: "pipe_ousia_trace_001"
+    
+    phases:
+      - phase: 1
+        name: "الاستخراج الأولي"
+        operations:
+          - id: "step_1"
+            operation: "E1"
+            params:
+              query: "جوهر οὐσία أرسطو"
+              corpora: ["greek_philosophy", "arabic_philosophy", "kalam"]
+            outputs_to: ["step_3", "step_4"]
+            
+          - id: "step_2"
+            operation: "E2"
+            params:
+              concept: "substance/essence"
+              similarity_threshold: 0.7
+            outputs_to: ["step_3", "step_4"]
+            
+      - phase: 2
+        name: "استخراج الكيانات والعلاقات"
+        depends_on: [1]
+        operations:
+          - id: "step_3"
+            operation: "E3"
+            params:
+              types: ["PERSON", "WORK", "SCHOOL"]
+            inputs_from: ["step_1", "step_2"]
+            outputs_to: ["step_5", "step_6"]
+            
+          - id: "step_4"
+            operation: "E6"
+            params:
+              domain: "metaphysics"
+            inputs_from: ["step_1", "step_2"]
+            outputs_to: ["step_7"]
+            
+      - phase: 3
+        name: "الربط والتتبع"
+        depends_on: [2]
+        operations:
+          - id: "step_5"
+            operation: "L2"
+            params:
+              source_lang: "greek"
+              target_lang: "arabic"
+            inputs_from: ["step_3"]
+            outputs_to: ["step_8"]
+            
+          - id: "step_6"
+            operation: "T3"
+            params:
+              trace_type: "INTELLECTUAL"
+            inputs_from: ["step_3"]
+            outputs_to: ["step_8"]
+            
+          - id: "step_7"
+            operation: "T1"
+            params:
+              word: "جوهر"
+              origin: "οὐσία"
+            inputs_from: ["step_4"]
+            outputs_to: ["step_8"]
+            
+      - phase: 4
+        name: "التحليل والتتبع المفاهيمي"
+        depends_on: [3]
+        operations:
+          - id: "step_8"
+            operation: "T2"
+            params:
+              concept: "الجوهر"
+              track_transformations: true
+            inputs_from: ["step_5", "step_6", "step_7"]
+            outputs_to: ["step_9"]
+            
+      - phase: 5
+        name: "البناء"
+        depends_on: [4]
+        operations:
+          - id: "step_9"
+            operation: "C1"
+            params:
+              bundle_type: "conceptual_tracing"
+            inputs_from: ["step_8"]
+            outputs_to: ["step_10"]
+            
+          - id: "step_10"
+            operation: "C2"
+            params:
+              claim_type: "CAUSAL"
+            inputs_from: ["step_9"]
+            outputs_to: ["step_11"]
+            
+      - phase: 6
+        name: "التركيب"
+        depends_on: [5]
+        operations:
+          - id: "step_11"
+            operation: "S1"
+            params:
+              narrative_type: "INTELLECTUAL"
+              include_uncertainty: true
+            inputs_from: ["step_10"]
+            outputs_to: ["step_12"]
+            
+      - phase: 7
+        name: "التحقق"
+        depends_on: [6]
+        operations:
+          - id: "step_12"
+            operation: "V1"
+            inputs_from: ["step_11"]
+            gate: true
+            
+          - id: "step_13"
+            operation: "V2"
+            inputs_from: ["step_11"]
+            gate: true
+            
+    execution_graph: |
+      
+      [E1]──┬──►[E3]──┬──►[L2]──┐
+            │        │         │
+      [E2]──┘        │   [T3]──┼──►[T2]──►[C1]──►[C2]──►[S1]──┬──►[V1]
+                     │         │                              │
+                     └──►[E6]──►[T1]──┘                       └──►[V2]
+      
+    estimated_cost:
+      compute: "HIGH"
+      tokens: 45000
+      time: "5-10 minutes"
+      monetary: "$0.50 - $1.00"
+      
+  expected_output:
+    type: "NarrativeSynthesis"
+    sections:
+      - "المقدمة: إشكالية الترجمة الفلسفية"
+      - "المفهوم عند أرسطو: οὐσία"
+      - "الترجمة السريانية: ܐܘܣܝܐ"
+      - "الترجمة العربية: الجوهر"
+      - "التحول في علم الكلام"
+      - "الخاتمة: من الأنطولوجيا إلى اللاهوت"
+
+# ═══════════════════════════════════════════════════════════════════════════════

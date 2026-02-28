@@ -1,0 +1,694 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#                    IQRA-12 Agent Contracts & Registry
+#                        عقود الوكلاء وسجلهم
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# "التوثيق شرط لتقليل المفاجآت والانحياز والالتباس"
+#                                    — Timnit Gebru
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+metadata:
+  component: "Agent Contracts & Registry"
+  component_ar: "عقود الوكلاء وسجلهم"
+  version: "1.0.0"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              المبدأ الحاكم
+# ═══════════════════════════════════════════════════════════════════════════════
+
+governing_principle:
+  
+  sources:
+    - name: "Timnit Gebru"
+      work: "Datasheets for Datasets / Model Cards"
+    - name: "Victoria Stodden"
+      work: "Reproducible Computational Science"
+    - name: "Alan Cooper"
+      work: "Goal-Directed Design"
+  
+  statement: |
+    كل وكيل يجب أن يمتلك "بطاقة تعريف" (Agent Card) مكتملة.
+    عدم اكتمال البطاقة = خفض الاستقلالية تلقائياً.
+    
+  rule: |
+    "الوكيل الواحد = مسؤولية واحدة"
+    (Single Responsibility Principle)
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              بنية بطاقة الوكيل
+# ═══════════════════════════════════════════════════════════════════════════════
+
+agent_card_schema:
+
+  required_sections:
+    
+    identity:
+      name_ar: "الهوية"
+      fields:
+        agent_id:
+          type: "string"
+          format: "iqra:agent:{category}:{name}"
+          example: "iqra:agent:search:recipe_builder"
+          required: true
+          
+        name:
+          type: "string"
+          required: true
+          
+        name_ar:
+          type: "string"
+          required: true
+          
+        version:
+          type: "string"
+          format: "semver"
+          required: true
+          
+        category:
+          type: "enum"
+          values: ["search", "link", "infer", "write", "governance", "gap"]
+          required: true
+          
+        owner:
+          type: "string"
+          description: "المسؤول عن الوكيل"
+          required: true
+
+    purpose:
+      name_ar: "الغرض"
+      fields:
+        description:
+          type: "text"
+          max_length: 500
+          required: true
+          
+        use_cases:
+          type: "array"
+          min_items: 1
+          required: true
+          
+        non_use_cases:
+          type: "array"
+          description: "ما لا يجب استخدام الوكيل له"
+          required: true
+
+    interface:
+      name_ar: "الواجهة"
+      fields:
+        inputs:
+          type: "object"
+          required: true
+          schema:
+            required_params: "array"
+            optional_params: "array"
+            constraints: "object"
+            
+        outputs:
+          type: "object"
+          required: true
+          schema:
+            artifacts: "array"
+            side_effects: "array"
+            
+        tools_used:
+          type: "array"
+          required: true
+
+    autonomy:
+      name_ar: "الاستقلالية"
+      fields:
+        current_level:
+          type: "enum"
+          values: ["L0", "L1", "L2", "L3", "L4"]
+          required: true
+          
+        max_allowed_level:
+          type: "enum"
+          values: ["L0", "L1", "L2", "L3", "L4"]
+          required: true
+          
+        risk_tier:
+          type: "enum"
+          values: ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
+          required: true
+
+    data_access:
+      name_ar: "الوصول للبيانات"
+      fields:
+        tables_read:
+          type: "array"
+          required: true
+          
+        tables_write:
+          type: "array"
+          required: true
+          
+        tables_propose:
+          type: "array"
+          description: "جداول _proposals"
+
+    evaluation:
+      name_ar: "التقييم"
+      fields:
+        eval_suite:
+          type: "string"
+          description: "معرّف مجموعة الاختبارات"
+          required: true
+          
+        success_criteria:
+          type: "object"
+          required: true
+          
+        quality_metrics:
+          type: "array"
+          required: true
+
+    limitations:
+      name_ar: "القيود"
+      fields:
+        known_limitations:
+          type: "array"
+          required: true
+          
+        failure_modes:
+          type: "array"
+          required: true
+          
+        edge_cases:
+          type: "array"
+
+    governance:
+      name_ar: "الحوكمة"
+      fields:
+        created_at:
+          type: "datetime"
+          required: true
+          
+        last_updated:
+          type: "datetime"
+          required: true
+          
+        change_log:
+          type: "array"
+          
+        approval_history:
+          type: "array"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              العقد القياسي للمدخلات
+# ═══════════════════════════════════════════════════════════════════════════════
+
+input_contract:
+  
+  description: |
+    كل استدعاء لوكيل يجب أن يتضمن هذه الحقول.
+    العقد يضمن التوحيد والتتبع.
+
+  required_fields:
+    
+    project_id:
+      type: "string"
+      description: "معرّف المشروع البحثي"
+      validation: "exists in projects table"
+      
+    run_id:
+      type: "string"
+      description: "معرّف التشغيل (يُنشأ تلقائياً)"
+      format: "iqra:run:{timestamp}:{uuid}"
+      
+    user_id:
+      type: "string"
+      description: "معرّف المستخدم المستدعي"
+      
+    question:
+      type: "text"
+      description: "السؤال أو المهمة"
+      max_length: 2000
+      
+    corpus_scope:
+      type: "object"
+      description: "نطاق الكوربس"
+      schema:
+        corpus_ids: "array (optional)"
+        work_ids: "array (optional)"
+        date_range: "object (optional)"
+        include_external: "boolean"
+        
+    constraints:
+      type: "object"
+      description: "القيود على التنفيذ"
+      schema:
+        cost_budget: "number (required)"
+        time_limit: "number (optional, seconds)"
+        quality_threshold: "number (optional, 0-1)"
+        
+    risk_tier:
+      type: "enum"
+      values: ["LOW", "MEDIUM", "HIGH"]
+      description: "مستوى المخاطر المقبول"
+      
+    required_outputs:
+      type: "array"
+      description: "المخرجات المطلوبة"
+      example: ["evidence_bundle", "claim_draft", "citations"]
+
+  optional_fields:
+    
+    context:
+      type: "object"
+      description: "سياق إضافي"
+      schema:
+        previous_runs: "array"
+        related_claims: "array"
+        user_preferences: "object"
+        
+    priority:
+      type: "enum"
+      values: ["LOW", "NORMAL", "HIGH", "URGENT"]
+      default: "NORMAL"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              العقد القياسي للمخرجات
+# ═══════════════════════════════════════════════════════════════════════════════
+
+output_contract:
+  
+  description: |
+    كل مخرج من وكيل يجب أن يتضمن هذه الحقول.
+    يضمن قابلية التدقيق وإعادة الإنتاج.
+
+  required_fields:
+    
+    run_id:
+      type: "string"
+      description: "معرّف التشغيل"
+      
+    agent_id:
+      type: "string"
+      description: "معرّف الوكيل"
+      
+    agent_version:
+      type: "string"
+      description: "إصدار الوكيل"
+      
+    status:
+      type: "enum"
+      values: ["SUCCESS", "PARTIAL", "FAILED", "TIMEOUT"]
+      
+    artifacts:
+      type: "array"
+      description: "المنتجات الناتجة"
+      item_schema:
+        artifact_type: "string"
+        artifact_id: "string"
+        location: "string (table/path)"
+        
+    tables_touched:
+      type: "object"
+      description: "الجداول المتأثرة"
+      schema:
+        read: "array"
+        written: "array"
+        proposed: "array"
+        
+    cost_actual:
+      type: "object"
+      description: "التكلفة الفعلية"
+      schema:
+        tokens_input: "number"
+        tokens_output: "number"
+        api_cost: "number"
+        compute_cost: "number"
+        total_usd: "number"
+        
+    duration_seconds:
+      type: "number"
+      description: "مدة التنفيذ بالثواني"
+      
+    confidence:
+      type: "number"
+      description: "درجة الثقة (0-1)"
+      
+    limitations:
+      type: "array"
+      description: "قيود النتيجة"
+      
+    next_actions:
+      type: "array"
+      description: "الخطوات التالية المقترحة"
+      item_schema:
+        action: "string"
+        agent: "string"
+        priority: "string"
+        
+    provenance:
+      type: "object"
+      description: "سلسلة الأصل"
+      schema:
+        model_used: "string"
+        prompt_version: "string"
+        tools_invoked: "array"
+        dependencies: "array"
+
+  optional_fields:
+    
+    warnings:
+      type: "array"
+      description: "تحذيرات (لم تمنع التنفيذ)"
+      
+    errors:
+      type: "array"
+      description: "أخطاء (إن كان status != SUCCESS)"
+      
+    debug_info:
+      type: "object"
+      description: "معلومات تصحيح الأخطاء"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              سجل الوكلاء (الأمثلة)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+agent_registry:
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # وكلاء البحث
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  search_agents:
+    
+    recipe_builder:
+      agent_id: "iqra:agent:search:recipe_builder"
+      name: "Recipe Builder"
+      name_ar: "باني الوصفات"
+      version: "1.0.0"
+      category: "search"
+      
+      purpose:
+        description: |
+          تحويل سؤال الباحث إلى وصفة بحث قابلة للتكرار.
+          يحدد النطاق والفلاتر ويقدر التكلفة قبل التنفيذ.
+        use_cases:
+          - "بناء استعلام بحث من سؤال طبيعي"
+          - "تقدير تكلفة البحث"
+          - "اقتراح تضييق النطاق"
+        non_use_cases:
+          - "تنفيذ البحث فعلياً"
+          - "تحليل النتائج"
+          
+      interface:
+        inputs:
+          required_params:
+            - question: "السؤال البحثي"
+            - corpus_scope: "نطاق الكوربس"
+          optional_params:
+            - constraints: "قيود إضافية"
+        outputs:
+          artifacts:
+            - type: "recipe"
+              table: "recipes"
+          side_effects: []
+        tools_used:
+          - "search_tool (dry-run only)"
+          - "cost_estimator"
+          
+      autonomy:
+        current_level: "L1"
+        max_allowed_level: "L2"
+        risk_tier: "LOW"
+        
+      data_access:
+        tables_read:
+          - "documents"
+          - "passages"
+          - "corpus_metadata"
+        tables_write: []
+        tables_propose:
+          - "recipes"
+          
+      evaluation:
+        eval_suite: "search_recipe_evals_v1"
+        success_criteria:
+          recipe_validity: ">= 0.95"
+          cost_accuracy: "+/- 20%"
+        quality_metrics:
+          - "recipe_completeness"
+          - "cost_estimation_accuracy"
+          - "scope_appropriateness"
+          
+      limitations:
+        known_limitations:
+          - "لا يفهم الاستعلامات الغامضة جداً"
+          - "تقدير التكلفة تقريبي"
+        failure_modes:
+          - "استعلام واسع جداً → تكلفة مرتفعة"
+          - "نطاق ضيق جداً → نتائج قليلة"
+          
+      owner: "search_team"
+
+    evidence_hunter:
+      agent_id: "iqra:agent:search:evidence_hunter"
+      name: "Evidence Hunter"
+      name_ar: "صياد الشواهد"
+      version: "1.0.0"
+      category: "search"
+      
+      purpose:
+        description: |
+          تنفيذ وصفة البحث وجمع الشواهد في حزمة منظمة.
+          يستخرج السياق ويحفظ الـ offsets.
+        use_cases:
+          - "تنفيذ recipe وجمع النتائج"
+          - "استخراج السياق للشواهد"
+          - "بناء evidence_bundle"
+        non_use_cases:
+          - "تحليل الشواهد"
+          - "صياغة ادعاءات"
+          
+      autonomy:
+        current_level: "L2"
+        max_allowed_level: "L3"
+        risk_tier: "LOW"
+        
+      owner: "search_team"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # وكلاء الربط
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  link_agents:
+    
+    entity_extractor:
+      agent_id: "iqra:agent:link:entity_extractor"
+      name: "Entity Extractor"
+      name_ar: "مستخرج الكيانات"
+      version: "1.0.0"
+      category: "link"
+      
+      purpose:
+        description: |
+          استخراج الكيانات (أشخاص، أماكن، مفاهيم) من النص.
+          يقترح كيانات جديدة مع درجة ثقة.
+        use_cases:
+          - "استخراج أسماء العلماء"
+          - "استخراج المفاهيم"
+          - "استخراج الأماكن"
+        non_use_cases:
+          - "دمج الكيانات"
+          - "اعتماد الكيانات نهائياً"
+          
+      autonomy:
+        current_level: "L1"
+        max_allowed_level: "L2"
+        risk_tier: "MEDIUM"
+        
+      data_access:
+        tables_read:
+          - "passages"
+          - "entities"
+          - "entity_names"
+        tables_write: []
+        tables_propose:
+          - "entity_proposals"
+          
+      owner: "link_team"
+
+    identity_resolver:
+      agent_id: "iqra:agent:link:identity_resolver"
+      name: "Identity Resolver"
+      name_ar: "حالّ الالتباس"
+      version: "1.0.0"
+      category: "link"
+      
+      purpose:
+        description: |
+          اكتشاف الكيانات المكررة واقتراح الدمج أو الفصل.
+          يقارن السمات ويحسب درجة التشابه.
+        use_cases:
+          - "اكتشاف التكرارات"
+          - "اقتراح الدمج"
+          - "اقتراح الفصل"
+        non_use_cases:
+          - "تنفيذ الدمج"
+          - "حذف الكيانات"
+          
+      autonomy:
+        current_level: "L1"
+        max_allowed_level: "L2"
+        risk_tier: "HIGH"
+        reason: "دمج خاطئ يفسد الشبكة"
+        
+      owner: "link_team"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # وكلاء الاستنتاج
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  infer_agents:
+    
+    claim_drafter:
+      agent_id: "iqra:agent:infer:claim_drafter"
+      name: "Claim Drafter"
+      name_ar: "صائغ الادعاءات"
+      version: "1.0.0"
+      category: "infer"
+      
+      purpose:
+        description: |
+          صياغة ادعاء أولي من حزمة شواهد.
+          يحدد النطاق والافتراضات ودرجة عدم اليقين.
+        use_cases:
+          - "صياغة claim من evidence"
+          - "تحديد scope و assumptions"
+          - "تقييم uncertainty"
+        non_use_cases:
+          - "اعتماد الادعاء"
+          - "نشر الادعاء"
+          
+      autonomy:
+        current_level: "L1"
+        max_allowed_level: "L2"
+        risk_tier: "MEDIUM"
+        
+      owner: "infer_team"
+
+    counter_evidence_seeker:
+      agent_id: "iqra:agent:infer:counter_evidence_seeker"
+      name: "Counter-Evidence Seeker"
+      name_ar: "باحث الأدلة المضادة"
+      version: "1.0.0"
+      category: "infer"
+      
+      purpose:
+        description: |
+          البحث عن أدلة تعارض أو تقيّد ادعاءً معيناً.
+          يضمن التوازن والموضوعية.
+        use_cases:
+          - "البحث عن أدلة مضادة"
+          - "البحث عن أدلة مقيّدة"
+          - "تقييم قوة الادعاء"
+        non_use_cases:
+          - "رفض الادعاء"
+          - "تعديل الادعاء"
+          
+      autonomy:
+        current_level: "L2"
+        max_allowed_level: "L3"
+        risk_tier: "LOW"
+        
+      owner: "infer_team"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # وكلاء الفجوات
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  gap_agents:
+    
+    gap_hunter:
+      agent_id: "iqra:agent:gap:gap_hunter"
+      name: "Gap Hunter"
+      name_ar: "صياد الثروة المهملة"
+      version: "1.0.0"
+      category: "gap"
+      
+      purpose:
+        description: |
+          اكتشاف الفجوات والفرص البحثية في الكوربس.
+          يحدد المناطق غير المدروسة والأسئلة غير المجابة.
+        use_cases:
+          - "اكتشاف المخطوطات غير المحققة"
+          - "اكتشاف العلماء المهملين"
+          - "اكتشاف الموضوعات غير المدروسة"
+        non_use_cases:
+          - "تحقيق المخطوطات"
+          - "ملء الفجوات"
+          
+      autonomy:
+        current_level: "L1"
+        max_allowed_level: "L2"
+        risk_tier: "LOW"
+        
+      data_access:
+        tables_read:
+          - "works"
+          - "entities"
+          - "claims"
+          - "research_coverage"
+        tables_write: []
+        tables_propose:
+          - "gap_reports"
+          - "opportunity_proposals"
+          
+      owner: "discovery_team"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              جداول BigQuery
+# ═══════════════════════════════════════════════════════════════════════════════
+
+bigquery_tables:
+
+  agent_registry:
+    description: "سجل الوكلاء الرسمي"
+    columns:
+      - agent_id: "معرّف الوكيل"
+      - name: "الاسم"
+      - name_ar: "الاسم العربي"
+      - version: "الإصدار"
+      - category: "التصنيف"
+      - owner: "المالك"
+      - current_level: "مستوى الاستقلالية الحالي"
+      - max_level: "أقصى مستوى مسموح"
+      - risk_tier: "مستوى المخاطر"
+      - card_complete: "هل البطاقة مكتملة"
+      - status: "ACTIVE | DEPRECATED | SUSPENDED"
+      - created_at: "تاريخ الإنشاء"
+      - updated_at: "تاريخ التحديث"
+
+  agent_cards:
+    description: "بطاقات الوكلاء الكاملة"
+    columns:
+      - card_id: "معرّف البطاقة"
+      - agent_id: "معرّف الوكيل"
+      - card_json: "البطاقة بصيغة JSON"
+      - completeness_score: "درجة الاكتمال"
+      - last_reviewed: "آخر مراجعة"
+      - reviewed_by: "المراجع"
+      - version: "إصدار البطاقة"
+
+  agent_runs:
+    description: "سجل تشغيل الوكلاء"
+    columns:
+      - run_id: "معرّف التشغيل"
+      - agent_id: "معرّف الوكيل"
+      - agent_version: "إصدار الوكيل"
+      - project_id: "معرّف المشروع"
+      - user_id: "معرّف المستخدم"
+      - input_json: "المدخلات"
+      - output_json: "المخرجات"
+      - status: "الحالة"
+      - cost_usd: "التكلفة"
+      - duration_seconds: "المدة"
+      - started_at: "بداية التشغيل"
+      - ended_at: "نهاية التشغيل"
+
+# ═══════════════════════════════════════════════════════════════════════════════

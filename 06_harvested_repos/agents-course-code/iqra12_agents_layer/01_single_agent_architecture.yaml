@@ -1,0 +1,556 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#                    IQRA-12 Single Agent Architecture
+#                        معمارية الوكيل الفردي
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# "الوكيل ليس LLM، بل نظام تشغيل يدير LLM"
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+metadata:
+  component: "Single Agent Architecture"
+  component_ar: "معمارية الوكيل الفردي"
+  version: "1.0.0"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                    إطار Brain-Perception-Action
+# ═══════════════════════════════════════════════════════════════════════════════
+
+brain_perception_action:
+  
+  source: "Zhiheng Xi - The Rise and Potential of LLM Based Agents"
+  
+  diagram: |
+    ┌─────────────────────────────────────────────────────────────────────────┐
+    │                         الوكيل الفردي                                   │
+    └─────────────────────────────────────────────────────────────────────────┘
+                                      │
+              ┌───────────────────────┼───────────────────────┐
+              │                       │                       │
+              ▼                       ▼                       ▼
+    ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+    │    الإدراك     │     │     الدماغ      │     │      الفعل      │
+    │   Perception    │ ──▶ │     Brain       │ ──▶ │     Action      │
+    │                 │     │                 │     │                 │
+    │  ┌───────────┐  │     │  ┌───────────┐  │     │  ┌───────────┐  │
+    │  │   نص     │  │     │  │  تخطيط   │  │     │  │  بحث     │  │
+    │  │  صورة    │  │     │  │  تفكير   │  │     │  │  حساب    │  │
+    │  │  بيانات  │  │     │  │  قرار    │  │     │  │  كتابة   │  │
+    │  └───────────┘  │     │  └───────────┘  │     │  └───────────┘  │
+    └─────────────────┘     └─────────────────┘     └─────────────────┘
+
+  components:
+    
+    # ─────────────────────────────────────────────────────────────────────────
+    # الدماغ (Brain)
+    # ─────────────────────────────────────────────────────────────────────────
+    
+    brain:
+      name_ar: "الدماغ"
+      role: "وحدة المعالجة المركزية للتخطيط واتخاذ القرار"
+      
+      capabilities:
+        planning:
+          name_ar: "التخطيط"
+          description: "تفكيك المهمة إلى خطوات"
+          methods:
+            - "Chain-of-Thought (CoT)"
+            - "Tree of Thoughts (ToT)"
+            - "ReAct Loop"
+            
+        reasoning:
+          name_ar: "التفكير"
+          description: "التحليل والاستنتاج"
+          methods:
+            - "Deductive reasoning"
+            - "Analogical reasoning"
+            - "Counterfactual thinking"
+            
+        decision:
+          name_ar: "اتخاذ القرار"
+          description: "اختيار الفعل المناسب"
+          methods:
+            - "Tool selection"
+            - "Action prioritization"
+            - "Uncertainty assessment"
+      
+      models:
+        primary: "Gemini 1.5 Pro"
+        fallback: "Claude 3.5 Sonnet"
+        specialized:
+          - model: "Arabic-tuned model"
+            use_case: "النصوص التراثية"
+          - model: "Code model"
+            use_case: "الحسابات والبرمجة"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # الإدراك (Perception)
+    # ─────────────────────────────────────────────────────────────────────────
+    
+    perception:
+      name_ar: "الإدراك"
+      role: "تحويل المدخلات المتنوعة إلى توكنات مفهومة"
+      
+      transducers:
+        text:
+          name_ar: "محول النص"
+          inputs:
+            - "استعلام المستخدم"
+            - "نصوص تراثية"
+            - "نتائج البحث"
+          processing:
+            - "Tokenization"
+            - "Arabic normalization"
+            - "Context windowing"
+            
+        image:
+          name_ar: "محول الصور"
+          inputs:
+            - "صور المخطوطات"
+            - "الرسوم التوضيحية"
+            - "الخرائط التاريخية"
+          processing:
+            - "OCR for manuscripts"
+            - "Layout analysis"
+            - "Visual feature extraction"
+            
+        structured_data:
+          name_ar: "محول البيانات المهيكلة"
+          inputs:
+            - "JSON from BigQuery"
+            - "Entity records"
+            - "Relation graphs"
+          processing:
+            - "Schema parsing"
+            - "Context injection"
+            - "Relevance filtering"
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # الفعل (Action)
+    # ─────────────────────────────────────────────────────────────────────────
+    
+    action:
+      name_ar: "الفعل"
+      role: "التأثير في البيئة عبر الأدوات"
+      
+      principle: |
+        لا يجوز للوكيل تنفيذ أي فعل خارج هذه الواجهة.
+        كل أداة لها عقد محدد (inputs/outputs/constraints).
+      
+      tools:
+        search_tool:
+          name_ar: "أداة البحث"
+          description: "البحث في BigQuery والكوربسات"
+          operations:
+            - "full_text_search"
+            - "semantic_search"
+            - "entity_lookup"
+          constraints:
+            - "cost_limit per query"
+            - "corpus_scope"
+            - "rights_check"
+            
+        calculator:
+          name_ar: "الحاسبة"
+          description: "الحسابات المعقدة"
+          use_cases:
+            - "حسابات المواريث"
+            - "حسابات المواقيت"
+            - "التحليل الإحصائي"
+          implementation: "Python interpreter"
+          
+        code_interpreter:
+          name_ar: "مفسر الكود"
+          description: "تنفيذ كود Python"
+          capabilities:
+            - "Data transformation"
+            - "Visualization"
+            - "Custom calculations"
+          sandbox: "Isolated environment"
+          
+        database_write:
+          name_ar: "كتابة قاعدة البيانات"
+          description: "إنشاء/تحديث السجلات"
+          tables:
+            - "claims"
+            - "evidence_bundles"
+            - "draft_assets"
+          constraints:
+            - "Requires L2+ autonomy"
+            - "Provenance logging mandatory"
+            
+        citation_tool:
+          name_ar: "أداة الاستشهاد"
+          description: "بناء وتدقيق الاستشهادات"
+          operations:
+            - "generate_citation"
+            - "verify_locator"
+            - "format_bibliography"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                    بروتوكول ReAct
+# ═══════════════════════════════════════════════════════════════════════════════
+
+react_protocol:
+  
+  source: "Shunyu Yao - ReAct: Synergizing Reasoning and Acting"
+  
+  principle: |
+    "ممنوع الإجابة المباشرة للمهام المعقدة"
+    (No Zero-Shot Answers allowed for complex tasks)
+  
+  loop:
+    step_1:
+      name: "Thought"
+      name_ar: "التفكير"
+      description: "تحليل الطلب وتحديد الاستراتيجية"
+      output: "خطة العمل"
+      
+    step_2:
+      name: "Action"
+      name_ar: "الفعل"
+      description: "تنفيذ الأمر باستخدام أداة"
+      output: "استدعاء الأداة"
+      
+    step_3:
+      name: "Observation"
+      name_ar: "الملاحظة"
+      description: "استقبال النتيجة من الأداة"
+      output: "نتيجة الأداة"
+      
+    step_4:
+      name: "Reflect"
+      name_ar: "التأمل"
+      description: "تقييم النتيجة وتحديد الخطوة التالية"
+      output: "قرار (تكرار | إنهاء)"
+
+  example:
+    query: "ما حكم التدخين في المذهب الحنفي؟"
+    
+    cycle_1:
+      thought: |
+        السؤال يتطلب استقراءً تاريخياً لأن التبغ ظهر متأخراً.
+        يجب البحث عن تاريخ ظهور التبغ أولاً.
+      action: |
+        search_tool.query("ظهور التبغ في الدولة العثمانية")
+      observation: |
+        ظهر في القرن 11 هـ، واختلف فيه الفقهاء.
+        
+    cycle_2:
+      thought: |
+        يوجد خلاف. يجب تحرير محل النزاع.
+        سأبحث عن آراء الحنفية المبكرين.
+      action: |
+        search_tool.query("رسالة الشرنبلالي في الدخان")
+      observation: |
+        الشرنبلالي أفتى بالكراهة، النابلسي أفتى بالإباحة.
+        
+    cycle_3:
+      thought: |
+        وجدت الخلاف. سأصيغ الإجابة مع ذكر الأقوال.
+      action: |
+        generate_response(include_sources=True)
+      output: |
+        صياغة الإجابة النهائية بناءً على الرحلة البحثية.
+
+  tracing:
+    purpose: "التصحيح والشفافية والمراجعة"
+    logged_items:
+      - "كل خطوة Thought"
+      - "كل استدعاء Action"
+      - "كل نتيجة Observation"
+      - "timestamps"
+      - "token_counts"
+      - "costs"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                    الذاكرة التوليدية
+# ═══════════════════════════════════════════════════════════════════════════════
+
+generative_memory:
+  
+  source: "Joon Sung Park - Generative Agents"
+  
+  problem: |
+    النماذج اللغوية "تنسى" بمجرد إغلاق النافذة.
+    لا يمكن بناء وكيل بحثي بدون ذاكرة طويلة المدى.
+  
+  solution:
+    architecture: "Memory Stream in Vector Database"
+    
+    retrieval_formula: |
+      Score = (α × Recency) + (β × Importance) + (γ × Relevance)
+      
+      Where:
+      - Recency: كم مضى من الوقت
+      - Importance: أهمية الذكرى (1-10)
+      - Relevance: صلة الذكرى بالسياق الحالي (cosine similarity)
+      
+      Default weights: α=0.3, β=0.3, γ=0.4
+
+  memory_types:
+    
+    episodic:
+      name_ar: "الذاكرة العرضية"
+      content: "أحداث وتفاعلات محددة"
+      examples:
+        - "المستخدم سأل عن الغزالي في 2024-01-15"
+        - "تم العثور على تناقض في claim_123"
+      retention: "Long-term"
+      
+    semantic:
+      name_ar: "الذاكرة الدلالية"
+      content: "معارف ومفاهيم مستخلصة"
+      examples:
+        - "الغزالي انتقد الفلاسفة في التهافت"
+        - "المذهب الأشعري يرفض التأويل المجازي المفرط"
+      retention: "Permanent (verified)"
+      
+    procedural:
+      name_ar: "الذاكرة الإجرائية"
+      content: "كيفية أداء المهام"
+      examples:
+        - "recipe لبحث تناص معين"
+        - "خطوات استخراج الأسانيد"
+      retention: "Permanent"
+      
+    working:
+      name_ar: "الذاكرة العاملة"
+      content: "السياق الحالي للمهمة"
+      capacity: "Context window limit"
+      retention: "Session only"
+
+  reflection:
+    name_ar: "التأمل"
+    description: |
+      إجراء دوري (كل ليلة افتراضية) حيث يراجع الوكيل
+      ذكرياته ويستخلص "رؤى عليا" (Higher-level Insights).
+    
+    process:
+      - "Retrieve recent memories"
+      - "Identify patterns"
+      - "Generate insights"
+      - "Store as semantic memory"
+    
+    example:
+      recent_memories:
+        - "بحثت عن الغزالي 5 مرات هذا الأسبوع"
+        - "كل البحوث كانت عن نقده للفلاسفة"
+      insight: |
+        "المستخدم مهتم بشكل خاص بموقف الغزالي
+        من الفلسفة اليونانية. أولوية عالية للتهافت."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                    الشخصية والدوافع
+# ═══════════════════════════════════════════════════════════════════════════════
+
+persona_and_motivation:
+  
+  sources:
+    - "Michal Kosinski - Psychometrics"
+    - "Lilian Weng - Steering"
+    - "Ron Sun - CLARION"
+    - "Mark Riedl - Narrative Intelligence"
+
+  psychometric_tuning:
+    description: |
+      تعديل بارامترات النموذج ليتوافق مع سمات شخصية محددة.
+    
+    big_five_profiles:
+      
+      fatwa_agent:
+        name_ar: "وكيل الفتاوى"
+        conscientiousness: "HIGH"  # دقيق وحذر
+        openness: "MEDIUM"
+        agreeableness: "HIGH"
+        extraversion: "LOW"
+        neuroticism: "LOW"
+        behavior: "دقيق، متحفظ، يطلب التأكيد"
+        
+      history_agent:
+        name_ar: "وكيل تاريخ الأفكار"
+        openness: "HIGH"  # مبدع في الربط
+        conscientiousness: "MEDIUM"
+        agreeableness: "MEDIUM"
+        extraversion: "MEDIUM"
+        neuroticism: "LOW"
+        behavior: "مبدع، يربط أفكاراً متباعدة"
+        
+      critic_agent:
+        name_ar: "وكيل النقد"
+        openness: "HIGH"
+        conscientiousness: "HIGH"
+        agreeableness: "LOW"  # لا يخشى الاعتراض
+        extraversion: "MEDIUM"
+        neuroticism: "LOW"
+        behavior: "ناقد، يبحث عن الثغرات"
+
+  implicit_drives:
+    description: |
+      برمجة "دالة هدف" (Objective Function) خفية.
+      الوكيل يكافئ نفسه داخلياً كلما حقق دافعه.
+    
+    examples:
+      - drive: "تعظيم دقة النقل"
+        agent: "وكيل الاستشهاد"
+      - drive: "تعظيم تبسيط المعلومة"
+        agent: "وكيل الشرح"
+      - drive: "تعظيم كشف التناقضات"
+        agent: "وكيل التدقيق"
+
+  narrative_intelligence:
+    source: "Mark Riedl"
+    description: |
+      تزويد الوكيل بـ "ذكاء سردي" لتقديم المعلومات
+      في سياق قصصي متماسك.
+    
+    application: |
+      بدلاً من: "ولد الغزالي سنة 450هـ"
+      يقول: "في طوس، مدينة خراسانية عريقة، ولد أبو حامد
+      الغزالي سنة 450هـ، في عصر كانت فيه المدرسة النظامية
+      في بغداد قبلة طلاب العلم..."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                    التصحيح الذاتي (Reflexion)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+self_correction:
+  
+  source: "Noah Shinn - Reflexion"
+  
+  principle: |
+    الوكيل يتعلم من أخطائه بدون إعادة تدريب النموذج.
+  
+  mechanism:
+    step_1:
+      name: "Attempt"
+      description: "محاولة أولى لحل المهمة"
+      
+    step_2:
+      name: "Evaluate"
+      description: "تقييم النتيجة (ذاتي أو خارجي)"
+      
+    step_3:
+      name: "Reflect"
+      description: "تحليل سبب الفشل إن وجد"
+      
+    step_4:
+      name: "Retry"
+      description: "محاولة جديدة مع تجنب الخطأ السابق"
+
+  error_memory:
+    description: |
+      ذاكرة خاصة بالأخطاء السابقة لتجنب تكرارها.
+    
+    structure:
+      - error_type: "نوع الخطأ"
+      - context: "السياق الذي حدث فيه"
+      - correction: "التصحيح المطلوب"
+      - timestamp: "وقت الحدوث"
+
+  application_example:
+    task: "كتابة فقرة عن موقف ابن تيمية من التوسل"
+    
+    attempt_1:
+      output: "ابن تيمية رفض التوسل بالكلية"
+      evaluation: "FAIL - تعميم غير دقيق"
+      reflection: |
+        الخطأ: عدم التمييز بين أنواع التوسل
+        التصحيح: ابن تيمية فرّق بين أنواع التوسل
+        
+    attempt_2:
+      output: |
+        فرّق ابن تيمية بين التوسل المشروع (بدعاء الصالحين الأحياء)
+        والتوسل الممنوع (بذوات الأموات)، مع خلاف في التوسل
+        بجاه النبي ﷺ.
+      evaluation: "PASS - دقيق ومفصّل"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                    Chain-of-Verification (CoVe)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+chain_of_verification:
+  
+  source: "Google DeepMind"
+  
+  purpose: "ضمان دقة العزو في النصوص التراثية"
+  
+  process:
+    step_1:
+      name: "Generate"
+      description: "توليد الإجابة الأولية"
+      
+    step_2:
+      name: "Plan Verification"
+      description: "تحديد الادعاءات القابلة للتحقق"
+      
+    step_3:
+      name: "Execute Verification"
+      description: "التحقق من كل ادعاء بشكل مستقل"
+      
+    step_4:
+      name: "Revise"
+      description: "تعديل الإجابة بناءً على نتائج التحقق"
+
+  example:
+    initial_response: |
+      قال الغزالي في إحياء علوم الدين: "العلم بلا عمل جنون"
+      
+    verification_questions:
+      - "هل هذا الاقتباس موجود في الإحياء؟"
+      - "ما السياق الأصلي للعبارة؟"
+      - "هل النسبة للغزالي صحيحة؟"
+      
+    verification_results:
+      - "العبارة موجودة في كتاب العلم"
+      - "السياق: فضل العلم النافع"
+      - "النسبة صحيحة، لكن العبارة الكاملة مختلفة قليلاً"
+      
+    revised_response: |
+      قال الغزالي في كتاب العلم من إحياء علوم الدين:
+      "العلم بلا عمل جنون، والعمل بغير علم لا يكون"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                    جداول BigQuery
+# ═══════════════════════════════════════════════════════════════════════════════
+
+bigquery_tables:
+
+  agent_memory:
+    description: "ذاكرة الوكيل طويلة المدى"
+    columns:
+      - memory_id: "معرّف الذكرى"
+      - agent_id: "معرّف الوكيل"
+      - memory_type: "EPISODIC | SEMANTIC | PROCEDURAL"
+      - content: "محتوى الذكرى"
+      - embedding: "المتجه"
+      - importance_score: "درجة الأهمية (1-10)"
+      - created_at: "تاريخ الإنشاء"
+      - last_accessed: "آخر وصول"
+      - access_count: "عدد مرات الوصول"
+
+  agent_errors:
+    description: "سجل أخطاء الوكلاء"
+    columns:
+      - error_id: "معرّف الخطأ"
+      - agent_id: "معرّف الوكيل"
+      - run_id: "معرّف التشغيل"
+      - error_type: "نوع الخطأ"
+      - context: "السياق"
+      - correction: "التصحيح"
+      - created_at: "تاريخ الحدوث"
+
+  react_traces:
+    description: "تتبع حلقات ReAct"
+    columns:
+      - trace_id: "معرّف التتبع"
+      - run_id: "معرّف التشغيل"
+      - step_number: "رقم الخطوة"
+      - step_type: "THOUGHT | ACTION | OBSERVATION"
+      - content: "المحتوى"
+      - tool_used: "الأداة المستخدمة"
+      - tokens_used: "التوكنات"
+      - cost: "التكلفة"
+      - timestamp: "الوقت"
+
+# ═══════════════════════════════════════════════════════════════════════════════

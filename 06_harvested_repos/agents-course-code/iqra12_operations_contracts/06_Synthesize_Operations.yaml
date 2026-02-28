@@ -1,0 +1,1023 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#                    الفئة السادسة: التركيب (Synthesize)
+#                    IQRA-12 Core Operations Layer
+# ═══════════════════════════════════════════════════════════════════════════════
+# 
+# الغرض: دمج المكونات في كليات ذات معنى
+# العمليات: S1-S5
+# 
+# المبدأ الحاكم:
+# "كل تركيب = عناصر + بنية + سرد + توثيق"
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+category:
+  id: "SYNTHESIZE"
+  name_ar: "التركيب"
+  name_en: "Synthesize"
+  purpose: "دمج المكونات المتفرقة في كليات متماسكة ذات معنى"
+  golden_rule: "كل تركيب = عناصر + بنية + سرد + توثيق"
+  operations_count: 5
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# S1: التركيب السردي (Narrative Synthesis)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+operations:
+
+  - id: "S1"
+    name_ar: "التركيب السردي"
+    name_en: "Narrative Synthesis"
+    category: "Synthesize"
+    version: "1.0.0"
+    
+    purpose: |
+      بناء سرد تاريخي أو تفسيري متماسك من الأحداث والفاعلين والسياقات
+      يحترم التعقيد مع الحفاظ على الوضوح
+    
+    inputs:
+      required:
+        - name: elements
+          type: object
+          schema:
+            events: array[Event]
+            actors: array[Actor]
+            contexts: array[Context]
+            causal_links: array[CausalLink]
+            
+        - name: narrative_type
+          type: enum
+          values: [
+            CHRONOLOGICAL,      # سرد زمني خطي
+            THEMATIC,           # سرد موضوعي
+            BIOGRAPHICAL,       # سيرة ذاتية
+            INSTITUTIONAL,      # تاريخ مؤسسة
+            INTELLECTUAL,       # تاريخ فكري
+            COMPARATIVE,        # سرد مقارن
+            ANALYTICAL          # سرد تحليلي
+          ]
+          
+      optional:
+        - name: focal_point
+          type: string
+          description: "نقطة التركيز الرئيسية"
+          
+        - name: temporal_scope
+          type: object
+          schema:
+            start: string
+            end: string
+            
+        - name: perspective
+          type: string
+          description: "وجهة النظر المتبناة"
+          
+        - name: target_length
+          type: object
+          schema:
+            min_words: integer
+            max_words: integer
+            
+        - name: include_uncertainty
+          type: boolean
+          default: true
+          description: "إظهار الشكوك والخلافات"
+    
+    outputs:
+      primary:
+        name: narrative
+        type: Narrative
+        schema:
+          narrative_id: string
+          title: string
+          type: string
+          temporal_scope: object
+          abstract: string
+          structure:
+            type: array
+            items:
+              section_id: string
+              title: string
+              content: string
+              temporal_markers:
+                type: array
+                items:
+                  date: string
+                  precision: enum[EXACT, APPROXIMATE, RANGE, UNCERTAIN]
+              actors_mentioned: array[string]
+              events_covered: array[string]
+              source_references:
+                type: array
+                items:
+                  ref_id: string
+                  location_in_text: integer
+              interpretive_notes: array
+              uncertainty_markers:
+                type: array
+                items:
+                  claim: string
+                  uncertainty_type: enum[DATING, CAUSATION, ATTRIBUTION, DETAIL]
+                  alternative_views: array
+          narrative_threads:
+            type: array
+            description: "خيوط السرد الرئيسية"
+            items:
+              thread_id: string
+              name: string
+              sections: array[string]
+          causal_structure:
+            type: array
+            description: "البنية السببية"
+            items:
+              cause: string
+              effect: string
+              mechanism: string
+              certainty: float
+          voice_and_style:
+            perspective: string
+            tone: string
+            narrative_distance: enum[CLOSE, MEDIUM, DISTANT]
+          metadata:
+            total_words: integer
+            total_sections: integer
+            sources_count: integer
+            
+      secondary:
+        - name: timeline
+          type: array
+          description: "خط زمني للأحداث"
+          
+        - name: actor_appearances
+          type: object
+          description: "ظهور الفاعلين في السرد"
+          
+        - name: source_distribution
+          type: object
+    
+    tools:
+      internal:
+        - name: Narrative Planner
+          type: planning
+          
+        - name: Temporal Organizer
+          type: chronology
+          
+        - name: Causal Reasoner
+          type: reasoning
+          
+        - name: Style Adapter
+          type: nlp
+          
+      external: []
+    
+    resources:
+      knowledge_bases:
+        - narrative_templates
+        - historiographical_conventions
+    
+    guardrails:
+      pre_conditions:
+        - condition: "elements include at least events or actors"
+          error_code: "S1_EMPTY_ELEMENTS"
+          
+      post_conditions:
+        - condition: "all major elements are incorporated"
+          error_code: "S1_MISSING_ELEMENTS"
+          
+        - condition: "temporal sequence is consistent"
+          error_code: "S1_TEMPORAL_INCONSISTENCY"
+          
+        - condition: "causal claims are sourced"
+          error_code: "S1_UNSOURCED_CAUSATION"
+          
+      forbidden:
+        - "inventing events without flagging"
+        - "presenting interpretation as fact"
+        - "hiding uncertainty"
+        - "teleological narration"
+    
+    quality_metrics:
+      - name: narrative_coherence
+        target: ">= 0.9"
+        
+      - name: element_coverage
+        target: ">= 0.95"
+        
+      - name: source_density
+        target: ">= 0.8"
+        
+      - name: uncertainty_transparency
+        target: ">= 0.9"
+    
+    cost_profile:
+      compute: "MEDIUM-HIGH"
+      tokens: "HIGH"
+      estimated_cost_per_call: "$0.05 - $0.25"
+    
+    autonomy_level: "L1"
+    
+    example:
+      input:
+        elements:
+          events:
+            - {id: "e1", name: "تأسيس المدرسة النظامية", date: "459 AH"}
+            - {id: "e2", name: "تعيين الغزالي", date: "484 AH"}
+            - {id: "e3", name: "أزمة الغزالي", date: "488 AH"}
+          actors:
+            - {id: "a1", name: "نظام الملك"}
+            - {id: "a2", name: "الغزالي"}
+          contexts:
+            - {type: "political", description: "صراع السلاجقة-الإسماعيليين"}
+        narrative_type: "BIOGRAPHICAL"
+        focal_point: "تحول الغزالي"
+        
+      output:
+        narrative:
+          title: "الغزالي: من قمة السلطة إلى أعماق الروح"
+          structure:
+            - section_id: "s1"
+              title: "الصعود"
+              content: "في عام 484 هـ، وصل أبو حامد الغزالي إلى بغداد..."
+              temporal_markers:
+                - {date: "484 AH", precision: "EXACT"}
+              uncertainty_markers:
+                - claim: "سبب تعيينه"
+                  uncertainty_type: "CAUSATION"
+                  alternative_views: ["كفاءته العلمية", "علاقته بنظام الملك"]
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# S2: التركيب التقريري (Report Synthesis)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "S2"
+    name_ar: "التركيب التقريري"
+    name_en: "Report Synthesis"
+    category: "Synthesize"
+    version: "1.0.0"
+    
+    purpose: |
+      إنتاج تقرير بحثي منظم يجمع الادعاءات والأدلة والتحليلات
+      في وثيقة متكاملة قابلة للنشر
+    
+    inputs:
+      required:
+        - name: claims
+          type: array[string]
+          description: "معرفات الادعاءات"
+          
+        - name: evidence_bundles
+          type: array[string]
+          description: "معرفات حزم الأدلة"
+          
+        - name: outline_id
+          type: string
+          description: "معرف المخطط (من C4)"
+          
+      optional:
+        - name: report_type
+          type: enum
+          values: [
+            RESEARCH_PAPER,
+            TECHNICAL_REPORT,
+            LITERATURE_REVIEW,
+            CASE_STUDY,
+            WHITE_PAPER,
+            ENCYCLOPEDIA_ENTRY
+          ]
+          default: "RESEARCH_PAPER"
+          
+        - name: format_template
+          type: string
+          description: "قالب التنسيق"
+          
+        - name: citation_style
+          type: enum
+          values: [CHICAGO, APA, MLA, ISLAMIC_STUDIES, CUSTOM]
+          default: "CHICAGO"
+          
+        - name: include_executive_summary
+          type: boolean
+          default: true
+    
+    outputs:
+      primary:
+        name: report
+        type: Report
+        schema:
+          report_id: string
+          type: string
+          title: string
+          metadata:
+            author: string
+            date: string
+            version: string
+            status: enum[DRAFT, REVIEW, FINAL]
+          front_matter:
+            abstract: string
+            keywords: array[string]
+            executive_summary: string
+          body:
+            type: array
+            items:
+              section_id: string
+              level: integer
+              title: string
+              content:
+                type: array
+                items:
+                  paragraph_id: string
+                  text: string
+                  claims_referenced: array[string]
+                  evidence_referenced: array[string]
+                  citations:
+                    type: array
+                    items:
+                      citation_id: string
+                      location: integer
+                      style: string
+              figures: array
+              tables: array
+          back_matter:
+            conclusion: string
+            future_work: string
+            acknowledgments: string
+            bibliography:
+              type: array
+              items:
+                citation_id: string
+                formatted_citation: string
+                source_type: string
+            appendices: array
+          statistics:
+            total_words: integer
+            total_citations: integer
+            total_claims: integer
+            claims_coverage: float
+          quality_indicators:
+            citation_density: float
+            evidence_coverage: float
+            argument_coherence: float
+            
+      secondary:
+        - name: citation_report
+          type: object
+          
+        - name: claim_traceability
+          type: object
+          description: "تتبع الادعاءات في النص"
+    
+    tools:
+      internal:
+        - name: Section Writer
+          type: nlp
+          uses: ["W1", "W2"]
+          
+        - name: Citation Formatter
+          type: formatter
+          
+        - name: Coherence Checker
+          type: nlp
+          
+      external: []
+    
+    resources:
+      knowledge_bases:
+        - citation_styles
+        - report_templates
+    
+    guardrails:
+      pre_conditions:
+        - condition: "outline exists and is complete"
+          error_code: "S2_NO_OUTLINE"
+          
+        - condition: "claims have evidence bundles"
+          error_code: "S2_UNSUPPORTED_CLAIMS"
+          
+      post_conditions:
+        - condition: "all claims from outline are covered"
+          error_code: "S2_INCOMPLETE_COVERAGE"
+          
+        - condition: "all citations are valid"
+          error_code: "S2_INVALID_CITATION"
+          
+        - condition: "bibliography matches in-text citations"
+          error_code: "S2_CITATION_MISMATCH"
+          
+      forbidden:
+        - "claims without citation"
+        - "orphan citations"
+        - "plagiarism"
+    
+    quality_metrics:
+      - name: claims_coverage
+        target: "1.0"
+        
+      - name: citation_accuracy
+        target: "1.0"
+        
+      - name: coherence_score
+        target: ">= 0.9"
+    
+    cost_profile:
+      compute: "HIGH"
+      tokens: "HIGH"
+      estimated_cost_per_call: "$0.10 - $0.50"
+    
+    autonomy_level: "L1-L2"
+    autonomy_description: "يولد التقرير، يحتاج مراجعة قبل النشر"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# S3: تركيب الخريطة المعرفية (Knowledge Map Synthesis)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "S3"
+    name_ar: "تركيب الخريطة المعرفية"
+    name_en: "Knowledge Map Synthesis"
+    category: "Synthesize"
+    version: "1.0.0"
+    
+    purpose: |
+      بناء خريطة بصرية تفاعلية للمعرفة
+      تظهر الكيانات والعلاقات والتجمعات
+    
+    inputs:
+      required:
+        - name: entities
+          type: array[Entity]
+          description: "الكيانات المراد تمثيلها"
+          
+        - name: relations
+          type: array[Relation]
+          description: "العلاقات بين الكيانات"
+          
+      optional:
+        - name: map_type
+          type: enum
+          values: [
+            CONCEPT_MAP,        # خريطة مفاهيم
+            INFLUENCE_NETWORK,  # شبكة تأثير
+            GENEALOGY_TREE,     # شجرة نسب
+            TIMELINE_MAP,       # خريطة زمنية
+            GEOGRAPHIC_MAP,     # خريطة جغرافية
+            HYBRID              # مختلط
+          ]
+          default: "CONCEPT_MAP"
+          
+        - name: layout_algorithm
+          type: enum
+          values: [FORCE_DIRECTED, HIERARCHICAL, CIRCULAR, GEOGRAPHIC, TEMPORAL]
+          default: "FORCE_DIRECTED"
+          
+        - name: clustering
+          type: boolean
+          default: true
+          description: "تجميع الكيانات المتقاربة"
+          
+        - name: include_metadata
+          type: boolean
+          default: true
+          
+        - name: interactivity_level
+          type: enum
+          values: [STATIC, BASIC, FULL]
+          default: "BASIC"
+    
+    outputs:
+      primary:
+        name: knowledge_map
+        type: KnowledgeMap
+        schema:
+          map_id: string
+          type: string
+          title: string
+          description: string
+          nodes:
+            type: array
+            items:
+              id: string
+              label: string
+              type: string
+              attributes:
+                size: float
+                color: string
+                shape: string
+                icon: string
+              position:
+                x: float
+                y: float
+                z: float  # for 3D
+              metadata: object
+              cluster_id: string
+          edges:
+            type: array
+            items:
+              id: string
+              source: string
+              target: string
+              label: string
+              type: string
+              weight: float
+              attributes:
+                width: float
+                color: string
+                style: string
+              directional: boolean
+              metadata: object
+          clusters:
+            type: array
+            items:
+              id: string
+              name: string
+              description: string
+              nodes: array[string]
+              color: string
+          layers:
+            type: array
+            description: "طبقات العرض"
+            items:
+              layer_id: string
+              name: string
+              visible: boolean
+              nodes: array[string]
+              edges: array[string]
+          legend:
+            node_types: object
+            edge_types: object
+            clusters: object
+          export_formats:
+            svg: string
+            png: string
+            json: string
+            graphml: string
+          interactivity:
+            zoom: boolean
+            pan: boolean
+            filter: boolean
+            search: boolean
+            details_on_hover: boolean
+            
+      secondary:
+        - name: statistics
+          type: object
+          properties:
+            total_nodes: integer
+            total_edges: integer
+            density: float
+            clustering_coefficient: float
+            central_nodes: array
+            
+        - name: insights
+          type: array
+          description: "ملاحظات مستخلصة من الخريطة"
+    
+    tools:
+      internal:
+        - name: Graph Builder
+          type: graph
+          
+        - name: Layout Engine
+          type: algorithm
+          
+        - name: Clustering Algorithm
+          type: ml
+          
+        - name: Visualization Renderer
+          type: graphics
+          
+      external:
+        - name: D3.js
+          purpose: "interactive visualization"
+    
+    guardrails:
+      post_conditions:
+        - condition: "all entities have positions"
+          error_code: "S3_UNPOSITIONED_NODE"
+          
+        - condition: "edges reference valid nodes"
+          error_code: "S3_INVALID_EDGE"
+          
+      forbidden:
+        - "overlapping nodes without indication"
+        - "misleading visual representations"
+    
+    quality_metrics:
+      - name: layout_quality
+        target: ">= 0.8"
+        
+      - name: readability
+        target: ">= 0.85"
+        
+      - name: completeness
+        target: ">= 0.95"
+    
+    cost_profile:
+      compute: "MEDIUM"
+      tokens: "LOW"
+      estimated_cost_per_call: "$0.02 - $0.10"
+    
+    autonomy_level: "L0"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# S4: تركيب الجدول الزمني (Timeline Synthesis)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "S4"
+    name_ar: "تركيب الجدول الزمني"
+    name_en: "Timeline Synthesis"
+    category: "Synthesize"
+    version: "1.0.0"
+    
+    purpose: |
+      بناء جدول زمني شامل ومتعدد المسارات
+      يظهر الأحداث والفاعلين والسياقات عبر الزمن
+    
+    inputs:
+      required:
+        - name: events
+          type: array[Event]
+          schema:
+            Event:
+              id: string
+              name: string
+              date:
+                value: string
+                precision: enum[EXACT, YEAR, DECADE, CENTURY, APPROXIMATE]
+                calendar: enum[HIJRI, GREGORIAN, BOTH]
+              end_date: string  # للأحداث الممتدة
+              type: string
+              description: string
+              actors: array[string]
+              location: string
+              sources: array
+              
+      optional:
+        - name: tracks
+          type: array[string]
+          description: "مسارات متوازية (سياسي، فكري، اجتماعي...)"
+          
+        - name: temporal_scope
+          type: object
+          schema:
+            start: string
+            end: string
+            
+        - name: granularity
+          type: enum
+          values: [DAY, MONTH, YEAR, DECADE, CENTURY]
+          default: "YEAR"
+          
+        - name: include_periods
+          type: boolean
+          default: true
+          description: "تضمين الفترات الزمنية"
+          
+        - name: calendar_display
+          type: enum
+          values: [HIJRI, GREGORIAN, DUAL]
+          default: "DUAL"
+    
+    outputs:
+      primary:
+        name: timeline
+        type: Timeline
+        schema:
+          timeline_id: string
+          title: string
+          temporal_scope:
+            start: string
+            end: string
+            span_years: integer
+          calendar_system: string
+          events:
+            type: array
+            items:
+              id: string
+              name: string
+              date:
+                hijri: string
+                gregorian: string
+                display: string
+              end_date: object
+              duration: string
+              type: string
+              track: string
+              description: string
+              significance: enum[MINOR, MODERATE, MAJOR, PIVOTAL]
+              actors: array
+              location: object
+              sources: array
+              position:
+                x: float
+                y: float
+              visual:
+                color: string
+                icon: string
+                size: string
+          periods:
+            type: array
+            items:
+              id: string
+              name: string
+              start: object
+              end: object
+              track: string
+              description: string
+              color: string
+          tracks:
+            type: array
+            items:
+              id: string
+              name: string
+              color: string
+              position: integer
+          connections:
+            type: array
+            description: "روابط بين الأحداث"
+            items:
+              from_event: string
+              to_event: string
+              type: enum[CAUSED, ENABLED, INFLUENCED, RESPONDED_TO]
+              label: string
+          scale:
+            type: string
+            major_ticks: array
+            minor_ticks: array
+          annotations:
+            type: array
+            items:
+              text: string
+              position: object
+          export_formats:
+            svg: string
+            png: string
+            json: string
+            ical: string
+            
+      secondary:
+        - name: event_density
+          type: object
+          description: "كثافة الأحداث عبر الزمن"
+          
+        - name: cross_track_analysis
+          type: object
+          description: "تحليل العلاقات بين المسارات"
+    
+    tools:
+      internal:
+        - name: Temporal Organizer
+          type: chronology
+          
+        - name: Calendar Converter
+          type: calculator
+          
+        - name: Timeline Renderer
+          type: graphics
+          
+      external: []
+    
+    resources:
+      knowledge_bases:
+        - calendar_conversion_tables
+        - historical_periods_db
+    
+    guardrails:
+      post_conditions:
+        - condition: "events are chronologically sorted"
+          error_code: "S4_UNSORTED_EVENTS"
+          
+        - condition: "dates are valid and consistent"
+          error_code: "S4_INVALID_DATE"
+          
+        - condition: "calendar conversions are accurate"
+          error_code: "S4_CONVERSION_ERROR"
+          
+      forbidden:
+        - "anachronistic event ordering"
+        - "missing date precision indication"
+    
+    quality_metrics:
+      - name: chronological_accuracy
+        target: "1.0"
+        
+      - name: coverage
+        target: ">= 0.95"
+        
+      - name: visual_clarity
+        target: ">= 0.85"
+    
+    cost_profile:
+      compute: "LOW-MEDIUM"
+      tokens: "LOW"
+      estimated_cost_per_call: "$0.01 - $0.05"
+    
+    autonomy_level: "L0"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# S5: التركيب المقارني (Comparative Synthesis)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "S5"
+    name_ar: "التركيب المقارني"
+    name_en: "Comparative Synthesis"
+    category: "Synthesize"
+    version: "1.0.0"
+    
+    purpose: |
+      بناء مصفوفة أو جدول مقارنة منهجي
+      يقارن بين كيانات متعددة عبر أبعاد محددة
+    
+    inputs:
+      required:
+        - name: items
+          type: array
+          min_items: 2
+          description: "العناصر المقارنة"
+          schema:
+            id: string
+            name: string
+            type: string
+            data: object
+            
+        - name: dimensions
+          type: array
+          description: "أبعاد المقارنة"
+          schema:
+            id: string
+            name: string
+            type: enum[CATEGORICAL, ORDINAL, NUMERICAL, TEXTUAL, BOOLEAN]
+            scale: object
+            
+      optional:
+        - name: comparison_source
+          type: string
+          description: "مصدر بيانات المقارنة (من A3)"
+          
+        - name: output_format
+          type: enum
+          values: [TABLE, MATRIX, RADAR_CHART, PARALLEL_COORDINATES, NARRATIVE]
+          default: "TABLE"
+          
+        - name: include_analysis
+          type: boolean
+          default: true
+          
+        - name: highlight_differences
+          type: boolean
+          default: true
+    
+    outputs:
+      primary:
+        name: comparison
+        type: ComparisonMatrix
+        schema:
+          comparison_id: string
+          title: string
+          items:
+            type: array
+            items:
+              id: string
+              name: string
+              summary: string
+          dimensions:
+            type: array
+            items:
+              id: string
+              name: string
+              type: string
+          matrix:
+            type: array
+            description: "مصفوفة البيانات"
+            items:
+              item_id: string
+              values:
+                type: array
+                items:
+                  dimension_id: string
+                  value: any
+                  formatted_value: string
+                  evidence: string
+                  confidence: float
+                  notes: string
+          comparisons:
+            type: array
+            description: "مقارنات ثنائية"
+            items:
+              item_a: string
+              item_b: string
+              similarities:
+                type: array
+                items:
+                  dimension: string
+                  description: string
+              differences:
+                type: array
+                items:
+                  dimension: string
+                  value_a: string
+                  value_b: string
+                  significance: string
+          rankings:
+            type: object
+            description: "ترتيبات حسب كل بعد"
+          analysis:
+            overall_similarity: float
+            most_similar_pair: array
+            most_different_pair: array
+            key_differentiators: array
+            common_features: array
+            clusters: array
+          visualizations:
+            table:
+              html: string
+              csv: string
+            chart:
+              type: string
+              data: object
+              
+      secondary:
+        - name: statistical_analysis
+          type: object
+          
+        - name: clustering_results
+          type: object
+    
+    tools:
+      internal:
+        - name: Comparison Aggregator
+          type: aggregator
+          
+        - name: Similarity Calculator
+          type: statistical
+          
+        - name: Table Generator
+          type: formatter
+          
+        - name: Chart Generator
+          type: graphics
+          
+      external: []
+    
+    guardrails:
+      pre_conditions:
+        - condition: "all items have data for comparison dimensions"
+          error_code: "S5_INCOMPLETE_DATA"
+          
+      post_conditions:
+        - condition: "comparisons are balanced and fair"
+          error_code: "S5_BIASED_COMPARISON"
+          
+        - condition: "missing values are indicated"
+          error_code: "S5_HIDDEN_MISSING"
+          
+      forbidden:
+        - "hiding missing data"
+        - "biased dimension selection"
+        - "misleading visualizations"
+    
+    quality_metrics:
+      - name: data_completeness
+        target: ">= 0.9"
+        
+      - name: comparison_balance
+        target: ">= 0.85"
+        
+      - name: visualization_accuracy
+        target: "1.0"
+    
+    cost_profile:
+      compute: "LOW-MEDIUM"
+      tokens: "LOW-MEDIUM"
+      estimated_cost_per_call: "$0.01 - $0.08"
+    
+    autonomy_level: "L0"
+    
+    example:
+      input:
+        items:
+          - {id: "ashary", name: "الأشاعرة", type: "school"}
+          - {id: "mutazila", name: "المعتزلة", type: "school"}
+          - {id: "maturidi", name: "الماتريدية", type: "school"}
+        dimensions:
+          - {id: "sifat", name: "الصفات الإلهية", type: "CATEGORICAL"}
+          - {id: "qadar", name: "القدر", type: "CATEGORICAL"}
+          - {id: "iman", name: "تعريف الإيمان", type: "TEXTUAL"}
+        output_format: "TABLE"
+        
+      output:
+        comparison:
+          matrix:
+            - item_id: "ashary"
+              values:
+                - {dimension_id: "sifat", value: "إثبات مع نفي التشبيه"}
+                - {dimension_id: "qadar", value: "الكسب"}
+            - item_id: "mutazila"
+              values:
+                - {dimension_id: "sifat", value: "نفي الصفات الزائدة"}
+                - {dimension_id: "qadar", value: "حرية الإرادة"}
+          analysis:
+            key_differentiators: ["الصفات", "القدر"]
+            common_features: ["التنزيه", "العقلانية"]
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              نهاية ملف التركيب
+# ═══════════════════════════════════════════════════════════════════════════════

@@ -1,0 +1,493 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#                    IQRA-12 Agents Layer
+#                        طبقة الوكلاء
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# "الوكيل ليس LLM، بل نظام تشغيل يدير LLM"
+#                                    — Zhiheng Xi
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+metadata:
+  layer: "Agents Layer"
+  layer_ar: "طبقة الوكلاء"
+  version: "1.0.0"
+  purpose: "تصميم العقول الرقمية التي تعمل على المعرفة"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              المبدأ المركزي
+# ═══════════════════════════════════════════════════════════════════════════════
+
+central_principle:
+  statement: |
+    الوكيل في إقرأ-12 ليس مجرد نموذج لغوي يجيب عن الأسئلة،
+    بل كيان برمجي مستقل يمتلك:
+    - ذاكرة (Memory)
+    - أدوات (Tools)
+    - شخصية (Persona)
+    - قدرة على التخطيط (Planning)
+    
+  anti_pattern: |
+    ❌ وكيل واحد يفعل كل شيء
+    ❌ LLM بدون أدوات
+    ❌ استقلالية بدون رقابة
+    ❌ تنفيذ بدون تفسير
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              المعمارية الشاملة
+# ═══════════════════════════════════════════════════════════════════════════════
+
+architecture:
+  
+  components:
+    - name: "Single Agent Architecture"
+      name_ar: "معمارية الوكيل الفردي"
+      file: "01_single_agent_architecture.yaml"
+      
+    - name: "Autonomy Ladder"
+      name_ar: "سلم الاستقلالية"
+      file: "02_autonomy_ladder.yaml"
+      
+    - name: "Agent Contracts"
+      name_ar: "عقود الوكلاء"
+      file: "03_agent_contracts.yaml"
+      
+    - name: "Multi-Agent Orchestration"
+      name_ar: "تنسيق متعدد الوكلاء"
+      file: "04_multi_agent_orchestration.yaml"
+      
+    - name: "Agent Registry"
+      name_ar: "سجل الوكلاء"
+      file: "05_agent_registry.yaml"
+      
+    - name: "Evaluation Framework"
+      name_ar: "إطار التقييم"
+      file: "06_evaluation_framework.yaml"
+
+  diagram: |
+    ┌─────────────────────────────────────────────────────────────────────────┐
+    │                         طبقة الوكلاء                                    │
+    │                   "العقول الرقمية لإقرأ-12"                             │
+    └─────────────────────────────────────────────────────────────────────────┘
+                                      │
+              ┌───────────────────────┼───────────────────────┐
+              │                       │                       │
+              ▼                       ▼                       ▼
+    ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+    │   الوكيل الفردي │     │  سلم الاستقلالية │     │   عقود الوكلاء  │
+    │  Brain-Percept  │     │   L0 → L4       │     │  Agent Cards    │
+    │  -Action        │     │                 │     │                 │
+    └─────────────────┘     └─────────────────┘     └─────────────────┘
+              │                       │                       │
+              └───────────────────────┼───────────────────────┘
+                                      │
+                                      ▼
+                        ┌───────────────────────┐
+                        │  المنسق الرئيسي      │
+                        │    Orchestrator       │
+                        └───────────────────────┘
+                                      │
+              ┌───────────────────────┼───────────────────────┐
+              │                       │                       │
+              ▼                       ▼                       ▼
+    ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+    │   سجل الوكلاء   │     │  إطار التقييم   │     │  سجل القرارات   │
+    │    Registry     │     │    Evals        │     │  Decision Log   │
+    └─────────────────┘     └─────────────────┘     └─────────────────┘
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              الآباء المؤسسون
+# ═══════════════════════════════════════════════════════════════════════════════
+
+founding_fathers:
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # معمارية الوكيل الفردي
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  zhiheng_xi:
+    name: "Zhiheng Xi"
+    field: "Agentic AI Architecture"
+    affiliation: "Fudan University"
+    key_work: "The Rise and Potential of LLM Based Agents"
+    lesson: "Brain-Perception-Action Framework"
+    description: |
+      الوكيل يتكون من ثلاثة مكونات:
+      1. الدماغ (Brain): LLM للتفكير والتخطيط
+      2. الإدراك (Perception): استقبال المدخلات المتعددة
+      3. الفعل (Action): التأثير في البيئة عبر الأدوات
+    implementation:
+      - "Gemini 1.5 Pro كعقل مدبر"
+      - "محولات للنص والصور والبيانات المهيكلة"
+      - "APIs محددة (Search, Calculator, DB_Write)"
+
+  shunyu_yao:
+    name: "Shunyu Yao"
+    field: "Cognitive Reasoning in LLMs"
+    affiliation: "Princeton University"
+    key_work: "ReAct: Synergizing Reasoning and Acting"
+    lesson: "فكّر ثم تصرّف (Thought → Action → Observation)"
+    description: |
+      لتقليل الهلوسة وزيادة الدقة:
+      إجبار الوكيل على "التفكير بصوت عالٍ" قبل أي إجراء.
+      
+      الحلقة:
+      1. Thought: تحليل الطلب
+      2. Action: تنفيذ الأمر
+      3. Observation: استقبال النتيجة
+      4. Thought: إعادة التقييم
+    implementation:
+      - "تسجيل كل خطوات الحلقة في Logs"
+      - "قابلية التحكم البشري عبر تحرير الأفكار"
+      - "Traces قابلة للمراجعة"
+
+  joon_sung_park:
+    name: "Joon Sung Park"
+    field: "Generative Agents"
+    affiliation: "Stanford University"
+    key_work: "Generative Agents: Interactive Simulacra"
+    lesson: "تيار الذاكرة التوليدية (Memory Stream)"
+    description: |
+      النماذج اللغوية "تنسى" بمجرد إغلاق النافذة.
+      الحل: بناء ذاكرة طويلة المدى في Vector DB.
+      
+      خوارزمية الاسترجاع:
+      Score = (α × Recency) + (β × Importance) + (γ × Relevance)
+      
+      التأمل (Reflection): مراجعة دورية لاستخلاص رؤى عليا.
+    implementation:
+      - "Vector Database للذاكرة"
+      - "Reflection إجراء دوري"
+      - "Higher-level Insights"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # استخدام الأدوات
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  toolformer_team:
+    name: "Timo Schick et al."
+    field: "Tool Use in LLMs"
+    affiliation: "Meta AI"
+    key_work: "Toolformer: Language Models Can Teach Themselves to Use Tools"
+    lesson: "الوكيل يتعلم متى وكيف يستخدم الأدوات"
+    description: |
+      النموذج يتعلم ذاتياً:
+      - متى يحتاج أداة خارجية
+      - أي أداة يختار
+      - كيف يصيغ الاستدعاء
+      - كيف يدمج النتيجة
+    implementation:
+      - "Search_Tool للبحث في BigQuery"
+      - "Calculator للحسابات (المواريث، المواقيت)"
+      - "Code_Interpreter لـ Python"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # التصحيح الذاتي
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  reflexion_team:
+    name: "Noah Shinn et al."
+    field: "Self-Correction in LLMs"
+    key_work: "Reflexion: Language Agents with Verbal Reinforcement Learning"
+    lesson: "التعلم من الأخطاء بدون إعادة تدريب"
+    description: |
+      آلية للوكيل لنقد ذاته وتصحيح أخطائه
+      في الكتابة أو البحث عبر محاولات متكررة.
+    implementation:
+      - "Self-critique loop"
+      - "Error memory"
+      - "Iterative refinement"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # الأنظمة متعددة الوكلاء
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  autogen_team:
+    name: "Qingyun Wu et al."
+    field: "Multi-Agent Frameworks"
+    affiliation: "Microsoft Research"
+    key_work: "AutoGen: Enabling Next-Gen LLM Applications"
+    lesson: "الحوار المنظم بين وكلاء بأدوار مختلفة"
+    description: |
+      بدل وكيل واحد لكل شيء:
+      بناء التطبيق كحوار منظم بين وكلاء بأدوار مختلفة.
+      
+      أنماط التفاعل:
+      - وكيل ↔ وكيل
+      - وكيل ↔ إنسان
+      - وكلاء + أدوات
+    implementation:
+      - "Conversable agents كوحدات بناء"
+      - "Roles وسلوكيات الحوار كسياسة"
+      - "Human-in-the-loop عند النقاط الحساسة"
+
+  camel_team:
+    name: "Guohao Li et al."
+    field: "Role-Playing Multi-Agent"
+    key_work: "CAMEL: Communicative Agents for Mind Exploration"
+    lesson: "تقمص الأدوار والتفاوض"
+    description: |
+      وكلاء يتقمصون أدواراً محددة ويتفاوضون
+      للوصول لحل مشترك.
+    implementation:
+      - "Role assignment"
+      - "Negotiation protocols"
+      - "Consensus building"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # التحكم البشري
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  ben_shneiderman:
+    name: "Ben Shneiderman"
+    field: "Human-Centered AI"
+    affiliation: "University of Maryland"
+    key_work: "Human-Centered AI"
+    lesson: "الجمع بين الأتمتة والتحكم البشري"
+    description: |
+      التدقيق والرجوع للخلف كعنصر تصميم لا كخيار.
+      كل مراجعة بشرية تُسجل كنشاط Provenance مستقل.
+    implementation:
+      - "Autonomy Ladder"
+      - "Human approval gates"
+      - "Audit trails"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # التوثيق والمساءلة
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  timnit_gebru:
+    name: "Timnit Gebru"
+    field: "AI Accountability"
+    key_work: "Datasheets for Datasets / Model Cards"
+    lesson: "التوثيق شرط لتقليل المفاجآت والانحياز"
+    description: |
+      بطاقة الوكيل (Agent Card) تُلزم:
+      - المدخلات والمخرجات
+      - القيود وحدود الاستنتاج
+      - مستوى المخاطر
+      - مستوى الاستقلالية
+    implementation:
+      - "Agent Cards إلزامية"
+      - "عدم اكتمال البطاقة = خفض الاستقلالية"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # منع الأخطاء
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  don_norman:
+    name: "Don Norman"
+    field: "Human-Centered Design"
+    key_work: "The Design of Everyday Things"
+    lesson: "منع الخطأ قبل وقوعه"
+    description: |
+      النظام يمنع الفعل المؤذي قبل وقوعه
+      بدل لوم المستخدم بعد وقوعه.
+      
+      "حدود واضحة" و"عقود استخدام" يفهمها البشر.
+    implementation:
+      - "Guardrails داخل الأوامر"
+      - "Cost limits"
+      - "Scope constraints"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # التخصص الحاد
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  alan_cooper:
+    name: "Alan Cooper"
+    field: "Goal-Directed Design"
+    key_work: "About Face: The Essentials of Interaction Design"
+    lesson: "الوكيل الواحد = مسؤولية واحدة"
+    description: |
+      رفض "الوظائف المتكدسة".
+      تصميم يُحترم فيه هدف المستخدم
+      ويُقسّم إلى مهام قابلة للقياس والتحسين.
+    implementation:
+      - "Single Responsibility Principle"
+      - "Clear task boundaries"
+      - "Measurable outcomes"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              سلم الاستقلالية
+# ═══════════════════════════════════════════════════════════════════════════════
+
+autonomy_ladder:
+  
+  principle: |
+    الاستقلالية ليست "ميزة" بل سياسة.
+    تُخفض تلقائياً عند:
+    - غياب بطاقة الوكيل
+    - عدم اكتمال provenance
+    - ارتفاع الكلفة أو حساسية البيانات
+  
+  levels:
+    L0:
+      name: "Read Only"
+      name_ar: "قراءة فقط"
+      description: "يستعلم ويعرض أدلة دون تغيير بيانات"
+      example: "وكيل البحث الأولي"
+      
+    L1:
+      name: "Suggest"
+      name_ar: "اقتراح"
+      description: "يقترح ربطاً أو دمجاً دون تنفيذ"
+      example: "وكيل اقتراح الكيانات"
+      
+    L2:
+      name: "Supervised Execute"
+      name_ar: "تنفيذ مراقب"
+      description: "ينفذ بعد موافقة بشرية صريحة"
+      example: "وكيل دمج الكيانات"
+      
+    L3:
+      name: "Conditional Execute"
+      name_ar: "تنفيذ مشروط"
+      description: "ينفذ تلقائياً داخل شروط صارمة"
+      constraints:
+        - "نطاق محدد"
+        - "سقف كلفة"
+        - "نوع عملية محدد"
+      example: "وكيل التقطيع الآلي"
+      
+    L4:
+      name: "Limited Autopilot"
+      name_ar: "طيار محدود"
+      description: "للأعمال الإدارية فقط"
+      constraints:
+        - "فحوصات روتينية"
+        - "لا يمس الادعاءات النهائية"
+      example: "وكيل مراقبة الجودة"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              العقود القياسية
+# ═══════════════════════════════════════════════════════════════════════════════
+
+contracts:
+  
+  input_contract:
+    required_fields:
+      - project_id: "معرّف المشروع"
+      - corpus_scope: "نطاق الكوربس"
+      - question: "السؤال/المهمة"
+      - constraints: "القيود"
+      - risk_tier: "مستوى المخاطر"
+      - cost_budget: "سقف الكلفة"
+      - required_outputs: "المخرجات المطلوبة"
+      
+  output_contract:
+    required_fields:
+      - run_id: "معرّف التشغيل"
+      - artifacts: "المنتجات"
+      - tables_touched: "الجداول المتأثرة"
+      - cost_actual: "الكلفة الفعلية"
+      - confidence: "درجة الثقة"
+      - limitations: "القيود والحدود"
+      - next_actions: "الخطوات التالية"
+
+  agent_card:
+    required_fields:
+      - agent_id: "معرّف الوكيل"
+      - purpose: "الغرض"
+      - inputs: "المدخلات"
+      - outputs: "المخرجات"
+      - evaluation: "معايير التقييم"
+      - limitations: "القيود"
+      - risk_tier: "مستوى المخاطر"
+      - autonomy_level: "مستوى الاستقلالية"
+      - owner: "المالك"
+      - tables_read: "جداول القراءة"
+      - tables_write: "جداول الكتابة"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              أنماط التنسيق
+# ═══════════════════════════════════════════════════════════════════════════════
+
+orchestration_patterns:
+
+  linear:
+    name: "Linear Pipeline"
+    name_ar: "تنسيق خطي"
+    description: "مهام متسلسلة"
+    example: "اقتناء → تنظيف → تقطيع → استخراج كيانات"
+    
+  dialectical:
+    name: "Dialectical/Iterative"
+    name_ar: "تنسيق جدلي"
+    description: "استنتاج → تدقيق مضاد → تعديل → إعادة اختبار"
+    inspiration: "منطق Hegel في تحويل التعارض إلى آلية تحسين"
+    example: "وكيل مؤيد + وكيل معارض قبل اعتماد claim"
+    
+  hierarchical:
+    name: "Hierarchical"
+    name_ar: "تنسيق هرمي"
+    description: "منسق رئيسي يدير وكلاء متخصصين"
+    example: "Orchestrator → Research, Critic, Executor"
+    
+  collaborative:
+    name: "Collaborative"
+    name_ar: "تنسيق تشاركي"
+    description: "وكلاء متساوون يتفاوضون"
+    example: "فريق مراجعة متعدد التخصصات"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              فئات الوكلاء
+# ═══════════════════════════════════════════════════════════════════════════════
+
+agent_categories:
+
+  search_agents:
+    name_ar: "وكلاء البحث"
+    agents:
+      - "Recipe Builder: بناء وصفات البحث"
+      - "Evidence Hunter: صيد الشواهد"
+      - "Counter-Evidence Seeker: البحث عن الأدلة المضادة"
+      
+  link_agents:
+    name_ar: "وكلاء الربط"
+    agents:
+      - "Entity Extractor: استخراج الكيانات"
+      - "Identity Resolver: حل الالتباس"
+      - "Relation Proposer: اقتراح العلاقات"
+      
+  infer_agents:
+    name_ar: "وكلاء الاستنتاج"
+    agents:
+      - "Claim Drafter: صياغة الادعاءات"
+      - "Scope Setter: تحديد النطاق"
+      - "Uncertainty Assessor: تقييم عدم اليقين"
+      
+  write_agents:
+    name_ar: "وكلاء الكتابة"
+    agents:
+      - "Outline Builder: بناء المخطط"
+      - "Section Writer: كتابة الأقسام"
+      - "Citation Auditor: تدقيق الاستشهادات"
+      
+  governance_agents:
+    name_ar: "وكلاء الحوكمة"
+    agents:
+      - "Rights Checker: فحص الحقوق"
+      - "Quality Auditor: تدقيق الجودة"
+      - "Cost Monitor: مراقبة التكلفة"
+
+  gap_agents:
+    name_ar: "وكلاء الفجوات"
+    agents:
+      - "Gap Hunter: صياد الثروة المهملة"
+      - "Blind Spot Detector: كاشف النقاط العمياء"
+      - "Opportunity Spotter: راصد الفرص"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              الإحصائيات
+# ═══════════════════════════════════════════════════════════════════════════════
+
+statistics:
+  components: 6
+  founding_fathers: 12
+  autonomy_levels: 5
+  orchestration_patterns: 4
+  agent_categories: 6
+  total_agent_types: 18
+
+# ═══════════════════════════════════════════════════════════════════════════════

@@ -1,0 +1,499 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#                    IQRA-12 Agent Evaluation Framework
+#                        إطار تقييم الوكلاء
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# "لا تثق بوكيل لم تختبره"
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+metadata:
+  component: "Agent Evaluation Framework"
+  component_ar: "إطار تقييم الوكلاء"
+  version: "1.0.0"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              المبادئ الحاكمة
+# ═══════════════════════════════════════════════════════════════════════════════
+
+governing_principles:
+
+  principle_1:
+    source: "Marco Ribeiro - CheckList"
+    lesson: "الاختبار السلوكي المنهجي"
+    description: |
+      لا يكفي اختبار الدقة الإجمالية.
+      يجب اختبار القدرات المحددة بشكل منفصل.
+      
+  principle_2:
+    source: "Percy Liang - HELM"
+    lesson: "التقييم الشمولي متعدد الأبعاد"
+    description: |
+      قياس 7 أبعاد: دقة، معايرة، متانة، عدالة، تحيز، سمية، كفاءة.
+      
+  principle_3:
+    source: "Anthropic - Constitutional AI"
+    lesson: "التقييم القيمي"
+    description: |
+      اختبار التزام الوكيل بالقيم والمبادئ، لا فقط الدقة.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              أنواع التقييم
+# ═══════════════════════════════════════════════════════════════════════════════
+
+evaluation_types:
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # التقييم الوظيفي
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  functional:
+    name: "Functional Evaluation"
+    name_ar: "التقييم الوظيفي"
+    description: "هل يؤدي الوكيل مهمته بشكل صحيح؟"
+    
+    test_types:
+      
+      minimum_functionality_tests:
+        name_ar: "اختبارات الحد الأدنى (MFT)"
+        source: "CheckList"
+        description: |
+          اختبار قدرة أساسية واحدة في كل اختبار.
+        
+        examples:
+          entity_extractor:
+            - test: "يستخرج اسم عالم من جملة بسيطة"
+              input: "قال الإمام الغزالي في الإحياء"
+              expected: "entity: الغزالي"
+              
+            - test: "يميز بين أسماء متشابهة"
+              input: "ابن تيمية الجد وابن تيمية الحفيد"
+              expected: "entity_1: ابن تيمية الجد, entity_2: ابن تيمية الحفيد"
+              
+          claim_drafter:
+            - test: "يصيغ ادعاءً بنطاق محدد"
+              input: "evidence bundle عن موقف الغزالي"
+              expected: "claim مع scope و uncertainty"
+              
+      invariance_tests:
+        name_ar: "اختبارات الثبات (INV)"
+        source: "CheckList"
+        description: |
+          تغييرات لا يجب أن تؤثر على النتيجة.
+        
+        examples:
+          - test: "ثبات تجاه التشكيل"
+            variant_1: "الغَزالي"
+            variant_2: "الغزالي"
+            expected: "نفس النتيجة"
+            
+          - test: "ثبات تجاه صيغة الاسم"
+            variant_1: "أبو حامد الغزالي"
+            variant_2: "الغزالي"
+            variant_3: "حجة الإسلام"
+            expected: "نفس الكيان"
+            
+      directional_tests:
+        name_ar: "اختبارات الاتجاه (DIR)"
+        source: "CheckList"
+        description: |
+          تغييرات يجب أن تؤثر على النتيجة بطريقة متوقعة.
+        
+        examples:
+          - test: "زيادة الأدلة → زيادة الثقة"
+            baseline: "claim مع 2 أدلة → confidence 0.6"
+            modified: "claim مع 5 أدلة → confidence > 0.6"
+            
+          - test: "أدلة متعارضة → زيادة عدم اليقين"
+            baseline: "claim مع أدلة متسقة → uncertainty LOW"
+            modified: "claim مع أدلة متعارضة → uncertainty > LOW"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # التقييم السلوكي
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  behavioral:
+    name: "Behavioral Evaluation"
+    name_ar: "التقييم السلوكي"
+    description: "هل يتصرف الوكيل بشكل مناسب في مواقف مختلفة؟"
+    
+    test_categories:
+      
+      edge_cases:
+        name_ar: "الحالات الحدية"
+        examples:
+          - "مدخل فارغ"
+          - "مدخل طويل جداً"
+          - "لغة مختلطة"
+          - "نص مشوه (OCR errors)"
+          
+      adversarial:
+        name_ar: "الحالات العدائية"
+        examples:
+          - "محاولة حقن تعليمات"
+          - "طلب خارج النطاق"
+          - "معلومات متناقضة"
+          
+      ambiguous:
+        name_ar: "الحالات الغامضة"
+        examples:
+          - "اسم يحتمل أكثر من شخص"
+          - "نص بدون سياق كافٍ"
+          - "طلب غير واضح"
+        expected_behavior: "طلب توضيح أو إظهار عدم اليقين"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # التقييم القيمي
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  values:
+    name: "Values Alignment Evaluation"
+    name_ar: "التقييم القيمي"
+    description: "هل يلتزم الوكيل بالقيم والمبادئ؟"
+    
+    dimensions:
+      
+      honesty:
+        name_ar: "الصدق"
+        tests:
+          - "لا يخترع معلومات"
+          - "يعترف بعدم المعرفة"
+          - "يذكر مصادره"
+          - "يميز بين اليقين والظن"
+          
+      fairness:
+        name_ar: "العدالة"
+        tests:
+          - "لا يتحيز لمذهب على آخر"
+          - "يعرض الآراء المختلفة"
+          - "لا يتجاهل الأقليات"
+          
+      safety:
+        name_ar: "السلامة"
+        tests:
+          - "لا يروّج للتطرف"
+          - "يرفض الطلبات الضارة"
+          - "يحافظ على الخصوصية"
+          
+      respect:
+        name_ar: "الاحترام"
+        tests:
+          - "لغة محترمة"
+          - "لا يسخر من المعتقدات"
+          - "يتعامل بجدية مع الاعتراضات"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # تقييم الكفاءة
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  efficiency:
+    name: "Efficiency Evaluation"
+    name_ar: "تقييم الكفاءة"
+    description: "هل يعمل الوكيل بكفاءة؟"
+    
+    metrics:
+      latency:
+        name_ar: "زمن الاستجابة"
+        thresholds:
+          p50: "< 2 seconds"
+          p95: "< 10 seconds"
+          p99: "< 30 seconds"
+          
+      cost:
+        name_ar: "التكلفة"
+        metrics:
+          - "cost per task"
+          - "cost per successful task"
+          - "token efficiency"
+          
+      resource_usage:
+        name_ar: "استهلاك الموارد"
+        metrics:
+          - "memory usage"
+          - "API calls per task"
+          - "retry rate"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # تقييم الانحراف
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  drift:
+    name: "Drift Detection"
+    name_ar: "كشف الانحراف"
+    description: "هل تغير سلوك الوكيل عن المتوقع؟"
+    
+    types:
+      
+      performance_drift:
+        name_ar: "انحراف الأداء"
+        indicators:
+          - "انخفاض الدقة"
+          - "زيادة التكلفة"
+          - "زيادة زمن الاستجابة"
+        detection:
+          method: "مقارنة مع baseline أسبوعي"
+          threshold: "> 10% change"
+          
+      behavior_drift:
+        name_ar: "انحراف السلوك"
+        indicators:
+          - "تغير في توزيع المخرجات"
+          - "تغير في أنماط استخدام الأدوات"
+          - "تغير في معدل الخطأ"
+        detection:
+          method: "statistical tests on output distribution"
+          
+      data_drift:
+        name_ar: "انحراف البيانات"
+        indicators:
+          - "تغير في توزيع المدخلات"
+          - "ظهور أنماط جديدة"
+        detection:
+          method: "مراقبة توزيع المدخلات"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              بنية مجموعة الاختبارات
+# ═══════════════════════════════════════════════════════════════════════════════
+
+eval_suite_schema:
+
+  required_fields:
+    
+    suite_id:
+      type: "string"
+      format: "iqra:eval:{agent_category}:{version}"
+      
+    agent_id:
+      type: "string"
+      description: "الوكيل المستهدف"
+      
+    version:
+      type: "string"
+      
+    test_cases:
+      type: "array"
+      item_schema:
+        test_id: "string"
+        category: "MFT | INV | DIR | EDGE | ADV | VALUE"
+        description: "string"
+        input: "object"
+        expected: "object"
+        tolerance: "object (optional)"
+        
+    thresholds:
+      type: "object"
+      schema:
+        overall_pass_rate: "number (0-1)"
+        category_thresholds: "object"
+        
+    metadata:
+      type: "object"
+      schema:
+        created_at: "datetime"
+        created_by: "string"
+        last_run: "datetime"
+        run_count: "number"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              دورة التقييم
+# ═══════════════════════════════════════════════════════════════════════════════
+
+evaluation_cycle:
+
+  continuous:
+    name_ar: "التقييم المستمر"
+    frequency: "كل تشغيل"
+    tests:
+      - "contract validation (input/output)"
+      - "basic functional tests"
+      - "cost tracking"
+    action_on_failure: "log + alert if pattern"
+
+  daily:
+    name_ar: "التقييم اليومي"
+    frequency: "مرة يومياً"
+    tests:
+      - "full functional suite"
+      - "drift detection"
+      - "cost aggregation"
+    action_on_failure: "alert + review queue"
+
+  weekly:
+    name_ar: "التقييم الأسبوعي"
+    frequency: "مرة أسبوعياً"
+    tests:
+      - "behavioral tests"
+      - "edge cases"
+      - "efficiency analysis"
+    action_on_failure: "demotion consideration"
+
+  quarterly:
+    name_ar: "التقييم الربعي"
+    frequency: "كل 3 أشهر"
+    tests:
+      - "full suite (all categories)"
+      - "values alignment"
+      - "adversarial testing"
+      - "human evaluation sample"
+    action_on_failure: "formal review + possible deprecation"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              مقاييس الأداء
+# ═══════════════════════════════════════════════════════════════════════════════
+
+performance_metrics:
+
+  accuracy_metrics:
+    
+    precision:
+      name_ar: "الدقة"
+      formula: "TP / (TP + FP)"
+      threshold: ">= 0.85"
+      
+    recall:
+      name_ar: "الاستدعاء"
+      formula: "TP / (TP + FN)"
+      threshold: ">= 0.80"
+      
+    f1_score:
+      name_ar: "درجة F1"
+      formula: "2 * (P * R) / (P + R)"
+      threshold: ">= 0.82"
+
+  reliability_metrics:
+    
+    success_rate:
+      name_ar: "معدل النجاح"
+      formula: "successful_runs / total_runs"
+      threshold: ">= 0.95"
+      
+    retry_rate:
+      name_ar: "معدل إعادة المحاولة"
+      formula: "retried_runs / total_runs"
+      threshold: "<= 0.10"
+      
+    timeout_rate:
+      name_ar: "معدل انتهاء الوقت"
+      formula: "timeout_runs / total_runs"
+      threshold: "<= 0.05"
+
+  quality_metrics:
+    
+    confidence_calibration:
+      name_ar: "معايرة الثقة"
+      description: "هل confidence يعكس الدقة الفعلية؟"
+      method: "reliability diagram"
+      
+    citation_accuracy:
+      name_ar: "دقة الاستشهاد"
+      description: "نسبة الاستشهادات الصحيحة والقابلة للتحقق"
+      threshold: ">= 0.98"
+      
+    provenance_completeness:
+      name_ar: "اكتمال الأصل"
+      description: "نسبة المخرجات مع provenance كامل"
+      threshold: "= 1.0"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              التنبيهات والإجراءات
+# ═══════════════════════════════════════════════════════════════════════════════
+
+alerts_and_actions:
+
+  alert_levels:
+    
+    INFO:
+      color: "#4CAF50"
+      action: "Log only"
+      example: "تحسن في الأداء"
+      
+    WARNING:
+      color: "#FF9800"
+      action: "Log + Notify owner"
+      example: "أداء قريب من الحد الأدنى"
+      
+    ERROR:
+      color: "#F44336"
+      action: "Log + Notify team + Add to review queue"
+      example: "فشل في اختبارات أساسية"
+      
+    CRITICAL:
+      color: "#9C27B0"
+      action: "Immediate demotion + Notify all + Stop new runs"
+      example: "خطأ قيمي أو أمني"
+
+  automated_actions:
+    
+    on_drift_detected:
+      - "خفض الاستقلالية درجة واحدة"
+      - "إضافة للمراجعة البشرية"
+      - "إخطار المالك"
+      
+    on_repeated_failure:
+      threshold: "3 failures in 24h"
+      actions:
+        - "تعليق الوكيل"
+        - "تحقيق تلقائي"
+        
+    on_cost_spike:
+      threshold: "> 200% of average"
+      actions:
+        - "خفض سقف التكلفة"
+        - "مراجعة الاستعلامات"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              جداول BigQuery
+# ═══════════════════════════════════════════════════════════════════════════════
+
+bigquery_tables:
+
+  eval_suites:
+    description: "سجل مجموعات الاختبارات"
+    columns:
+      - suite_id: "معرّف المجموعة"
+      - agent_id: "معرّف الوكيل"
+      - version: "الإصدار"
+      - test_cases_json: "حالات الاختبار"
+      - thresholds_json: "الحدود"
+      - created_at: "تاريخ الإنشاء"
+      - created_by: "المنشئ"
+
+  eval_runs:
+    description: "سجل تشغيل التقييمات"
+    columns:
+      - eval_run_id: "معرّف تشغيل التقييم"
+      - suite_id: "معرّف المجموعة"
+      - agent_id: "معرّف الوكيل"
+      - agent_version: "إصدار الوكيل"
+      - total_tests: "عدد الاختبارات"
+      - passed: "الناجحة"
+      - failed: "الفاشلة"
+      - pass_rate: "معدل النجاح"
+      - details_json: "التفاصيل"
+      - run_at: "وقت التشغيل"
+
+  drift_alerts:
+    description: "تنبيهات الانحراف"
+    columns:
+      - alert_id: "معرّف التنبيه"
+      - agent_id: "معرّف الوكيل"
+      - drift_type: "نوع الانحراف"
+      - metric: "المقياس"
+      - baseline_value: "القيمة الأساسية"
+      - current_value: "القيمة الحالية"
+      - deviation: "الانحراف"
+      - severity: "الخطورة"
+      - action_taken: "الإجراء المتخذ"
+      - detected_at: "وقت الاكتشاف"
+
+  performance_snapshots:
+    description: "لقطات الأداء الدورية"
+    columns:
+      - snapshot_id: "معرّف اللقطة"
+      - agent_id: "معرّف الوكيل"
+      - period: "الفترة (DAILY | WEEKLY | MONTHLY)"
+      - metrics_json: "المقاييس"
+      - comparison_json: "المقارنة مع الفترة السابقة"
+      - created_at: "تاريخ الإنشاء"
+
+# ═══════════════════════════════════════════════════════════════════════════════

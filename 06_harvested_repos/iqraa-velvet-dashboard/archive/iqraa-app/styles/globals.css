@@ -1,0 +1,1101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ثيم إقرأ 2.0 – ألوان مطفّأة وخط عربي مريح */
+
+/* متغيّرات الألوان العامة */
+:root {
+  --iq-bg: #050914;              /* خلفية عامة داكنة جدًا */
+  --iq-bg-soft: #101827;         /* خلفية صناديق */
+  --iq-border-soft: #273244;     /* حدود ناعمة */
+  --iq-text-main: #f5f5f5;       /* نص أساسي */
+  --iq-text-muted: #9ca3af;      /* نص ثانوي */
+  --iq-gold: #bfa76a;            /* ذهبي مطفأ */
+  --iq-olive: #4f5a32;           /* زيتوني مطفأ */
+  --iq-purple-soft: #4d3f53;     /* بنفسجي رمادي هادئ */
+  --iq-accent: #1f2937;          /* لمسات بسيطة للهوفر */
+  --iq-shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.45);
+  --iq-radius-lg: 14px;
+  --iq-radius-md: 10px;
+  --iq-radius-sm: 6px;
+}
+
+/* تعميم الخط والخلفية على الجسم كله */
+html,
+body,
+#__next {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background-color: var(--iq-bg);
+  color: var(--iq-text-main);
+  font-family: "IBM Plex Sans Arabic", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+}
+
+/* إلغاء سكرول أفقية مزعجة محتملة */
+body {
+  overflow-x: hidden;
+}
+
+/* حاوية الداشبورد */
+.iq-dashboard {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 20px;
+  box-sizing: border-box;
+}
+
+/* الشريط العلوي */
+.iq-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.iq-logo {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--iq-gold);
+}
+
+.iq-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.iq-icon-button {
+  border: 1px solid var(--iq-border-soft);
+  background: rgba(15, 23, 42, 0.9);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--iq-text-muted);
+  cursor: pointer;
+}
+
+/* منطقة البحث */
+.iq-search-zone {
+  background: radial-gradient(circle at top left, #111827 0, #020617 55%);
+  border-radius: var(--iq-radius-lg);
+  padding: 14px 18px 12px;
+  box-shadow: var(--iq-shadow-soft);
+  border: 1px solid var(--iq-border-soft);
+  margin-bottom: 10px;
+}
+
+.iq-search-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--iq-text-muted);
+  margin-bottom: 6px;
+}
+
+.iq-search-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.iq-search-input {
+  flex: 1;
+  background: #020617;
+  border-radius: 999px;
+  border: 1px solid #1f2937;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: var(--iq-text-main);
+  outline: none;
+}
+
+.iq-search-input::placeholder {
+  color: #6b7280;
+}
+
+.iq-search-button {
+  border-radius: 999px;
+  border: none;
+  background: var(--iq-olive);
+  color: #f9fafb;
+  font-size: 13px;
+  padding: 9px 16px;
+  cursor: pointer;
+}
+
+/* مسار الاكتشاف */
+.iq-trail {
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--iq-text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.iq-trail-chip {
+  background: rgba(15, 23, 42, 0.8);
+  border-radius: 999px;
+  padding: 4px 8px;
+  border: 1px solid rgba(55, 65, 81, 0.7);
+}
+
+/* المنطقة الوسطى: المرشد + النتائج + المفكرة */
+.iq-main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 0.78fr) minmax(0, 0.22fr);
+  gap: 12px;
+  margin-top: 8px;
+}
+
+/* نتائج + صحة البحث */
+.iq-results-column {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* رأس النتائج + صحة البحث */
+.iq-results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.iq-results-title {
+  font-size: 13px;
+  color: var(--iq-text-muted);
+}
+
+.iq-health-chip {
+  border-radius: 999px;
+  border: 1px solid var(--iq-border-soft);
+  padding: 4px 10px;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(15, 23, 42, 0.9);
+}
+
+/* صندوق النتائج */
+.iq-results-box {
+  background: rgba(15, 23, 42, 0.98);
+  border-radius: var(--iq-radius-lg);
+  border: 1px solid var(--iq-border-soft);
+  padding: 10px 12px;
+  min-height: 260px;
+}
+
+/* بطاقة نتيجة */
+.iq-result-item {
+  padding: 8px 8px;
+  border-radius: var(--iq-radius-md);
+  border: 1px solid transparent;
+  margin-bottom: 4px;
+  cursor: pointer;
+}
+
+.iq-result-item:hover {
+  background: #020617;
+  border-color: var(--iq-olive);
+}
+
+.iq-result-title {
+  font-size: 13px;
+  margin-bottom: 2px;
+}
+
+.iq-result-meta {
+  font-size: 11px;
+  color: var(--iq-text-muted);
+}
+
+/* لوحة المرشد */
+.iq-guide-panel {
+  background: rgba(15, 23, 42, 0.98);
+  border-radius: var(--iq-radius-lg);
+  border: 1px solid var(--iq-border-soft);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.iq-guide-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.iq-guide-title {
+  font-size: 12px;
+  color: var(--iq-text-muted);
+}
+
+.iq-guide-badge {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(79, 90, 50, 0.3);
+  color: #e5e7eb;
+}
+
+/* فقاعة المرشد */
+.iq-guide-bubble {
+  font-size: 12px;
+  line-height: 1.5;
+  background: radial-gradient(circle at top left, #111827 0, #020617 70%);
+  border-radius: var(--iq-radius-md);
+  padding: 8px 10px;
+  border: 1px solid var(--iq-border-soft);
+}
+
+/* إدخال المرشد */
+.iq-guide-input-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.iq-guide-input {
+  flex: 1;
+  border-radius: 999px;
+  border: 1px solid #1f2937;
+  font-size: 11px;
+  padding: 6px 10px;
+  background: #020617;
+  color: var(--iq-text-main);
+}
+
+.iq-guide-input::placeholder {
+  color: #6b7280;
+}
+
+.iq-guide-send {
+  border-radius: 999px;
+  border: none;
+  padding: 5px 10px;
+  font-size: 11px;
+  background: var(--iq-purple-soft);
+  color: #f9fafb;
+  cursor: pointer;
+}
+
+/* المفكرة في الأسفل */
+.iq-notebook-wrapper {
+  margin-top: 10px;
+}
+
+.iq-notebook-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.iq-notebook-label {
+  font-size: 11px;
+  color: var(--iq-text-muted);
+}
+
+.iq-reflection-toggle {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--iq-border-soft);
+  background: transparent;
+  color: var(--iq-text-muted);
+  cursor: pointer;
+}
+
+.iq-notebook {
+  background: #020617;
+  border-radius: var(--iq-radius-lg);
+  border: 1px solid var(--iq-border-soft);
+  padding: 8px 10px;
+  min-height: 80px;
+  max-height: 160px;
+  font-size: 12px;
+  resize: vertical;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* استجابة الشاشات الصغيرة */
+@media (max-width: 900px) {
+  .iq-main {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===== تحسين تموضع وحجم شريط البحث في غرفة القيادة ===== */
+
+.iq-search-zone {
+  display: flex;
+  justify-content: center;      /* يوسّط الكرت في منتصف المساحة */
+}
+
+.iq-search-box {
+  width: 80%;                   /* عرض الكرت نفسه */
+  max-width: 1100px;            /* لا يتجاوز هذا العرض على الشاشات الكبيرة */
+  margin: 24px auto;
+}
+
+.iq-search-input-row {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;                    /* مسافة صغيرة بين المستطيل وزر البحث */
+}
+
+.iq-search-input {
+  flex: 1 1 0;                  /* يخلي مستطيل البحث يتمدد ويأخذ أغلب العرض */
+  min-width: 0;
+}
+
+.iq-search-button {
+  flex: 0 0 auto;               /* الزر يأخذ الحجم المناسب له فقط */
+}
+
+/* ===== ضبط شريط البحث ومسار الاكتشاف مجدداً ===== */
+
+/* نجعل منطقة البحث عموداً عاديًا: الكرت فوق + مسار الاكتشاف تحته */
+.iq-search-zone {
+  max-width: 1200px;
+  margin: 24px auto 16px;
+}
+
+/* الكرت نفسه في الوسط ويأخذ معظم العرض */
+.iq-search-box {
+  width: 100%;
+  margin: 0 auto 16px;
+}
+
+/* صف مستطيل البحث + زر البحث: شبكة من عمودين
+   العمود الأول = المستطيل (يمتد بالكامل)
+   العمود الثاني = زر "بحث" بحجمه الطبيعي */
+.iq-search-input-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: stretch;
+}
+
+/* المستطيل نفسه يتمدد ليملأ كل العرض المتبقي */
+.iq-search-input {
+  width: 100%;
+  min-width: 0;
+  padding: 0.9rem 1.1rem;
+  font-size: 1rem;
+}
+
+/* نضمن أن مسار الاكتشاف يظهر تحت الكرت وبعرض كامل */
+.iq-discovery-track {
+  width: 100%;
+}
+
+/* === ضبط نهائي لشريط البحث وتموضعه وألوان الأزرار === */
+
+/* نجعل منطقة البحث في عمود واحد: الكرت ثم مسار الاكتشاف تحته */
+.iq-search-zone {
+  display: block;
+  max-width: 1100px;
+  margin: 24px auto 16px;
+}
+
+/* الكرت يأخذ العرض الكامل داخل هذه المساحة */
+.iq-search-box {
+  width: 100%;
+  margin: 0 auto 16px;
+}
+
+/* صف مستطيل البحث + الزر: عمودين، المستطيل يتمدد، الزر بحجمه الطبيعي */
+.iq-search-input-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: center;
+}
+
+/* تكبير المستطيل (ارتفاع + حجم خط) بحوالي 25٪ */
+.iq-search-input {
+  width: 100%;
+  min-width: 0;
+  padding: 1.2rem 1.2rem;
+  font-size: 1.1rem;
+}
+
+/* مسار الاكتشاف أسفل الكرت وبعرض كامل */
+.iq-discovery-track {
+  width: 100%;
+  margin-top: 12px;
+}
+
+/* توحيد ألوان الأزرار العليا مع ثيم الكحلي المخملي */
+.iq-topbar-button {
+  background: rgba(10, 16, 35, 0.95);
+  border: 1px solid rgba(215, 185, 120, 0.9); /* ذهبي مطفأ */
+  color: #f7f4ea;
+  border-radius: 999px;
+  padding: 0.45rem 1.1rem;
+  font-size: 0.9rem;
+}
+
+.iq-topbar-button:hover {
+  background: rgba(20, 28, 55, 1);
+}
+
+/* انسجام ألوان الكروت الجانبية مع كرت البحث */
+.iq-results-box,
+.iq-guide-panel,
+.iq-search-box,
+.iq-notebook {
+  background: radial-gradient(
+    circle at top left,
+    #151b2b 0%,
+    #050814 55%,
+    #02030a 100%
+  );
+}
+
+/* توسيع كرت شريط البحث ليقترب من حافة الصفحة والكرت الأيمن */
+.iq-search-zone {
+  display: block;
+  margin: 24px 12px 16px;   /* فراغ صغير جداً يمين ويسار */
+}
+/* المينيو الرئيسي كأزرار أفقية */
+.iq-mainmenu {
+  max-width: 1200px;
+  margin: 8px 12px 12px;
+  padding: 6px 10px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: radial-gradient(
+    circle at top left,
+    #151b2b 0%,
+    #050814 55%,
+    #02030a 100%
+  );
+  direction: rtl;
+}
+
+.iq-mainmenu-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-start;
+}
+
+.iq-mainmenu-tab {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(7, 11, 25, 0.9);
+  padding: 4px 14px;
+  font-size: 0.86rem;
+  color: #f7f4ea;
+  cursor: pointer;
+}
+
+.iq-mainmenu-tab-active {
+  border-color: rgba(215, 185, 120, 1);
+  background: rgba(215, 185, 120, 0.16);
+}
+
+.iq-search-box {
+  width: 100%;
+}
+
+/* === تفعيل حالة نشطة لأزرار الشريط العلوي (استكشاف / تنبيه) === */
+.iq-topbar-button-active {
+  background: rgba(215, 185, 120, 0.18);
+  border-color: rgba(215, 185, 120, 1);
+}
+
+/* === صف لوحات استكشاف / تنبيه (وسط الواجهة) === */
+.iq-panels-row {
+  display: flex;
+  gap: 16px;
+  margin: 12px 12px 16px;
+}
+
+.iq-middle-panel {
+  flex: 1 1 0;
+  min-height: 260px;
+  background: radial-gradient(
+    circle at top left,
+    #151b2b 0%,
+    #050814 55%,
+    #02030a 100%
+  );
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  padding: 12px 14px 16px;
+}
+
+.iq-panel-body {
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+}
+
+.iq-panel-chat-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+.iq-panel-chat-input {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(5, 9, 22, 0.95);
+  padding: 0.55rem 1rem;
+  font-size: 0.9rem;
+  color: #f7f4ea;
+}
+
+.iq-panel-chat-input::placeholder {
+  color: rgba(250, 246, 230, 0.45);
+}
+
+.iq-panel-chat-send {
+  border-radius: 999px;
+  border: 1px solid rgba(215, 185, 120, 0.9);
+  background: rgba(15, 22, 40, 1);
+  padding: 0.45rem 0.9rem;
+  font-size: 0.85rem;
+  color: #f7f4ea;
+  cursor: pointer;
+}
+
+.iq-panel-log {
+  flex: 1 1 auto;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  background: rgba(2, 4, 10, 0.8);
+  padding: 8px 10px;
+  overflow: auto;
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.iq-panel-log-empty {
+  opacity: 0.6;
+}
+
+.iq-panel-log-pre {
+  white-space: pre-wrap;
+}
+
+/* === نتيجة سؤال الجلسة تحت اللوحات === */
+.iq-results-box {
+  margin: 0 12px 16px;
+}
+
+/* === صف المفكرة: شاشة كبيرة + كرت صغير === */
+.iq-notebook-row {
+  display: flex;
+  gap: 16px;
+  margin: 0 12px 24px;
+  align-items: flex-start;
+}
+
+/* شاشة المفكرة الكبيرة (من يسار الواجهة حتى بداية كرت المفكرة) */
+.iq-notebook-panel {
+  flex: 1 1 0;
+  background: radial-gradient(
+    circle at top left,
+    #151b2b 0%,
+    #050814 55%,
+    #02030a 100%
+  );
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  padding: 12px 14px 16px;
+}
+
+.iq-notebook-panel-body {
+  margin-top: 6px;
+}
+
+.iq-notebook-panel-input {
+  width: 100%;
+  min-height: 180px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(5, 9, 22, 0.95);
+  padding: 0.9rem 1rem;
+  font-size: 0.95rem;
+  color: #f7f4ea;
+  resize: vertical;
+}
+
+.iq-notebook-panel-input::placeholder {
+  color: rgba(250, 246, 230, 0.45);
+}
+
+/* كرت المفكرة الصغير على اليمين */
+.iq-notebook {
+  width: 280px;
+  background: radial-gradient(
+    circle at top left,
+    #151b2b 0%,
+    #050814 55%,
+    #02030a 100%
+  );
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  padding: 10px 12px 14px;
+}
+
+.iq-notebook-body {
+  margin-top: 6px;
+}
+
+.iq-notebook-mini-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+.iq-notebook-mini-input {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(5, 9, 22, 0.95);
+  padding: 0.5rem 0.9rem;
+  font-size: 0.9rem;
+  color: #f7f4ea;
+}
+
+.iq-notebook-mini-input::placeholder {
+  color: rgba(250, 246, 230, 0.45);
+}
+
+.iq-notebook-open-btn {
+  border-radius: 999px;
+  border: 1px solid rgba(215, 185, 120, 0.9);
+  background: rgba(15, 22, 40, 1);
+  padding: 0.45rem 0.9rem;
+  font-size: 0.85rem;
+  color: #f7f4ea;
+  cursor: pointer;
+}
+
+/* أزرار مسح / تصدير في منتصف الكرت وبنفس روح زر الإعدادات */
+.iq-notebook-footer {
+  margin-top: 10px;
+}
+
+.iq-notebook-actions {
+  margin-top: 6px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.iq-notebook-action-btn {
+  border-radius: 999px;
+  border: 1px solid rgba(215, 185, 120, 0.9);
+  background: rgba(15, 22, 40, 1);
+  padding: 0.35rem 1rem;
+  font-size: 0.85rem;
+  color: #f7f4ea;
+  cursor: pointer;
+}
+
+.iq-notebook-action-secondary {
+  background: rgba(8, 13, 30, 0.9);
+}
+
+/* حالة عدم وجود ملاحظات */
+.iq-notebook-status {
+  font-size: 0.8rem;
+  opacity: 0.7;
+  text-align: center;
+}
+
+/* تكبير شعار "اقرأ" في الشريط العلوي */
+.iq-logo-large {
+  font-size: 2.4rem;
+  line-height: 1.1;
+}
+
+/* صف النتائج + المفكرة (المفكرة في يمين الواجهة) */
+.iq-bottom-row {
+  display: flex;
+  gap: 16px;
+  margin: 16px 12px 24px;
+  align-items: flex-start;
+}
+
+/* نجعل كرت النتائج أعرض، والمفكرة أضيق في اليمين */
+.iq-bottom-row .iq-results-box {
+  flex: 3 1 0;
+}
+
+.iq-bottom-row .iq-notebook {
+  flex: 1 1 0;
+  max-width: 320px;
+  margin: 0;
+}
+/* تكبير شعار "اقرأ" في الشريط العلوي */
+.iq-logo-large {
+  font-size: 2.4rem;
+  line-height: 1.1;
+}
+
+/* صف النتائج + المفكرة (المفكرة في يمين الواجهة) */
+.iq-bottom-row {
+  display: flex;
+  gap: 16px;
+  margin: 16px 12px 24px;
+  align-items: flex-start;
+}
+
+/* نجعل كرت النتائج أعرض، والمفكرة أضيق في اليمين */
+.iq-bottom-row .iq-results-box {
+  flex: 3 1 0;
+}
+
+.iq-bottom-row .iq-notebook {
+  flex: 1 1 0;
+  max-width: 320px;
+  margin: 0;
+}
+
+/* تكبير شعار اقرأ */
+.iq-logo-large {
+  font-size: 2.4rem;
+  line-height: 1.1;
+}
+
+/* النتائج والمفكرة بعرض واسع تحت شريط البحث */
+.iq-results-wide,
+.iq-notebook-wide {
+  max-width: 1200px;
+  margin: 16px 12px 0;
+}
+
+/* مسافة إضافية أسفل المفكرة */
+.iq-notebook-wide {
+  margin-bottom: 24px;
+}
+
+/* جعل المحتوى الرئيسي في عمود (بحث ثم نتائج) */
+.iq-main {
+  display: block;
+}
+
+/* تكبير شعار "اقرأ" */
+.iq-logo-large {
+  font-size: 2.4rem;
+  line-height: 1.1;
+}
+
+/* النتائج تحت شريط البحث وبعرض واسع */
+.iq-results-wide {
+  max-width: 1200px;
+  margin: 16px 12px 24px;
+}
+
+/* ضبط كرت النتائج: ارتفاع ابتدائي أعمق وتمدد حر مع النص */
+.iq-results-wide {
+  max-width: 1200px;
+  margin: 16px 12px 48px;   /* نزول جميل قبل أسفل الصفحة */
+}
+
+/* نعطي الجسم الداخلي حدًّا أدنى فقط، ونتركه يتمدّد بلا حدود */
+.iq-results-wide .iq-results-body {
+  min-height: 320px;        /* ارتفاع افتراضي أعمق للكرت */
+  max-height: none;         /* لا سقف للارتفاع */
+  overflow: visible;        /* النص يمدّ الكرت، والصفحة هي التي تسكرول */
+}
+
+/* ===== مسار الاكتشاف تحت شريط البحث ===== */
+
+.iq-discovery-track {
+  max-width: 1200px;
+  margin: 10px 12px 4px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  font-size: 0.85rem;
+  direction: rtl;
+}
+
+/* عنوان صغير فوق الحبات */
+.iq-discovery-track::before {
+  content: "مسار الاكتشاف";
+  display: inline-block;
+  margin-bottom: 6px;
+  opacity: 0.7;
+}
+
+/* قائمة الحبات */
+.iq-track-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* كل عنصر في المسار */
+.iq-track-item {
+  max-width: 100%;
+  border-radius: 999px;
+  padding: 4px 10px;
+  background: rgba(8, 13, 30, 0.95);
+  border: 1px solid rgba(215, 185, 120, 0.3);
+  cursor: default;
+}
+
+/* نص السؤال داخل الحبة */
+.iq-track-query {
+  font-size: 0.8rem;
+  color: #f7f4ea;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 260px;
+}
+
+/* معاينة سطر من الإجابة (نخفيها الآن إلى أن نحتاجها) */
+.iq-track-preview {
+  display: none;
+}
+/* ===== مسار الاكتشاف تحت شريط البحث ===== */
+
+.iq-discovery-track {
+  max-width: 1200px;
+  margin: 10px 12px 4px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  font-size: 0.85rem;
+  direction: rtl;
+}
+
+/* عنوان صغير فوق الحبات */
+.iq-discovery-track::before {
+  content: "مسار الاكتشاف";
+  display: inline-block;
+  margin-bottom: 6px;
+  opacity: 0.7;
+}
+
+/* قائمة الحبات */
+.iq-track-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* كل عنصر في المسار */
+.iq-track-item {
+  max-width: 100%;
+  border-radius: 999px;
+  padding: 4px 10px;
+  background: rgba(8, 13, 30, 0.95);
+  border: 1px solid rgba(215, 185, 120, 0.3);
+  cursor: default;
+}
+
+/* نص السؤال داخل الحبة */
+.iq-track-query {
+  font-size: 0.8rem;
+  color: #f7f4ea;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 260px;
+}
+
+/* معاينة سطر من الإجابة (نخفيها الآن إلى أن نحتاجها) */
+.iq-track-preview {
+  display: none;
+}
+
+/* ==== تحسين مسار الاكتشاف تحت شريط البحث ==== */
+
+.iq-discovery-track {
+  max-width: 1200px;
+  margin: 10px 12px 0;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  font-size: 0.85rem;
+  direction: rtl;
+}
+
+/* العنوان */
+.iq-discovery-track::before {
+  content: "مسار الاكتشاف";
+  display: block;
+  margin-bottom: 6px;
+  opacity: 0.7;
+}
+
+/* قائمة الحبات */
+.iq-track-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* شكل الحبة */
+.iq-track-item {
+  max-width: 100%;
+  border-radius: 999px;
+  padding: 4px 12px;
+  background: rgba(8, 13, 30, 0.95);
+  border: 1px solid rgba(215, 185, 120, 0.45);
+}
+
+/* نص السؤال داخل الحبة */
+.iq-track-query {
+  font-size: 0.82rem;
+  color: #f7f4ea;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 260px;
+}
+
+/* نخفي المعاينة الآن */
+.iq-track-preview {
+  display: none;
+}
+
+/* زر نشط في الشريط العلوي (مثل المفكرة عندما تكون مفتوحة) */
+.iq-topbar-button-active {
+  background: rgba(215, 185, 120, 0.18);
+  border-color: rgba(215, 185, 120, 1);
+}
+
+/* لوحة المفكرة أسفل النتائج */
+.iq-notebook-panel {
+  max-width: 1200px;
+  margin: 0 12px 24px;
+  background: radial-gradient(
+    circle at top left,
+    #151b2b 0%,
+    #050814 55%,
+    #02030a 100%
+  );
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  padding: 12px 14px 16px;
+}
+
+.iq-notebook-panel-body {
+  margin-top: 6px;
+}
+
+.iq-notebook-panel-input {
+  width: 100%;
+  min-height: 140px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(5, 9, 22, 0.95);
+  padding: 0.9rem 1rem;
+  font-size: 0.95rem;
+  color: #f7f4ea;
+  resize: vertical;
+}
+
+.iq-notebook-panel-input::placeholder {
+  color: rgba(250, 246, 230, 0.45);
+}
+
+.iq-notebook-panel-footer {
+  margin-top: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.iq-notebook-panel-status {
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+.iq-notebook-panel-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.iq-notebook-action-btn {
+  border-radius: 999px;
+  border: 1px solid rgba(215, 185, 120, 0.9);
+  background: rgba(15, 22, 40, 1);
+  padding: 0.35rem 1.1rem;
+  font-size: 0.85rem;
+  color: #f7f4ea;
+  cursor: pointer;
+}
+
+.iq-notebook-action-secondary {
+  background: rgba(8, 13, 30, 0.9);
+}
+/* المينيو الرئيسي أعلى الصفحة */
+.iq-mainmenu {
+  max-width: 1200px;
+  margin: 8px 12px 12px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: radial-gradient(
+    circle at top left,
+    #151b2b 0%,
+    #050814 55%,
+    #02030a 100%
+  );
+  direction: rtl;
+  font-size: 0.86rem;
+}
+
+.iq-mainmenu-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.iq-mainmenu-group {
+  min-width: 170px;
+  flex: 1 1 0;
+}
+
+.iq-mainmenu-title {
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+  opacity: 0.9;
+}
+
+.iq-mainmenu-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  opacity: 0.8;
+}
+
+.iq-mainmenu-items span {
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(5, 9, 22, 0.9);
+  font-size: 0.8rem;
+}

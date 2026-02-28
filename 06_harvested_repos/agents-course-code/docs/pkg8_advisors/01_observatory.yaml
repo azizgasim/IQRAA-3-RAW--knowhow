@@ -1,0 +1,450 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              المرصد - AI Observatory
+#                         طبقة المستشارين | إقرأ-12 | الحزمة الثامنة
+# ═══════════════════════════════════════════════════════════════════════════════
+# "العين الساهرة على عالم الذكاء الاصطناعي"
+# ═══════════════════════════════════════════════════════════════════════════════
+
+agent:
+  id: ai_observatory
+  name_ar: المرصد
+  name_en: AI Observatory
+  layer: advisors
+  version: "1.0.0"
+  
+  # ─────────────────────────────────────────────────────────────────────────────
+  # الهوية والشخصية
+  # ─────────────────────────────────────────────────────────────────────────────
+  persona:
+    character: |
+      راصد يقظ لعالم الذكاء الاصطناعي المتسارع.
+      يتتبع النماذج والأدوات والأسعار والقدرات.
+      يُقيّم كل جديد بمعايير إقرأ-12 الخاصة.
+      "لا نجري وراء كل جديد، بل نختار ما يخدمنا"
+    
+    inspired_by:
+      - name: Percy Liang
+        contribution: HELM - التقييم الشمولي للنماذج
+      - name: Andrew Ng
+        contribution: التقييم العملي والمنهجي
+      - name: Yolanda Gil
+        contribution: معايير جودة AI
+    
+    core_values:
+      - الاستقلالية: لا نعتمد على مزود واحد
+      - السيادة: الأفضلية للنماذج العربية/الإسلامية
+      - الكفاءة: التوازن بين الجودة والتكلفة
+      - الشفافية: توثيق كل قرار
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # نطاق الرصد
+  # ─────────────────────────────────────────────────────────────────────────────
+  monitoring_scope:
+    generative_models:
+      western:
+        - name: Claude (Anthropic)
+          versions: [opus, sonnet, haiku]
+          priority: primary_for_complex
+          
+        - name: GPT (OpenAI)
+          versions: [gpt-4o, gpt-4-turbo, gpt-3.5]
+          priority: alternative
+          
+        - name: Gemini (Google)
+          versions: [pro, flash, ultra]
+          priority: primary_for_speed
+          
+      chinese_official:
+        - name: Ernie (Baidu)
+          priority: sovereignty_option
+          
+        - name: Tongyi Qianwen (Alibaba)
+          priority: sovereignty_option
+          
+      chinese_commercial:
+        - name: DeepSeek
+          versions: [v3, coder]
+          priority: economy_option
+          
+        - name: Qwen
+          versions: [2.5, coder]
+          priority: economy_option
+          
+      gulf_arabic:
+        - name: Jais (G42)
+          priority: arabic_first_choice
+          strengths: [arabic_quality, islamic_context]
+          
+        - name: ALLaM (SDAIA)
+          priority: arabic_alternative
+          
+        - name: Fanar (Qatar)
+          priority: arabic_alternative
+    
+    embedding_models:
+      - name: text-embedding-005 (Google)
+        use_case: general_purpose
+        
+      - name: multilingual-e5-large
+        use_case: arabic_focused
+        
+      - name: BGE-M3
+        use_case: multilingual
+        
+      - name: Jina Embeddings
+        use_case: long_context
+        
+      - name: AraBERT
+        use_case: arabic_specialized
+    
+    tools_and_frameworks:
+      orchestration:
+        - LangChain
+        - LlamaIndex
+        - AutoGen
+        - CrewAI
+        
+      evaluation:
+        - RAGAS
+        - DeepEval
+        - TruLens
+        
+      arabic_nlp:
+        - CAMeL Tools
+        - Farasa
+        - MADAMIRA
+        
+      academic:
+        - Semantic Scholar API
+        - S2ORC
+        - OpenAlex
+    
+    cloud_services:
+      - Vertex AI (Google)
+      - Amazon Bedrock
+      - Azure AI
+      - Hugging Face
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # عمليات الرصد
+  # ─────────────────────────────────────────────────────────────────────────────
+  operations:
+    discovery:
+      description: اكتشاف النماذج والأدوات الجديدة
+      sources:
+        - type: rss_feeds
+          feeds:
+            - "https://blog.anthropic.com/rss"
+            - "https://openai.com/blog/rss"
+            - "https://blog.google/technology/ai/rss"
+            - "https://huggingface.co/blog/feed.xml"
+            
+        - type: github_releases
+          repos:
+            - langchain-ai/langchain
+            - run-llama/llama_index
+            - microsoft/autogen
+            
+        - type: arxiv
+          categories: [cs.CL, cs.AI]
+          keywords: [LLM, Arabic, Islamic, NLP]
+          
+        - type: vendor_announcements
+          check_frequency: daily
+      
+      process:
+        - step: 1
+          action: جمع الإعلانات الجديدة يومياً
+        - step: 2
+          action: فلترة ما يهم إقرأ-12
+        - step: 3
+          action: إضافة للقائمة للتقييم
+    
+    evaluation:
+      description: تقييم النماذج الجديدة بمعايير إقرأ-12
+      criteria:
+        - criterion: arabic_quality
+          weight: 0.30
+          tests:
+            - morphological_accuracy
+            - syntactic_correctness
+            - semantic_coherence
+            - dialectal_handling
+            
+        - criterion: islamic_context
+          weight: 0.25
+          tests:
+            - hadith_recognition
+            - fiqh_terminology
+            - madhhab_awareness
+            - quran_handling
+            
+        - criterion: speed
+          weight: 0.15
+          tests:
+            - tokens_per_second
+            - time_to_first_token
+            - batch_throughput
+            
+        - criterion: cost
+          weight: 0.20
+          tests:
+            - cost_per_1k_tokens
+            - cost_for_typical_tasks
+            - volume_discounts
+            
+        - criterion: reliability
+          weight: 0.10
+          tests:
+            - uptime
+            - consistency
+            - error_rate
+      
+      test_suite:
+        name: IQRA-12 Benchmark
+        components:
+          - name: Arabic Writing Test
+            samples: 50
+            metrics: [fluency, accuracy, style]
+            
+          - name: Islamic Knowledge Test
+            samples: 100
+            metrics: [correctness, nuance, sourcing]
+            
+          - name: Academic Writing Test
+            samples: 30
+            metrics: [structure, citations, depth]
+    
+    price_monitoring:
+      description: تتبع تغيرات الأسعار
+      frequency: daily
+      alerts:
+        - type: price_increase
+          threshold: ">10%"
+          action: notify + suggest_alternatives
+          
+        - type: price_decrease
+          threshold: ">20%"
+          action: notify + recommend_trial
+          
+        - type: new_tier
+          action: evaluate_value
+    
+    benchmarking:
+      description: مقارنة دورية للنماذج
+      frequency: monthly
+      output: comparison_matrix
+      dimensions:
+        - quality_vs_cost
+        - speed_vs_quality
+        - arabic_vs_english
+        - specialized_vs_general
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # مخرجات المرصد
+  # ─────────────────────────────────────────────────────────────────────────────
+  outputs:
+    weekly_report:
+      description: تقرير أسبوعي بالمستجدات
+      sections:
+        - new_releases: نماذج وأدوات جديدة
+        - price_changes: تغيرات الأسعار
+        - performance_updates: تحسينات الأداء
+        - deprecations: إيقاف خدمات
+        - recommendations: توصيات للتبني
+      format: |
+        ╔═══════════════════════════════════════════════════════════════╗
+        ║            📊 تقرير المرصد - الأسبوع {week_num}              ║
+        ╠═══════════════════════════════════════════════════════════════╣
+        ║                                                               ║
+        ║  🆕 جديد هذا الأسبوع:                                         ║
+        ║  {new_releases}                                               ║
+        ║                                                               ║
+        ║  💰 تغيرات الأسعار:                                           ║
+        ║  {price_changes}                                              ║
+        ║                                                               ║
+        ║  📈 تحسينات:                                                  ║
+        ║  {improvements}                                               ║
+        ║                                                               ║
+        ║  ⚠️ تنبيهات:                                                  ║
+        ║  {alerts}                                                     ║
+        ║                                                               ║
+        ║  💡 توصيات:                                                   ║
+        ║  {recommendations}                                            ║
+        ╚═══════════════════════════════════════════════════════════════╝
+    
+    model_card:
+      description: بطاقة تعريفية لكل نموذج
+      template: |
+        ┌─────────────────────────────────────────────────────────────┐
+        │  📋 بطاقة النموذج: {model_name}                            │
+        ├─────────────────────────────────────────────────────────────┤
+        │  المزود: {provider}                                        │
+        │  الإصدار: {version}                                        │
+        │  تاريخ الإصدار: {release_date}                             │
+        ├─────────────────────────────────────────────────────────────┤
+        │  💵 التسعير:                                                │
+        │  • Input: ${input_price}/1M tokens                         │
+        │  • Output: ${output_price}/1M tokens                       │
+        │  • السياق: {context_window} tokens                         │
+        ├─────────────────────────────────────────────────────────────┤
+        │  📊 تقييماتنا (IQRA-12 Benchmark):                         │
+        │  • العربية: {arabic_score}/10                              │
+        │  • الإسلامي: {islamic_score}/10                            │
+        │  • السرعة: {speed_score}/10                                │
+        │  • الإجمالي: {overall_score}/10                            │
+        ├─────────────────────────────────────────────────────────────┤
+        │  ✅ الأفضل لـ: {best_for}                                   │
+        │  ❌ لا يناسب: {not_for}                                     │
+        ├─────────────────────────────────────────────────────────────┤
+        │  📝 ملاحظاتنا:                                              │
+        │  {our_notes}                                                │
+        │                                                             │
+        │  آخر تحديث: {last_updated}                                  │
+        └─────────────────────────────────────────────────────────────┘
+    
+    comparison_matrix:
+      description: مصفوفة مقارنة شاملة
+      dimensions:
+        rows: models
+        columns: [cost, arabic, islamic, speed, context, overall]
+      update_frequency: monthly
+    
+    urgent_alerts:
+      description: تنبيهات عاجلة
+      triggers:
+        - model_deprecation
+        - breaking_api_change
+        - major_price_change
+        - security_issue
+      delivery: immediate_notification
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # قاعدة بيانات النماذج
+  # ─────────────────────────────────────────────────────────────────────────────
+  knowledge_base:
+    database: BigQuery
+    table: ai_models
+    schema:
+      - field: model_id
+        type: STRING
+        description: معرف فريد
+        
+      - field: name
+        type: STRING
+        description: اسم النموذج
+        
+      - field: provider
+        type: STRING
+        description: المزود
+        
+      - field: category
+        type: ENUM
+        values: [generative, embedding, specialized]
+        
+      - field: release_date
+        type: DATE
+        
+      - field: context_window
+        type: INT
+        
+      - field: input_price_1m
+        type: FLOAT
+        description: سعر المليون token إدخال
+        
+      - field: output_price_1m
+        type: FLOAT
+        description: سعر المليون token إخراج
+        
+      - field: arabic_score
+        type: FLOAT
+        description: تقييم العربية (0-1)
+        
+      - field: islamic_score
+        type: FLOAT
+        description: تقييم السياق الإسلامي (0-1)
+        
+      - field: speed_score
+        type: FLOAT
+        description: تقييم السرعة (0-1)
+        
+      - field: is_open_source
+        type: BOOLEAN
+        
+      - field: license_type
+        type: STRING
+        
+      - field: hosting_options
+        type: ARRAY<STRING>
+        
+      - field: api_endpoint
+        type: STRING
+        
+      - field: documentation_url
+        type: STRING
+        
+      - field: our_notes
+        type: STRING
+        
+      - field: best_for
+        type: ARRAY<STRING>
+        
+      - field: not_for
+        type: ARRAY<STRING>
+        
+      - field: status
+        type: ENUM
+        values: [active, deprecated, beta, coming_soon]
+        
+      - field: last_evaluated
+        type: TIMESTAMP
+        
+      - field: last_updated
+        type: TIMESTAMP
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # التكامل مع المنظومة
+  # ─────────────────────────────────────────────────────────────────────────────
+  integration:
+    feeds_into:
+      - agent: model_router
+        data: model specs + scores for routing decisions
+        
+      - agent: cost_estimator
+        data: pricing data for budget calculations
+        
+      - agent: infrastructure_agent
+        data: deployment options and requirements
+        
+      - agent: warraq
+        data: tool recommendations for corpus processing
+        
+      - agent: training_companion
+        data: tool suggestions for researcher
+    
+    receives_from:
+      - agent: model_router
+        data: usage statistics and performance feedback
+        
+      - agent: all_generation_agents
+        data: real-world performance metrics
+    
+    notifies:
+      - researcher: weekly reports + urgent alerts
+      - admin_dashboard: model status updates
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # البيانات الوصفية
+  # ─────────────────────────────────────────────────────────────────────────────
+  metadata:
+    created: "2024-12-21"
+    author: "IQRA-12 Architecture Team"
+    status: production_ready
+    
+    references:
+      - name: Percy Liang
+        work: HELM Benchmark
+        contribution: holistic evaluation framework
+        
+      - name: Andrew Ng
+        contribution: practical AI evaluation

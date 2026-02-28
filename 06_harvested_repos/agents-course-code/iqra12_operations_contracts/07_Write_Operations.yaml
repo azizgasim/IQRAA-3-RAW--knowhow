@@ -1,0 +1,901 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#                    الفئة السابعة: الكتابة (Write)
+#                    IQRA-12 Core Operations Layer
+# ═══════════════════════════════════════════════════════════════════════════════
+# 
+# الغرض: إنتاج نصوص أكاديمية قابلة للنشر
+# العمليات: W1-W5
+# 
+# المبدأ الحاكم:
+# "لا كتابة بدون (claim_id + evidence_ids + citations)"
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+category:
+  id: "WRITE"
+  name_ar: "الكتابة"
+  name_en: "Write"
+  purpose: "إنتاج نصوص أكاديمية موثقة قابلة للنشر"
+  golden_rule: "لا كتابة بدون (claim_id + evidence_ids + citations)"
+  operations_count: 5
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# W1: كتابة الفقرة الموثقة (Documented Paragraph Writing)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+operations:
+
+  - id: "W1"
+    name_ar: "كتابة الفقرة الموثقة"
+    name_en: "Documented Paragraph Writing"
+    category: "Write"
+    version: "1.0.0"
+    
+    purpose: |
+      كتابة فقرة واحدة متماسكة تعبر عن ادعاء محدد
+      مع توثيق كامل لكل جملة تحتاج مصدراً
+    
+    critical_principle: |
+      ⚠️ الوحدة الذرية للكتابة الأكاديمية
+      كل فقرة = فكرة واحدة + أدلة + توثيق
+    
+    inputs:
+      required:
+        - name: claim_id
+          type: string
+          description: "معرف الادعاء المراد التعبير عنه"
+          
+        - name: evidence_ids
+          type: array[string]
+          description: "معرفات الأدلة الداعمة"
+          
+      optional:
+        - name: paragraph_type
+          type: enum
+          values: [
+            TOPIC,          # فقرة موضوعية (تقدم فكرة)
+            EVIDENCE,       # فقرة استدلالية (تقدم أدلة)
+            ANALYSIS,       # فقرة تحليلية
+            TRANSITION,     # فقرة انتقالية
+            COUNTER,        # فقرة مضادة (عرض الرأي الآخر)
+            SYNTHESIS       # فقرة تركيبية
+          ]
+          default: "TOPIC"
+          
+        - name: position_in_section
+          type: enum
+          values: [OPENING, BODY, CLOSING]
+          default: "BODY"
+          
+        - name: target_length
+          type: object
+          schema:
+            min_sentences: integer
+            max_sentences: integer
+          default: {min_sentences: 4, max_sentences: 8}
+          
+        - name: citation_style
+          type: enum
+          values: [CHICAGO_NOTES, CHICAGO_AUTHOR_DATE, APA, MLA, ISLAMIC_STUDIES]
+          default: "CHICAGO_NOTES"
+          
+        - name: language
+          type: enum
+          values: [AR, EN, AR_EN]
+          default: "AR"
+          
+        - name: register
+          type: enum
+          values: [FORMAL_ACADEMIC, SEMI_FORMAL, ACCESSIBLE]
+          default: "FORMAL_ACADEMIC"
+    
+    outputs:
+      primary:
+        name: documented_paragraph
+        type: DocumentedParagraph
+        schema:
+          paragraph_id: string
+          claim_id: string
+          type: string
+          text: string
+          sentences:
+            type: array
+            items:
+              sentence_id: string
+              text: string
+              function: enum[TOPIC, SUPPORT, ELABORATION, EVIDENCE, TRANSITION, CONCLUSION]
+              citations:
+                type: array
+                items:
+                  citation_id: string
+                  evidence_id: string
+                  source:
+                    work_id: string
+                    location: object
+                  formatted_citation: string
+                  position_in_sentence: integer
+              requires_citation: boolean
+              claim_support_type: enum[DIRECT, INDIRECT, CONTEXT, NONE]
+          footnotes:
+            type: array
+            items:
+              note_id: string
+              marker: string
+              text: string
+              type: enum[CITATION, EXPLANATORY, CROSS_REFERENCE]
+          coherence:
+            topic_sentence: string
+            supporting_sentences: integer
+            concluding_sentence: string
+            logical_flow_score: float
+          metadata:
+            word_count: integer
+            sentence_count: integer
+            citation_count: integer
+            citation_density: float
+          provenance:
+            claim_id: string
+            evidence_ids: array[string]
+            generated_at: timestamp
+            version: string
+            
+      secondary:
+        - name: citation_list
+          type: array
+          description: "قائمة الاستشهادات المستخدمة"
+          
+        - name: uncited_claims
+          type: array
+          description: "ادعاءات في الفقرة بدون توثيق (يجب أن تكون فارغة)"
+    
+    tools:
+      internal:
+        - name: Sentence Generator
+          type: nlp
+          
+        - name: Citation Inserter
+          type: formatter
+          
+        - name: Coherence Checker
+          type: nlp
+          
+        - name: Style Enforcer
+          type: rule_based
+          
+      external: []
+    
+    resources:
+      knowledge_bases:
+        - citation_formats
+        - academic_phrases
+        - transition_words
+    
+    guardrails:
+      pre_conditions:
+        - condition: "claim exists and has evidence"
+          error_code: "W1_NO_CLAIM"
+          
+        - condition: "evidence_ids are valid"
+          error_code: "W1_INVALID_EVIDENCE"
+          
+      post_conditions:
+        - condition: "every factual claim has citation"
+          error_code: "W1_UNCITED_CLAIM"
+          
+        - condition: "citations match evidence_ids"
+          error_code: "W1_CITATION_MISMATCH"
+          
+        - condition: "paragraph has topic sentence"
+          error_code: "W1_NO_TOPIC_SENTENCE"
+          
+        - condition: "paragraph is coherent"
+          error_code: "W1_INCOHERENT"
+          
+      forbidden:
+        - "factual claims without citations"
+        - "citations without corresponding evidence"
+        - "plagiarism or close paraphrase without attribution"
+        - "inventing sources"
+    
+    quality_metrics:
+      - name: citation_completeness
+        target: "1.0"
+        
+      - name: coherence_score
+        target: ">= 0.85"
+        
+      - name: claim_expression_accuracy
+        target: ">= 0.9"
+        
+      - name: style_consistency
+        target: ">= 0.9"
+    
+    cost_profile:
+      compute: "LOW-MEDIUM"
+      tokens: "MEDIUM"
+      estimated_cost_per_call: "$0.01 - $0.05"
+    
+    autonomy_level: "L1"
+    autonomy_description: "يكتب، يحتاج مراجعة"
+    
+    example:
+      input:
+        claim_id: "claim_greek_logic_usul"
+        evidence_ids: ["ev_001", "ev_002", "ev_003"]
+        paragraph_type: "TOPIC"
+        citation_style: "CHICAGO_NOTES"
+        language: "AR"
+        
+      output:
+        documented_paragraph:
+          text: |
+            يُعدّ تأثير المنطق اليوناني على تشكّل أصول الفقه الإسلامي من المسائل التي شغلت الباحثين المعاصرين.
+            فقد لاحظ عدد من الدارسين تشابهات بنيوية بين الجدل الأصولي والقياس الأرسطي،
+            غير أن طبيعة هذا التأثير ومداه يظلان محل نقاش.¹
+            والأرجح أن التأثير كان غير مباشر، عبر قنوات ثقافية متعددة،
+            أبرزها حركة الترجمة في القرنين الثاني والثالث الهجريين.²
+          sentences:
+            - sentence_id: "s1"
+              text: "يُعدّ تأثير المنطق اليوناني..."
+              function: "TOPIC"
+              citations: []
+              requires_citation: false
+            - sentence_id: "s2"
+              text: "فقد لاحظ عدد من الدارسين..."
+              function: "SUPPORT"
+              citations:
+                - citation_id: "c1"
+                  evidence_id: "ev_001"
+              requires_citation: true
+          footnotes:
+            - note_id: "fn1"
+              marker: "¹"
+              text: "انظر: مقدمة المستصفى للغزالي، تحقيق..."
+              type: "CITATION"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# W2: كتابة القسم (Section Writing)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "W2"
+    name_ar: "كتابة القسم"
+    name_en: "Section Writing"
+    category: "Write"
+    version: "1.0.0"
+    
+    purpose: |
+      كتابة قسم كامل من فصل أو ورقة
+      يتكون من عدة فقرات مترابطة تخدم هدفاً واحداً
+    
+    inputs:
+      required:
+        - name: section_outline
+          type: object
+          description: "مخطط القسم (من C4)"
+          schema:
+            section_id: string
+            title: string
+            purpose: string
+            claims: array[string]
+            evidence_bundles: array[string]
+            target_length: integer
+            
+      optional:
+        - name: preceding_context
+          type: string
+          description: "ملخص ما سبق"
+          
+        - name: following_context
+          type: string
+          description: "ما سيأتي بعده"
+          
+        - name: depth_level
+          type: enum
+          values: [OVERVIEW, STANDARD, DETAILED, COMPREHENSIVE]
+          default: "STANDARD"
+          
+        - name: include_subheadings
+          type: boolean
+          default: true
+    
+    outputs:
+      primary:
+        name: section
+        type: Section
+        schema:
+          section_id: string
+          title: string
+          level: integer
+          paragraphs:
+            type: array
+            items:
+              paragraph_id: string
+              type: string
+              text: string
+              citations: array
+              claims_covered: array
+          subheadings:
+            type: array
+            items:
+              id: string
+              title: string
+              level: integer
+              after_paragraph: string
+          transitions:
+            opening: string
+            internal: array
+            closing: string
+          footnotes: array
+          figures: array
+          tables: array
+          metadata:
+            word_count: integer
+            paragraph_count: integer
+            citation_count: integer
+            claims_coverage: float
+          quality:
+            coherence: float
+            argument_flow: float
+            evidence_integration: float
+            
+      secondary:
+        - name: outline_compliance
+          type: object
+          description: "مدى الالتزام بالمخطط"
+          
+        - name: gap_report
+          type: array
+          description: "ادعاءات لم تُغطَّ"
+    
+    tools:
+      internal:
+        - name: Paragraph Orchestrator
+          type: planning
+          uses: ["W1"]
+          
+        - name: Transition Generator
+          type: nlp
+          
+        - name: Section Structurer
+          type: document
+          
+      external: []
+    
+    guardrails:
+      post_conditions:
+        - condition: "all claims from outline are covered"
+          error_code: "W2_INCOMPLETE_COVERAGE"
+          
+        - condition: "section has clear opening and closing"
+          error_code: "W2_NO_FRAMING"
+          
+        - condition: "paragraphs are logically connected"
+          error_code: "W2_DISCONNECTED"
+          
+      forbidden:
+        - "skipping claims from outline"
+        - "introducing unsupported claims"
+    
+    quality_metrics:
+      - name: outline_compliance
+        target: "1.0"
+        
+      - name: coherence
+        target: ">= 0.85"
+        
+      - name: transition_quality
+        target: ">= 0.8"
+    
+    cost_profile:
+      compute: "MEDIUM"
+      tokens: "HIGH"
+      estimated_cost_per_call: "$0.05 - $0.20"
+    
+    autonomy_level: "L1-L2"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# W3: كتابة الملخص (Abstract/Summary Writing)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "W3"
+    name_ar: "كتابة الملخص"
+    name_en: "Abstract/Summary Writing"
+    category: "Write"
+    version: "1.0.0"
+    
+    purpose: |
+      كتابة ملخص مكثف لوثيقة أو بحث أو كوربس
+      يستوفي معايير الملخصات الأكاديمية
+    
+    inputs:
+      required:
+        - name: source
+          type: union[document_id, report_id, corpus_summary]
+          description: "المصدر المراد تلخيصه"
+          
+      optional:
+        - name: summary_type
+          type: enum
+          values: [
+            ABSTRACT,           # ملخص بحث (200-300 كلمة)
+            EXECUTIVE_SUMMARY,  # ملخص تنفيذي
+            ANNOTATED,          # ملخص مع تعليقات
+            STRUCTURED,         # ملخص منظم (خلفية-منهج-نتائج)
+            INDICATIVE,         # ملخص وصفي (يصف دون تفصيل)
+            INFORMATIVE         # ملخص معلوماتي (يعطي النتائج)
+          ]
+          default: "ABSTRACT"
+          
+        - name: target_length
+          type: object
+          schema:
+            min_words: integer
+            max_words: integer
+          default: {min_words: 200, max_words: 300}
+          
+        - name: structure
+          type: array[string]
+          description: "عناصر الملخص المطلوبة"
+          default: ["background", "objective", "method", "results", "conclusion"]
+          
+        - name: keywords_count
+          type: integer
+          default: 5
+    
+    outputs:
+      primary:
+        name: summary
+        type: Summary
+        schema:
+          summary_id: string
+          type: string
+          source_id: string
+          text: string
+          structured_sections:
+            type: object
+            properties:
+              background: string
+              objective: string
+              method: string
+              results: string
+              conclusion: string
+              significance: string
+          keywords:
+            type: array
+            items:
+              term: string
+              relevance: float
+          metadata:
+            word_count: integer
+            compression_ratio: float
+            source_length: integer
+          quality:
+            completeness: float
+            accuracy: float
+            conciseness: float
+            
+      secondary:
+        - name: key_points_extracted
+          type: array
+          
+        - name: omitted_content
+          type: array
+          description: "ما لم يُدرج في الملخص"
+    
+    tools:
+      internal:
+        - name: Key Point Extractor
+          type: summarization
+          
+        - name: Compression Engine
+          type: nlp
+          
+        - name: Structure Enforcer
+          type: template
+          
+      external: []
+    
+    guardrails:
+      post_conditions:
+        - condition: "summary reflects source accurately"
+          error_code: "W3_INACCURATE"
+          
+        - condition: "within length limits"
+          error_code: "W3_LENGTH_VIOLATION"
+          
+        - condition: "contains all required sections"
+          error_code: "W3_INCOMPLETE_STRUCTURE"
+          
+      forbidden:
+        - "introducing information not in source"
+        - "misrepresenting conclusions"
+        - "opinion injection"
+    
+    quality_metrics:
+      - name: accuracy
+        target: ">= 0.95"
+        
+      - name: completeness
+        target: ">= 0.9"
+        
+      - name: conciseness
+        target: ">= 0.85"
+    
+    cost_profile:
+      compute: "LOW-MEDIUM"
+      tokens: "MEDIUM"
+      estimated_cost_per_call: "$0.02 - $0.08"
+    
+    autonomy_level: "L1"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# W4: كتابة المراجعة النقدية (Critical Review Writing)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "W4"
+    name_ar: "كتابة المراجعة النقدية"
+    name_en: "Critical Review Writing"
+    category: "Write"
+    version: "1.0.0"
+    
+    purpose: |
+      كتابة مراجعة نقدية لمصدر أو مجموعة مصادر
+      تجمع بين العرض والتحليل والتقييم
+    
+    inputs:
+      required:
+        - name: source
+          type: object
+          schema:
+            type: enum[BOOK, ARTICLE, THESIS, EDITION, CORPUS]
+            id: string
+            metadata: object
+            
+      optional:
+        - name: review_type
+          type: enum
+          values: [
+            BOOK_REVIEW,        # مراجعة كتاب
+            ARTICLE_CRITIQUE,   # نقد مقالة
+            LITERATURE_REVIEW,  # مراجعة أدبيات
+            EDITION_REVIEW,     # مراجعة تحقيق
+            COMPARATIVE_REVIEW  # مراجعة مقارنة
+          ]
+          default: "BOOK_REVIEW"
+          
+        - name: focus_areas
+          type: array[string]
+          default: ["all"]
+          values: [
+            "thesis",
+            "methodology",
+            "evidence",
+            "argumentation",
+            "originality",
+            "scholarship",
+            "presentation",
+            "edition_quality"
+          ]
+          
+        - name: evaluation_framework
+          type: string
+          description: "إطار التقييم المستخدم"
+          
+        - name: target_length
+          type: object
+          default: {min_words: 1500, max_words: 3000}
+    
+    outputs:
+      primary:
+        name: review
+        type: CriticalReview
+        schema:
+          review_id: string
+          type: string
+          source: object
+          bibliographic_info: string
+          structure:
+            introduction:
+              text: string
+              source_summary: string
+              review_scope: string
+            summary:
+              text: string
+              main_thesis: string
+              key_arguments: array
+              methodology: string
+            analysis:
+              strengths:
+                type: array
+                items:
+                  point: string
+                  evidence: string
+                  significance: string
+              weaknesses:
+                type: array
+                items:
+                  point: string
+                  evidence: string
+                  impact: string
+              methodology_assessment: string
+              evidence_assessment: string
+              originality_assessment: string
+            evaluation:
+              overall_assessment: string
+              contribution_to_field: string
+              comparison_to_similar_works: string
+              recommendations: array
+            conclusion:
+              text: string
+              final_verdict: string
+              audience_recommendation: string
+          ratings:
+            overall: float
+            by_criterion:
+              thesis: float
+              methodology: float
+              evidence: float
+              argumentation: float
+              originality: float
+              presentation: float
+          footnotes: array
+          metadata:
+            word_count: integer
+            review_date: string
+            reviewer_expertise: string
+            
+      secondary:
+        - name: detailed_annotations
+          type: array
+          
+        - name: comparison_table
+          type: object
+          description: "مقارنة مع أعمال مشابهة"
+    
+    tools:
+      internal:
+        - name: Source Analyzer
+          type: critical_reading
+          
+        - name: Evaluation Framework Applier
+          type: assessment
+          
+        - name: Review Structurer
+          type: document
+          
+      external: []
+    
+    guardrails:
+      pre_conditions:
+        - condition: "source is fully read/processed"
+          error_code: "W4_INCOMPLETE_READING"
+          
+      post_conditions:
+        - condition: "review is balanced (strengths and weaknesses)"
+          error_code: "W4_UNBALANCED"
+          
+        - condition: "criticisms are supported"
+          error_code: "W4_UNSUPPORTED_CRITICISM"
+          
+        - condition: "praise is justified"
+          error_code: "W4_UNJUSTIFIED_PRAISE"
+          
+      forbidden:
+        - "ad hominem criticism"
+        - "unfounded praise or criticism"
+        - "reviewing without reading"
+        - "bias without disclosure"
+    
+    quality_metrics:
+      - name: balance
+        target: ">= 0.85"
+        
+      - name: evidence_support
+        target: ">= 0.9"
+        
+      - name: constructiveness
+        target: ">= 0.8"
+    
+    cost_profile:
+      compute: "MEDIUM"
+      tokens: "HIGH"
+      estimated_cost_per_call: "$0.05 - $0.20"
+    
+    autonomy_level: "L1"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# W5: كتابة المقدمة والخاتمة (Introduction/Conclusion Writing)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "W5"
+    name_ar: "كتابة المقدمة والخاتمة"
+    name_en: "Introduction/Conclusion Writing"
+    category: "Write"
+    version: "1.0.0"
+    
+    purpose: |
+      كتابة مقدمات وخاتمات تؤطر البحث بشكل مناسب
+      وتحقق التوقعات الأكاديمية للنوع الأدبي
+    
+    inputs:
+      required:
+        - name: document
+          type: object
+          description: "الوثيقة المراد كتابة إطارها"
+          schema:
+            document_id: string
+            type: string
+            title: string
+            claims: array
+            sections_summary: array
+            
+        - name: frame_type
+          type: enum
+          values: [INTRODUCTION, CONCLUSION, BOTH]
+          
+      optional:
+        - name: document_type
+          type: enum
+          values: [PAPER, THESIS, CHAPTER, BOOK, ARTICLE]
+          default: "PAPER"
+          
+        - name: introduction_elements
+          type: array[string]
+          default: ["hook", "background", "gap", "thesis", "methodology", "roadmap"]
+          
+        - name: conclusion_elements
+          type: array[string]
+          default: ["summary", "implications", "limitations", "future_work", "closing"]
+          
+        - name: target_length
+          type: object
+          schema:
+            introduction: {min: integer, max: integer}
+            conclusion: {min: integer, max: integer}
+    
+    outputs:
+      primary:
+        name: framing_text
+        type: FramingText
+        schema:
+          document_id: string
+          introduction:
+            text: string
+            elements:
+              hook:
+                text: string
+                type: enum[QUESTION, QUOTE, ANECDOTE, STATISTIC, PROBLEM]
+              background:
+                text: string
+                key_concepts: array
+              literature_gap:
+                text: string
+                gap_identified: string
+              thesis_statement:
+                text: string
+                claim_id: string
+              methodology_preview:
+                text: string
+                methods: array
+              roadmap:
+                text: string
+                sections_mentioned: array
+            word_count: integer
+          conclusion:
+            text: string
+            elements:
+              summary:
+                text: string
+                main_findings: array
+              implications:
+                text: string
+                theoretical: string
+                practical: string
+              limitations:
+                text: string
+                acknowledged: array
+              future_research:
+                text: string
+                suggestions: array
+              closing:
+                text: string
+                type: enum[CALL_TO_ACTION, REFLECTION, QUESTION, ECHO_HOOK]
+            word_count: integer
+          coherence:
+            intro_conclusion_echo: float
+            thesis_conclusion_alignment: float
+            
+      secondary:
+        - name: alternative_hooks
+          type: array
+          
+        - name: alternative_closings
+          type: array
+    
+    tools:
+      internal:
+        - name: Hook Generator
+          type: creative
+          
+        - name: Thesis Formulator
+          type: nlp
+          
+        - name: Roadmap Builder
+          type: structural
+          
+        - name: Echo Detector
+          type: coherence
+          
+      external: []
+    
+    guardrails:
+      pre_conditions:
+        - condition: "document body is complete or outlined"
+          error_code: "W5_INCOMPLETE_DOCUMENT"
+          
+      post_conditions:
+        - condition: "introduction previews actual content"
+          error_code: "W5_MISLEADING_INTRO"
+          
+        - condition: "conclusion reflects actual findings"
+          error_code: "W5_CONCLUSION_MISMATCH"
+          
+        - condition: "thesis in intro matches conclusion"
+          error_code: "W5_THESIS_DRIFT"
+          
+      forbidden:
+        - "promising what document doesn't deliver"
+        - "conclusions with new arguments"
+        - "introductions that don't match body"
+    
+    quality_metrics:
+      - name: intro_body_alignment
+        target: ">= 0.95"
+        
+      - name: conclusion_body_alignment
+        target: ">= 0.95"
+        
+      - name: hook_effectiveness
+        target: ">= 0.8"
+        
+      - name: closing_impact
+        target: ">= 0.8"
+    
+    cost_profile:
+      compute: "LOW-MEDIUM"
+      tokens: "MEDIUM"
+      estimated_cost_per_call: "$0.02 - $0.10"
+    
+    autonomy_level: "L1"
+    
+    example:
+      input:
+        document:
+          document_id: "paper_greek_logic"
+          type: "PAPER"
+          title: "تأثير المنطق اليوناني على صياغة أصول الفقه"
+          claims: ["claim_001", "claim_002", "claim_003"]
+        frame_type: "BOTH"
+        
+      output:
+        framing_text:
+          introduction:
+            elements:
+              hook:
+                text: "حين صاغ الشافعي رسالته في القرن الثاني الهجري، هل كان يستحضر أرسطو؟"
+                type: "QUESTION"
+              thesis_statement:
+                text: "تسعى هذه الدراسة لإثبات أن التأثير المنطقي اليوناني على أصول الفقه كان غير مباشر، وجزئياً، ومحصوراً في البنية الشكلية دون المضمون"
+          conclusion:
+            elements:
+              summary:
+                main_findings:
+                  - "التأثير كان عبر قنوات غير مباشرة"
+                  - "اقتصر على الشكل دون الجوهر"
+              closing:
+                text: "وهكذا، فإن السؤال الذي بدأنا به يحتاج إعادة صياغة: ليس هل أثر المنطق اليوناني، بل كيف ولماذا وإلى أي حد"
+                type: "ECHO_HOOK"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              نهاية ملف الكتابة
+# ═══════════════════════════════════════════════════════════════════════════════

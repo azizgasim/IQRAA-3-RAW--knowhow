@@ -1,0 +1,529 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#                    IQRA-12 Core Operations Layer
+#                    الفهرس الشامل للعمليات الذرية
+# ═══════════════════════════════════════════════════════════════════════════════
+# 
+# المبدأ المركزي:
+# "الوكيل ليس كياناً ثابتاً، بل تركيبة ديناميكية تتشكل من السؤال"
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+metadata:
+  project: "IQRA-12"
+  layer: "Core Operations"
+  version: "1.0.0"
+  created_at: "2024"
+  total_operations: 44
+  total_categories: 8
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              ملخص الفئات
+# ═══════════════════════════════════════════════════════════════════════════════
+
+categories_summary:
+
+  - id: "EXTRACT"
+    name_ar: "الاستخراج"
+    name_en: "Extract"
+    operations_count: 6
+    golden_rule: "كل مخرج يحمل offset (الموقع الدقيق في النص الأصلي)"
+    file: "01_Extract_Operations.yaml"
+    
+  - id: "LINK"
+    name_ar: "الربط"
+    name_en: "Link"
+    operations_count: 5
+    golden_rule: "كل ربط = Suggest → Evidence → Approve"
+    file: "02_Link_Operations.yaml"
+    
+  - id: "TRACE"
+    name_ar: "التتبع"
+    name_en: "Trace"
+    operations_count: 5
+    golden_rule: "كل تتبع = محطات + انتقالات + تحولات + فاعلون"
+    file: "03_Trace_Operations.yaml"
+    
+  - id: "ANALYZE"
+    name_ar: "التحليل"
+    name_en: "Analyze"
+    operations_count: 6
+    golden_rule: "كل تحليل = بنية + أدلة + حدود + بدائل"
+    file: "04_Analyze_Operations.yaml"
+    
+  - id: "CONSTRUCT"
+    name_ar: "البناء"
+    name_en: "Construct"
+    operations_count: 6
+    golden_rule: "كل بناء = مواد + منهج + مخرج + provenance"
+    file: "05_Construct_Operations.yaml"
+    
+  - id: "SYNTHESIZE"
+    name_ar: "التركيب"
+    name_en: "Synthesize"
+    operations_count: 5
+    golden_rule: "كل تركيب = عناصر + بنية + سرد + توثيق"
+    file: "06_Synthesize_Operations.yaml"
+    
+  - id: "WRITE"
+    name_ar: "الكتابة"
+    name_en: "Write"
+    operations_count: 5
+    golden_rule: "لا كتابة بدون (claim_id + evidence_ids + citations)"
+    file: "07_Write_Operations.yaml"
+    
+  - id: "VERIFY"
+    name_ar: "التحقق"
+    name_en: "Verify"
+    operations_count: 6
+    golden_rule: "لا نشر بدون V1 + V2 + V4 ناجحة"
+    file: "08_Verify_Operations.yaml"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              فهرس العمليات الكامل
+# ═══════════════════════════════════════════════════════════════════════════════
+
+operations_index:
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # الاستخراج (Extract)
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  E1:
+    name_ar: "البحث النصي"
+    name_en: "Text Search"
+    category: "Extract"
+    purpose: "العثور على المقاطع بالكلمات المفتاحية"
+    autonomy: "L0"
+    
+  E2:
+    name_ar: "البحث الدلالي"
+    name_en: "Semantic Search"
+    category: "Extract"
+    purpose: "العثور على المقاطع المشابهة في المعنى"
+    autonomy: "L0"
+    
+  E3:
+    name_ar: "استخراج الكيانات"
+    name_en: "Entity Extraction"
+    category: "Extract"
+    purpose: "التعرف على الأشخاص والأماكن والكتب..."
+    autonomy: "L1"
+    
+  E4:
+    name_ar: "استخراج العلاقات"
+    name_en: "Relation Extraction"
+    category: "Extract"
+    purpose: "اكتشاف العلاقات بين الكيانات"
+    autonomy: "L1"
+    
+  E5:
+    name_ar: "استخراج الاستشهادات"
+    name_en: "Citation Extraction"
+    category: "Extract"
+    purpose: "التعرف على الآيات والأحاديث والأقوال"
+    autonomy: "L1"
+    
+  E6:
+    name_ar: "استخراج المصطلحات"
+    name_en: "Term Extraction"
+    category: "Extract"
+    purpose: "اكتشاف المصطلحات التخصصية وتعريفاتها"
+    autonomy: "L0"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # الربط (Link)
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  L1:
+    name_ar: "حل الهوية"
+    name_en: "Entity Resolution"
+    category: "Link"
+    purpose: "تحديد إذا كانت الإشارات تعود لنفس الكيان"
+    autonomy: "L1"
+    critical: "لا دمج تلقائي أبداً"
+    
+  L2:
+    name_ar: "الربط المفاهيمي"
+    name_en: "Concept Linking"
+    category: "Link"
+    purpose: "ربط المفاهيم عبر اللغات والمدارس"
+    autonomy: "L1"
+    
+  L3:
+    name_ar: "الربط الاستشهادي"
+    name_en: "Citation Linking"
+    category: "Link"
+    purpose: "ربط الاستشهاد بمصدره الأصلي"
+    autonomy: "L0-L1"
+    
+  L4:
+    name_ar: "الربط التناصي"
+    name_en: "Intertextual Linking"
+    category: "Link"
+    purpose: "اكتشاف العلاقات بين النصوص"
+    autonomy: "L1"
+    
+  L5:
+    name_ar: "الربط الجينالوجي"
+    name_en: "Genealogical Linking"
+    category: "Link"
+    purpose: "تتبع نسب الأفكار والنصوص"
+    autonomy: "L1"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # التتبع (Trace)
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  T1:
+    name_ar: "التتبع المعجمي"
+    name_en: "Lexical Tracing"
+    category: "Trace"
+    purpose: "تتبع رحلة الكلمة عبر اللغات"
+    autonomy: "L0"
+    
+  T2:
+    name_ar: "التتبع المفاهيمي"
+    name_en: "Conceptual Tracing"
+    category: "Trace"
+    purpose: "تتبع تطور المفهوم عبر الزمن"
+    autonomy: "L1"
+    
+  T3:
+    name_ar: "التتبع الجينالوجي"
+    name_en: "Genealogical Tracing"
+    category: "Trace"
+    purpose: "تتبع سلاسل النقل والتأثير"
+    autonomy: "L1"
+    
+  T4:
+    name_ar: "التتبع الجغرافي"
+    name_en: "Geographic Tracing"
+    category: "Trace"
+    purpose: "تتبع الانتشار الجغرافي"
+    autonomy: "L0-L1"
+    
+  T5:
+    name_ar: "التتبع المؤسسي"
+    name_en: "Institutional Tracing"
+    category: "Trace"
+    purpose: "تتبع تطور المؤسسات"
+    autonomy: "L1"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # التحليل (Analyze)
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  A1:
+    name_ar: "تحليل الحجة"
+    name_en: "Argument Analysis"
+    category: "Analyze"
+    purpose: "تفكيك الحجج إلى مكوناتها"
+    autonomy: "L0"
+    
+  A2:
+    name_ar: "تحليل السياق"
+    name_en: "Context Analysis"
+    category: "Analyze"
+    purpose: "فهم السياق متعدد الأبعاد"
+    autonomy: "L0-L1"
+    
+  A3:
+    name_ar: "تحليل المقارنة"
+    name_en: "Comparative Analysis"
+    category: "Analyze"
+    purpose: "المقارنة المنهجية"
+    autonomy: "L0"
+    
+  A4:
+    name_ar: "تحليل التناقض"
+    name_en: "Contradiction Analysis"
+    category: "Analyze"
+    purpose: "اكتشاف التناقضات وتحليلها"
+    autonomy: "L1"
+    
+  A5:
+    name_ar: "تحليل الفجوات"
+    name_en: "Gap Analysis"
+    category: "Analyze"
+    purpose: "اكتشاف الفجوات المعرفية"
+    autonomy: "L0"
+    critical: "أساس وكيل الثروة المهملة"
+    
+  A6:
+    name_ar: "تحليل الموقف"
+    name_en: "Position Analysis"
+    category: "Analyze"
+    purpose: "تحديد موقف عالم أو مدرسة"
+    autonomy: "L0-L1"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # البناء (Construct)
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  C1:
+    name_ar: "بناء حزمة الأدلة"
+    name_en: "Evidence Bundle Construction"
+    category: "Construct"
+    purpose: "تجميع الأدلة في حزمة موثقة"
+    autonomy: "L0"
+    
+  C2:
+    name_ar: "بناء الادعاء"
+    name_en: "Claim Construction"
+    category: "Construct"
+    purpose: "صياغة ادعاء مقيد بالأدلة"
+    autonomy: "L1"
+    critical: "لا ادعاء بلا أدلة"
+    
+  C3:
+    name_ar: "بناء الدليل المضاد"
+    name_en: "Counter-Evidence Construction"
+    category: "Construct"
+    purpose: "البحث عن ما يدحض الادعاء"
+    autonomy: "L0"
+    critical: "إلزامي قبل النشر"
+    
+  C4:
+    name_ar: "بناء المخطط"
+    name_en: "Outline Construction"
+    category: "Construct"
+    purpose: "بناء هيكل منطقي للوثيقة"
+    autonomy: "L1"
+    
+  C5:
+    name_ar: "بناء القاموس"
+    name_en: "Glossary Construction"
+    category: "Construct"
+    purpose: "بناء قاموس مصطلحات"
+    autonomy: "L0-L1"
+    
+  C6:
+    name_ar: "بناء الأنطولوجيا"
+    name_en: "Ontology Construction"
+    category: "Construct"
+    purpose: "بناء خريطة مفاهيمية هيكلية"
+    autonomy: "L1"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # التركيب (Synthesize)
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  S1:
+    name_ar: "التركيب السردي"
+    name_en: "Narrative Synthesis"
+    category: "Synthesize"
+    purpose: "بناء سرد تاريخي أو تفسيري"
+    autonomy: "L1"
+    
+  S2:
+    name_ar: "التركيب التقريري"
+    name_en: "Report Synthesis"
+    category: "Synthesize"
+    purpose: "إنتاج تقرير بحثي منظم"
+    autonomy: "L1-L2"
+    
+  S3:
+    name_ar: "تركيب الخريطة المعرفية"
+    name_en: "Knowledge Map Synthesis"
+    category: "Synthesize"
+    purpose: "بناء خريطة بصرية تفاعلية"
+    autonomy: "L0"
+    
+  S4:
+    name_ar: "تركيب الجدول الزمني"
+    name_en: "Timeline Synthesis"
+    category: "Synthesize"
+    purpose: "بناء جدول زمني متعدد المسارات"
+    autonomy: "L0"
+    
+  S5:
+    name_ar: "التركيب المقارني"
+    name_en: "Comparative Synthesis"
+    category: "Synthesize"
+    purpose: "بناء مصفوفة مقارنة منهجية"
+    autonomy: "L0"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # الكتابة (Write)
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  W1:
+    name_ar: "كتابة الفقرة الموثقة"
+    name_en: "Documented Paragraph Writing"
+    category: "Write"
+    purpose: "كتابة فقرة بتوثيق كامل"
+    autonomy: "L1"
+    critical: "الوحدة الذرية للكتابة"
+    
+  W2:
+    name_ar: "كتابة القسم"
+    name_en: "Section Writing"
+    category: "Write"
+    purpose: "كتابة قسم كامل من الوثيقة"
+    autonomy: "L1-L2"
+    
+  W3:
+    name_ar: "كتابة الملخص"
+    name_en: "Abstract/Summary Writing"
+    category: "Write"
+    purpose: "كتابة ملخص مكثف"
+    autonomy: "L1"
+    
+  W4:
+    name_ar: "كتابة المراجعة النقدية"
+    name_en: "Critical Review Writing"
+    category: "Write"
+    purpose: "كتابة مراجعة نقدية"
+    autonomy: "L1"
+    
+  W5:
+    name_ar: "كتابة المقدمة والخاتمة"
+    name_en: "Introduction/Conclusion Writing"
+    category: "Write"
+    purpose: "كتابة إطار البحث"
+    autonomy: "L1"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # التحقق (Verify)
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  V1:
+    name_ar: "تدقيق الاستشهادات"
+    name_en: "Citation Audit"
+    category: "Verify"
+    purpose: "التحقق من صحة الاستشهادات"
+    autonomy: "L0"
+    mandatory_gate: true
+    
+  V2:
+    name_ar: "تدقيق الاتساق"
+    name_en: "Consistency Audit"
+    category: "Verify"
+    purpose: "اكتشاف التناقضات الداخلية"
+    autonomy: "L0-L1"
+    mandatory_gate: true
+    
+  V3:
+    name_ar: "تدقيق التغطية"
+    name_en: "Coverage Audit"
+    category: "Verify"
+    purpose: "التحقق من تغطية المخطط"
+    autonomy: "L0"
+    
+  V4:
+    name_ar: "تدقيق الأصل"
+    name_en: "Provenance Audit"
+    category: "Verify"
+    purpose: "التحقق من سلسلة الإنتاج"
+    autonomy: "L0"
+    mandatory_gate: true
+    
+  V5:
+    name_ar: "تدقيق الحقوق"
+    name_en: "Rights Audit"
+    category: "Verify"
+    purpose: "التحقق من حقوق النشر"
+    autonomy: "L0-L1"
+    
+  V6:
+    name_ar: "اختبار النسق"
+    name_en: "Schema/Ontology Testing"
+    category: "Verify"
+    purpose: "اختبار تماسك الأنطولوجيات"
+    autonomy: "L0"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              مستويات الاستقلالية
+# ═══════════════════════════════════════════════════════════════════════════════
+
+autonomy_levels:
+  L0:
+    name: "قراءة فقط"
+    description: "لا يعدل أي بيانات، يقرأ ويحلل فقط"
+    human_review: "غير مطلوب للقراءة"
+    
+  L1:
+    name: "اقتراح"
+    description: "يقترح تعديلات أو روابط، لا يوافق عليها"
+    human_review: "مطلوب للموافقة"
+    critical_note: "لا موافقة تلقائية أبداً"
+    
+  L2:
+    name: "تنفيذ محدود"
+    description: "ينفذ عمليات محددة ضمن حدود"
+    human_review: "مطلوب للمراجعة"
+    
+  L3:
+    name: "تنفيذ مستقل"
+    description: "ينفذ بشكل مستقل مع تسجيل"
+    human_review: "مراجعة لاحقة"
+    
+  L4:
+    name: "استقلال كامل"
+    description: "يتخذ قرارات ويتعلم"
+    human_review: "مراقبة دورية"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              بوابات الجودة الإلزامية
+# ═══════════════════════════════════════════════════════════════════════════════
+
+mandatory_gates:
+  pre_publish:
+    name: "بوابة ما قبل النشر"
+    required: ["V1", "V2", "V4"]
+    rule: "لا نشر بدون اجتياز الثلاثة"
+    
+  pre_integration:
+    name: "بوابة ما قبل الدمج"
+    required: ["V2", "V4", "V6"]
+    rule: "لا دمج في قاعدة المعرفة بدون اجتياز"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              المبادئ الحاكمة (Non-negotiables)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+non_negotiables:
+  - id: "NN1"
+    rule: "لا claim بلا evidence"
+    enforced_by: ["C2", "W1"]
+    
+  - id: "NN2"
+    rule: "لا evidence بلا offsets وسياق"
+    enforced_by: ["E1", "E2", "C1"]
+    
+  - id: "NN3"
+    rule: "لا تشغيل بلا run_id + recipe"
+    enforced_by: "جميع العمليات"
+    
+  - id: "NN4"
+    rule: "لا ربط كيانات بلا Suggest→Approve"
+    enforced_by: ["L1", "L2", "E3"]
+    
+  - id: "NN5"
+    rule: "لا نشر بلا بوابات الثقة"
+    enforced_by: ["V1", "V2", "V4"]
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              إحصائيات
+# ═══════════════════════════════════════════════════════════════════════════════
+
+statistics:
+  total_operations: 44
+  by_category:
+    Extract: 6
+    Link: 5
+    Trace: 5
+    Analyze: 6
+    Construct: 6
+    Synthesize: 5
+    Write: 5
+    Verify: 6
+  by_autonomy:
+    L0: 18
+    L0-L1: 8
+    L1: 15
+    L1-L2: 3
+  mandatory_gates: 3
+  non_negotiables: 5
+
+# ═══════════════════════════════════════════════════════════════════════════════

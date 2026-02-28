@@ -1,0 +1,610 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#                    IQRA-12 Gap Hunter Operations
+#                        عمليات وكيل الثروة المهملة
+# ═══════════════════════════════════════════════════════════════════════════════
+
+metadata:
+  component: "Gap Hunter Operations"
+  component_ar: "عمليات وكيل الثروة المهملة"
+  version: "1.0.0"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              العمليات الأساسية
+# ═══════════════════════════════════════════════════════════════════════════════
+
+operations:
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # عملية 1: مسح التغطية (Coverage Scan)
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  coverage_scan:
+    operation_id: "iqra:op:gap:coverage_scan"
+    name: "Coverage Scan"
+    name_ar: "مسح التغطية"
+    
+    purpose: |
+      تحليل شامل لتغطية الكوربس عبر جميع الأبعاد.
+      إنتاج خريطة حرارية للفجوات.
+    
+    input:
+      required:
+        - corpus_scope: "نطاق الكوربس للتحليل"
+        - dimensions: "الأبعاد المطلوب تحليلها"
+      optional:
+        - date_range: "النطاق الزمني"
+        - granularity: "دقة التحليل (century | decade | year)"
+    
+    process:
+      step_1:
+        name: "Query Aggregation"
+        description: "تجميع إحصائيات من BigQuery"
+        query_template: |
+          SELECT 
+            EXTRACT(CENTURY FROM date_composed) as century,
+            school,
+            genre,
+            region,
+            language,
+            COUNT(*) as work_count
+          FROM works
+          WHERE corpus_id IN (@corpus_ids)
+          GROUP BY 1, 2, 3, 4, 5
+          
+      step_2:
+        name: "Gap Detection"
+        description: "تحديد الفجوات بناءً على التوزيع"
+        algorithm: |
+          للكل بُعد:
+            احسب المتوسط والانحراف المعياري
+            حدد القيم الأقل من (المتوسط - 2 * الانحراف)
+            صنّف كـ "فجوة"
+            
+      step_3:
+        name: "Visualization"
+        description: "إنتاج خريطة حرارية"
+    
+    output:
+      coverage_map:
+        description: "خريطة التغطية لكل بُعد"
+        format: "JSON with heatmap data"
+      gap_list:
+        description: "قائمة الفجوات المكتشفة"
+        format: "array of Gap objects"
+      gap_report:
+        description: "تقرير الفجوات"
+        format: "markdown"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # عملية 2: صيد الشرارات (Spark Hunting)
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  spark_hunting:
+    operation_id: "iqra:op:gap:spark_hunting"
+    name: "Spark Hunting"
+    name_ar: "صيد الشرارات"
+    
+    purpose: |
+      اكتشاف الروابط غير المتوقعة والأفكار المبتكرة.
+      البحث عن "الجِدّة" لا عن "التأكيد".
+    
+    methodology:
+      source: "Kenneth Stanley - Novelty Search"
+      
+    input:
+      required:
+        - seed_concepts: "مفاهيم بذرية للانطلاق"
+        - exploration_depth: "عمق الاستكشاف (1-5)"
+      optional:
+        - novelty_threshold: "حد الجِدّة (0-1)"
+        - max_sparks: "أقصى عدد من الشرارات"
+    
+    process:
+      step_1:
+        name: "Semantic Embedding"
+        description: "تحويل المفاهيم إلى متجهات"
+        
+      step_2:
+        name: "Distance Calculation"
+        description: "حساب المسافات في الفضاء الدلالي"
+        formula: "distance = cosine_distance(concept_a, concept_b)"
+        
+      step_3:
+        name: "Novelty Scoring"
+        description: "تقييم الجِدّة"
+        formula: |
+          novelty_score = average(
+            distance(current_link, previous_links)
+          )
+          
+      step_4:
+        name: "Coherence Check"
+        description: "التحقق من التماسك المنطقي"
+        
+      step_5:
+        name: "Spark Generation"
+        description: "توليد الشرارات المبتكرة"
+    
+    output:
+      sparks:
+        description: "قائمة الشرارات المكتشفة"
+        format: "array of Spark objects"
+        fields:
+          - spark_id: "معرّف الشرارة"
+          - concept_a: "المفهوم الأول"
+          - concept_b: "المفهوم الثاني"
+          - novelty_score: "درجة الجِدّة"
+          - coherence_score: "درجة التماسك"
+          - description: "وصف الرابط المكتشف"
+          - research_question: "سؤال بحثي مقترح"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # عملية 3: كشف البقع العمياء (Blind Spot Detection)
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  blind_spot_detection:
+    operation_id: "iqra:op:gap:blind_spot_detection"
+    name: "Blind Spot Detection"
+    name_ar: "كشف البقع العمياء"
+    
+    purpose: |
+      تحديد المواضيع التي تجنب العلماء الخوض فيها.
+      اكتشاف ما لم يُكتب وما تم تجاهله.
+    
+    methodology:
+      source: "James Evans - Agnotology"
+      
+    input:
+      required:
+        - domain: "المجال المعرفي"
+        - network_snapshot: "لقطة شبكة المعرفة"
+      optional:
+        - sensitivity: "حساسية الكشف (LOW | MEDIUM | HIGH)"
+    
+    process:
+      step_1:
+        name: "Expected Links"
+        description: "تحديد الروابط المتوقعة"
+        method: |
+          بناءً على نمط الشبكة:
+          إذا كان A مرتبطاً بـ B و B مرتبطاً بـ C
+          فمن المتوقع وجود رابط بين A و C
+          
+      step_2:
+        name: "Missing Links"
+        description: "اكتشاف الروابط المفقودة"
+        query: |
+          SELECT 
+            a.concept_id as concept_a,
+            c.concept_id as concept_c,
+            COUNT(b.concept_id) as common_links,
+            0 as actual_link
+          FROM concept_relations a
+          JOIN concept_relations b ON a.target = b.source
+          JOIN concept_relations c ON b.target = c.source
+          WHERE NOT EXISTS (
+            SELECT 1 FROM concept_relations 
+            WHERE source = a.concept_id AND target = c.concept_id
+          )
+          GROUP BY 1, 2
+          HAVING common_links > @threshold
+          
+      step_3:
+        name: "Silence Analysis"
+        description: "تحليل الصمت"
+        method: |
+          ما هي المواضيع التي:
+          - يُشار إليها لكن لا تُناقش
+          - مذكورة في الهوامش فقط
+          - مرتبطة بجدل أو حساسية
+          
+      step_4:
+        name: "Hypothesis Generation"
+        description: "توليد فرضيات عن سبب الصمت"
+    
+    output:
+      blind_spots:
+        description: "قائمة البقع العمياء"
+        format: "array of BlindSpot objects"
+        fields:
+          - topic: "الموضوع"
+          - type: "MISSING_LINK | TABOO | MINORITY_VIEW | LOST"
+          - evidence: "الأدلة على الغياب"
+          - hypothesis: "فرضية عن السبب"
+          - research_potential: "الإمكانية البحثية"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # عملية 4: صيد المخطوطات (Manuscript Hunting)
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  manuscript_hunting:
+    operation_id: "iqra:op:gap:manuscript_hunting"
+    name: "Manuscript Hunting"
+    name_ar: "صيد المخطوطات"
+    
+    purpose: |
+      اكتشاف المخطوطات غير المحققة أو غير المفهرسة.
+      تحديد أولويات التحقيق.
+    
+    input:
+      required:
+        - target_domain: "المجال المستهدف"
+      optional:
+        - author_filter: "فلتر المؤلفين"
+        - date_range: "النطاق الزمني"
+    
+    process:
+      step_1:
+        name: "Citation Mining"
+        description: "استخراج الإشارات للكتب المفقودة"
+        method: |
+          البحث في الكتب المحققة عن:
+          - "قال في كتابه..."
+          - "ذكر في رسالته..."
+          - "ألف كتاباً في..."
+          
+      step_2:
+        name: "Catalog Cross-Reference"
+        description: "مراجعة فهارس المكتبات"
+        sources:
+          - "فهارس مكتبة الملك فهد"
+          - "فهارس دار الكتب المصرية"
+          - "FIHRIST database"
+          - "Hill Museum & Manuscript Library"
+          
+      step_3:
+        name: "Priority Scoring"
+        description: "تقييم أولوية التحقيق"
+        criteria:
+          - author_importance: "أهمية المؤلف"
+          - topic_rarity: "ندرة الموضوع"
+          - citation_count: "عدد الاستشهادات"
+          - manuscript_copies: "عدد النسخ المخطوطة"
+          - accessibility: "سهولة الوصول"
+    
+    output:
+      manuscript_list:
+        description: "قائمة المخطوطات المكتشفة"
+        fields:
+          - title: "العنوان"
+          - author: "المؤلف"
+          - manuscript_locations: "أماكن النسخ"
+          - priority_score: "درجة الأولوية"
+          - editing_status: "حالة التحقيق"
+          - estimated_effort: "الجهد المقدر"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # عملية 5: صيد العلماء المهملين (Neglected Scholar Hunt)
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  neglected_scholar_hunt:
+    operation_id: "iqra:op:gap:neglected_scholar_hunt"
+    name: "Neglected Scholar Hunt"
+    name_ar: "صيد العلماء المهملين"
+    
+    purpose: |
+      اكتشاف العلماء المؤثرين الذين لم يُدرسوا كفاية.
+      تحديد "الجسور" بين المدارس.
+    
+    methodology:
+      source: "Ruth Ahnert - Network Analysis"
+      
+    input:
+      required:
+        - scholar_network: "شبكة العلماء"
+      optional:
+        - time_period: "الفترة الزمنية"
+        - school_filter: "فلتر المذهب"
+    
+    process:
+      step_1:
+        name: "Centrality Analysis"
+        description: "تحليل المركزية في الشبكة"
+        metrics:
+          - degree_centrality: "مركزية الدرجة"
+          - betweenness_centrality: "المركزية البينية"
+          - pagerank: "ترتيب الصفحات"
+          
+      step_2:
+        name: "Citation vs Study Ratio"
+        description: "نسبة الاستشهاد إلى الدراسة"
+        formula: |
+          neglect_score = citations_received / studies_about_scholar
+          
+      step_3:
+        name: "Bridge Scholar Detection"
+        description: "اكتشاف العلماء الجسور"
+        method: |
+          العلماء ذوو المركزية البينية العالية
+          الذين يربطون بين مجتمعات معزولة
+          
+      step_4:
+        name: "Minority Leader Detection"
+        description: "اكتشاف قادة المدارس الأقلية"
+    
+    output:
+      neglected_scholars:
+        description: "قائمة العلماء المهملين"
+        fields:
+          - scholar_id: "معرّف العالم"
+          - name: "الاسم"
+          - neglect_score: "درجة الإهمال"
+          - influence_type: "نوع التأثير"
+          - research_suggestions: "اقتراحات بحثية"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # عملية 6: توليد الفرضيات (Hypothesis Generation)
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  hypothesis_generation:
+    operation_id: "iqra:op:gap:hypothesis_generation"
+    name: "Hypothesis Generation"
+    name_ar: "توليد الفرضيات"
+    
+    purpose: |
+      توليد فرضيات بحثية قابلة للاختبار.
+      تحويل الفجوات إلى أسئلة بحثية.
+    
+    methodology:
+      source: "Hiroaki Kitano - AI Scientist"
+      
+    input:
+      required:
+        - gap_report: "تقرير الفجوات"
+      optional:
+        - hypothesis_type: "EXPLANATORY | PREDICTIVE | COUNTER"
+        - max_hypotheses: "أقصى عدد"
+    
+    process:
+      step_1:
+        name: "Gap Analysis"
+        description: "تحليل طبيعة الفجوة"
+        
+      step_2:
+        name: "Pattern Recognition"
+        description: "التعرف على الأنماط"
+        
+      step_3:
+        name: "Hypothesis Formulation"
+        description: "صياغة الفرضية"
+        templates:
+          explanatory: |
+            "الفجوة في [X] تُفسر بـ [Y] لأن [Z]"
+          predictive: |
+            "إذا بحثنا في [X] فسنجد [Y]"
+          counter: |
+            "على عكس الإجماع، قد يكون [X] هو الصحيح"
+            
+      step_4:
+        name: "Testability Check"
+        description: "التحقق من قابلية الاختبار"
+        criteria:
+          - falsifiable: "قابل للدحض"
+          - specific: "محدد"
+          - measurable: "قابل للقياس"
+    
+    output:
+      hypotheses:
+        description: "قائمة الفرضيات"
+        fields:
+          - hypothesis_id: "معرّف الفرضية"
+          - statement: "نص الفرضية"
+          - type: "نوع الفرضية"
+          - testability_score: "درجة قابلية الاختبار"
+          - suggested_tests: "الاختبارات المقترحة"
+          - priority: "الأولوية"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # عملية 7: تقرير الفرص (Opportunity Report)
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  opportunity_report:
+    operation_id: "iqra:op:gap:opportunity_report"
+    name: "Opportunity Report"
+    name_ar: "تقرير الفرص"
+    
+    purpose: |
+      تجميع نتائج جميع العمليات في تقرير شامل.
+      ترتيب الفرص حسب الأولوية والجدوى.
+    
+    input:
+      required:
+        - coverage_scan_results: "نتائج مسح التغطية"
+        - spark_results: "نتائج صيد الشرارات"
+        - blind_spot_results: "نتائج كشف البقع العمياء"
+      optional:
+        - manuscript_results: "نتائج صيد المخطوطات"
+        - scholar_results: "نتائج صيد العلماء"
+        - hypothesis_results: "نتائج توليد الفرضيات"
+    
+    process:
+      step_1:
+        name: "Aggregation"
+        description: "تجميع النتائج"
+        
+      step_2:
+        name: "Priority Scoring"
+        description: "تقييم الأولويات"
+        criteria:
+          - impact: "الأثر المتوقع (30%)"
+          - feasibility: "الجدوى (25%)"
+          - novelty: "الجِدّة (20%)"
+          - urgency: "الإلحاحية (15%)"
+          - resources: "الموارد المطلوبة (10%)"
+          
+      step_3:
+        name: "Report Generation"
+        description: "توليد التقرير"
+    
+    output:
+      report:
+        format: "markdown + JSON"
+        sections:
+          - executive_summary: "ملخص تنفيذي"
+          - gap_overview: "نظرة عامة على الفجوات"
+          - opportunity_ranking: "ترتيب الفرص"
+          - action_recommendations: "توصيات العمل"
+          - resource_estimates: "تقديرات الموارد"
+          - appendices: "ملاحق تفصيلية"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              الخوارزميات الأساسية
+# ═══════════════════════════════════════════════════════════════════════════════
+
+algorithms:
+
+  novelty_search:
+    name: "Novelty Search Algorithm"
+    source: "Kenneth Stanley"
+    
+    description: |
+      بدلاً من البحث عن "الأكثر احتمالية"، نبحث عن "الأكثر إبداعاً".
+    
+    fitness_function: |
+      Fitness = Distance(Current_Idea, Archive_of_Previous_Ideas)
+      
+      الوكيل يُكافأ كلما كانت فكرته "بعيدة" في الفضاء المتجهي
+      عن الأفكار السابقة، بشرط أن تحافظ على الاتساق المنطقي.
+    
+    behavioral_archive: |
+      أرشيف لكل الأفكار التي تم طرحها سابقاً.
+      الوكيل يرفض توليد أي فكرة مشابهة لها،
+      مما يجبره على استكشاف مناطق بكر.
+
+  link_prediction:
+    name: "Link Prediction Algorithm"
+    source: "Jure Leskovec"
+    
+    description: |
+      استخدام شبكات عصبية رسومية (GNNs) للتنبؤ بعلاقات مفقودة.
+    
+    method: |
+      1. تحويل شبكة المعرفة إلى رسم بياني
+      2. تدريب نموذج GNN على الروابط الموجودة
+      3. التنبؤ بالروابط المفقودة
+      4. ترتيب التنبؤات حسب الاحتمالية
+    
+    output: |
+      "بناءً على نمط الشبكة، احتمال 90% أن العالم X التقى بالعالم Y،
+      رغم عدم وجود وثيقة تثبت ذلك."
+
+  gap_detection:
+    name: "Gap Detection Algorithm"
+    source: "James Evans"
+    
+    description: |
+      تحليل شبكة المعرفة للبحث عن "الروابط المفقودة"
+      بين العقد الكثيفة.
+    
+    method: |
+      1. تحديد العقد الكثيفة (المفاهيم ذات الروابط الكثيرة)
+      2. البحث عن أزواج عقد كثيفة بدون رابط مباشر
+      3. تقييم "غرابة" الغياب
+      4. توليد سؤال بحثي
+    
+    example: |
+      "لماذا توجد روابط كثيرة بين الفقه والطب،
+      وروابط قليلة جداً بين الفقه والكيمياء في القرن العاشر؟"
+
+  echo_algorithm:
+    name: "ECHO (Explanatory Coherence)"
+    source: "Paul Thagard"
+    
+    description: |
+      كيف نرجح بين رأيين متعارضين؟
+      الرأي الأقوى هو الذي يملك "تماسكاً تفسيرياً" أكبر.
+    
+    method: |
+      شبكة قيود (Constraint Satisfaction Network):
+      - تمثيل الآراء والأدلة كعقد
+      - رابط إيجابي بين الدليل والنظرية التي تفسره
+      - رابط سلبي بين النظريات المتناقضة
+      - حل الشبكة للعثور على التفسير الأمثل
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              جداول BigQuery
+# ═══════════════════════════════════════════════════════════════════════════════
+
+bigquery_tables:
+
+  coverage_snapshots:
+    description: "لقطات التغطية الدورية"
+    columns:
+      - snapshot_id: "معرّف اللقطة"
+      - corpus_scope: "نطاق الكوربس"
+      - dimension: "البُعد"
+      - coverage_data: "بيانات التغطية (JSON)"
+      - gaps_detected: "الفجوات المكتشفة (JSON)"
+      - created_at: "تاريخ الإنشاء"
+
+  sparks:
+    description: "سجل الشرارات المكتشفة"
+    columns:
+      - spark_id: "معرّف الشرارة"
+      - concept_a: "المفهوم الأول"
+      - concept_b: "المفهوم الثاني"
+      - novelty_score: "درجة الجِدّة"
+      - coherence_score: "درجة التماسك"
+      - description: "الوصف"
+      - research_question: "السؤال البحثي"
+      - status: "PROPOSED | VALIDATED | EXPLORED | REJECTED"
+      - created_at: "تاريخ الإنشاء"
+
+  blind_spots:
+    description: "سجل البقع العمياء"
+    columns:
+      - blind_spot_id: "معرّف البقعة العمياء"
+      - topic: "الموضوع"
+      - type: "النوع"
+      - evidence: "الأدلة"
+      - hypothesis: "الفرضية"
+      - research_potential: "الإمكانية البحثية"
+      - status: "DETECTED | CONFIRMED | ADDRESSED"
+      - created_at: "تاريخ الإنشاء"
+
+  manuscript_opportunities:
+    description: "فرص المخطوطات"
+    columns:
+      - opportunity_id: "معرّف الفرصة"
+      - title: "العنوان"
+      - author_id: "معرّف المؤلف"
+      - locations: "أماكن النسخ (JSON)"
+      - priority_score: "درجة الأولوية"
+      - editing_status: "حالة التحقيق"
+      - estimated_effort: "الجهد المقدر"
+      - created_at: "تاريخ الإنشاء"
+
+  neglected_scholars:
+    description: "سجل العلماء المهملين"
+    columns:
+      - record_id: "معرّف السجل"
+      - scholar_id: "معرّف العالم"
+      - neglect_score: "درجة الإهمال"
+      - influence_type: "نوع التأثير"
+      - research_suggestions: "الاقتراحات (JSON)"
+      - status: "IDENTIFIED | RESEARCHED | PUBLISHED"
+      - created_at: "تاريخ الإنشاء"
+
+  hypotheses:
+    description: "سجل الفرضيات المولدة"
+    columns:
+      - hypothesis_id: "معرّف الفرضية"
+      - statement: "نص الفرضية"
+      - type: "النوع"
+      - source_gap: "الفجوة المصدر"
+      - testability_score: "درجة قابلية الاختبار"
+      - suggested_tests: "الاختبارات المقترحة (JSON)"
+      - status: "GENERATED | TESTING | CONFIRMED | REFUTED"
+      - created_at: "تاريخ الإنشاء"
+
+  opportunity_reports:
+    description: "تقارير الفرص"
+    columns:
+      - report_id: "معرّف التقرير"
+      - scope: "النطاق"
+      - opportunities: "الفرص (JSON)"
+      - recommendations: "التوصيات (JSON)"
+      - generated_at: "تاريخ التوليد"
+      - approved_by: "المعتمِد"
+
+# ═══════════════════════════════════════════════════════════════════════════════

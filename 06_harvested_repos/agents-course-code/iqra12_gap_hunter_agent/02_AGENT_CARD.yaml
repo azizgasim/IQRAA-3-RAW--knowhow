@@ -1,0 +1,373 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#                    IQRA-12 Gap Hunter Agent Card
+#                        بطاقة وكيل الثروة المهملة
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# بطاقة تعريف شاملة وفق معيار Timnit Gebru للتوثيق والمساءلة
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              الهوية
+# ═══════════════════════════════════════════════════════════════════════════════
+
+identity:
+  agent_id: "iqra:agent:gap:gap_hunter"
+  name: "Gap Hunter Agent"
+  name_ar: "وكيل الثروة المهملة"
+  version: "1.0.0"
+  category: "discovery"
+  owner: "discovery_team"
+  created_at: "2024-12-20"
+  last_updated: "2024-12-20"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              الغرض
+# ═══════════════════════════════════════════════════════════════════════════════
+
+purpose:
+  
+  description: |
+    وكيل متخصص في اكتشاف الفجوات والفرص البحثية في التراث الإسلامي.
+    يحول "ما لا نعرفه" إلى خريطة فرص قابلة للاستثمار.
+    يبحث عن الجِدّة والمختلف، لا عن تأكيد المعروف.
+    
+  use_cases:
+    - "مسح التغطية وتحديد الفجوات الزمنية والمذهبية والنوعية"
+    - "اكتشاف المخطوطات غير المحققة وتحديد أولويات التحقيق"
+    - "صيد العلماء المهملين والجسور بين المدارس"
+    - "توليد أسئلة بحثية وفرضيات قابلة للاختبار"
+    - "كشف البقع العمياء والموضوعات المتجنبة"
+    - "اكتشاف الروابط غير المتوقعة (صيد الشرارات)"
+    
+  non_use_cases:
+    - "البحث العادي في الكوربس (استخدم Search Agent)"
+    - "استخراج الكيانات (استخدم Entity Extractor)"
+    - "صياغة الادعاءات (استخدم Claim Drafter)"
+    - "تنفيذ أي تعديل على البيانات"
+    - "اتخاذ قرارات نهائية عن أولويات الاقتناء"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              الواجهة
+# ═══════════════════════════════════════════════════════════════════════════════
+
+interface:
+
+  inputs:
+    required_params:
+      - name: "operation"
+        type: "enum"
+        values:
+          - "coverage_scan"
+          - "spark_hunting"
+          - "blind_spot_detection"
+          - "manuscript_hunting"
+          - "neglected_scholar_hunt"
+          - "hypothesis_generation"
+          - "opportunity_report"
+        description: "العملية المطلوبة"
+        
+      - name: "scope"
+        type: "object"
+        description: "نطاق التحليل"
+        schema:
+          corpus_ids: "array (optional)"
+          date_range: "object (optional)"
+          domains: "array (optional)"
+          
+    optional_params:
+      - name: "dimensions"
+        type: "array"
+        values: ["temporal", "doctrinal", "genre", "geographic", "linguistic", "thematic", "scholarly"]
+        default: ["temporal", "doctrinal", "genre"]
+        description: "أبعاد كشف الفجوات"
+        
+      - name: "novelty_threshold"
+        type: "number"
+        range: [0, 1]
+        default: 0.7
+        description: "حد الجِدّة لصيد الشرارات"
+        
+      - name: "max_results"
+        type: "integer"
+        default: 50
+        description: "أقصى عدد للنتائج"
+        
+    constraints:
+      cost_budget:
+        max: 50.0
+        description: "سقف التكلفة بالدولار"
+      time_limit:
+        max: 3600
+        description: "سقف الوقت بالثواني"
+
+  outputs:
+    artifacts:
+      - type: "coverage_map"
+        table: "coverage_snapshots"
+        description: "خريطة التغطية الحرارية"
+        
+      - type: "gap_list"
+        table: "gaps"
+        description: "قائمة الفجوات المكتشفة"
+        
+      - type: "spark_list"
+        table: "sparks"
+        description: "قائمة الشرارات/الروابط المبتكرة"
+        
+      - type: "blind_spot_list"
+        table: "blind_spots"
+        description: "قائمة البقع العمياء"
+        
+      - type: "manuscript_list"
+        table: "manuscript_opportunities"
+        description: "قائمة المخطوطات المكتشفة"
+        
+      - type: "scholar_list"
+        table: "neglected_scholars"
+        description: "قائمة العلماء المهملين"
+        
+      - type: "hypothesis_list"
+        table: "hypotheses"
+        description: "قائمة الفرضيات المولدة"
+        
+      - type: "opportunity_report"
+        table: "opportunity_reports"
+        description: "تقرير الفرص الشامل"
+        
+    side_effects: []
+
+  tools_used:
+    - name: "search_tool"
+      purpose: "البحث في BigQuery"
+      
+    - name: "graph_analyzer"
+      purpose: "تحليل شبكة المعرفة"
+      
+    - name: "embedding_tool"
+      purpose: "حساب المتجهات الدلالية"
+      
+    - name: "catalog_searcher"
+      purpose: "البحث في فهارس المخطوطات"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              الاستقلالية
+# ═══════════════════════════════════════════════════════════════════════════════
+
+autonomy:
+  current_level: "L1"
+  max_allowed_level: "L2"
+  risk_tier: "LOW"
+  
+  justification: |
+    الوكيل يقترح فقط ولا ينفذ.
+    لا يعدل بيانات الإنتاج.
+    نتائجه تحتاج مراجعة بشرية.
+
+  restrictions:
+    - "لا يُضيف سجلات للجداول الأساسية"
+    - "لا يُعدل الكيانات أو العلاقات"
+    - "كل اقتراح يُخزن في جداول _proposals"
+    
+  promotion_path:
+    to_L2:
+      requirements:
+        - "1000 اقتراح بمعدل قبول >85%"
+        - "لا أخطاء حرجة في آخر 30 يوم"
+        - "موافقة Discovery Team Lead"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              الوصول للبيانات
+# ═══════════════════════════════════════════════════════════════════════════════
+
+data_access:
+
+  tables_read:
+    - "works"
+    - "entities"
+    - "entity_relations"
+    - "passages"
+    - "concepts"
+    - "concept_relations"
+    - "claims"
+    - "citations"
+    - "manuscript_catalogs"
+    - "scholar_network"
+    
+  tables_write: []
+  
+  tables_propose:
+    - "coverage_snapshots"
+    - "gaps"
+    - "sparks"
+    - "blind_spots"
+    - "manuscript_opportunities"
+    - "neglected_scholars"
+    - "hypotheses"
+    - "opportunity_reports"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              التقييم
+# ═══════════════════════════════════════════════════════════════════════════════
+
+evaluation:
+
+  eval_suite: "gap_hunter_evals_v1"
+  
+  success_criteria:
+    gap_detection_precision: ">= 0.80"
+    novelty_score_validity: ">= 0.75"
+    hypothesis_testability: ">= 0.70"
+    
+  quality_metrics:
+    - name: "gap_relevance"
+      description: "هل الفجوات المكتشفة مهمة فعلاً؟"
+      measurement: "تقييم بشري على عينة"
+      
+    - name: "spark_coherence"
+      description: "هل الروابط المكتشفة منطقية؟"
+      measurement: "تقييم بشري + اختبار تلقائي"
+      
+    - name: "hypothesis_quality"
+      description: "هل الفرضيات قابلة للاختبار؟"
+      measurement: "معايير Kitano"
+      
+    - name: "coverage_accuracy"
+      description: "دقة تقييم التغطية"
+      measurement: "مقارنة مع تدقيق يدوي"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              القيود والحدود
+# ═══════════════════════════════════════════════════════════════════════════════
+
+limitations:
+
+  known_limitations:
+    - title: "اعتماد على جودة البيانات"
+      description: "الفجوات المكتشفة تعتمد على اكتمال الميتاداتا"
+      mitigation: "تشغيل فحص جودة البيانات أولاً"
+      
+    - title: "التحيز للمتاح"
+      description: "قد يفوت فجوات في مجالات غير مفهرسة أصلاً"
+      mitigation: "دمج مصادر خارجية للفهارس"
+      
+    - title: "False Positives"
+      description: "بعض 'الفجوات' قد تكون مقصودة أو طبيعية"
+      mitigation: "مراجعة بشرية إلزامية"
+      
+    - title: "حدود الجِدّة"
+      description: "الجِدّة مقاسة بالنسبة للأرشيف الحالي فقط"
+      mitigation: "تحديث الأرشيف دورياً"
+
+  failure_modes:
+    - mode: "Empty Results"
+      cause: "نطاق ضيق جداً أو بيانات ناقصة"
+      recovery: "توسيع النطاق أو الإبلاغ عن نقص البيانات"
+      
+    - mode: "Noise Overload"
+      cause: "حد جِدّة منخفض جداً"
+      recovery: "رفع novelty_threshold"
+      
+    - mode: "Timeout"
+      cause: "تحليل كوربس ضخم"
+      recovery: "تقسيم إلى دفعات"
+
+  edge_cases:
+    - "كوربس جديد بدون بيانات تاريخية"
+    - "مجال بمذهب واحد فقط"
+    - "فترة زمنية بمصادر محدودة جداً"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              الحوكمة
+# ═══════════════════════════════════════════════════════════════════════════════
+
+governance:
+
+  change_log:
+    - version: "1.0.0"
+      date: "2024-12-20"
+      changes:
+        - "الإصدار الأولي"
+        - "7 عمليات أساسية"
+        - "4 خوارزميات"
+        
+  approval_history:
+    - date: "2024-12-20"
+      action: "CREATE"
+      approver: "discovery_team_lead"
+      
+  review_schedule:
+    frequency: "monthly"
+    next_review: "2025-01-20"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              الاتصالات
+# ═══════════════════════════════════════════════════════════════════════════════
+
+connections:
+
+  upstream_agents:
+    - agent: "coverage_analyzer"
+      interaction: "receives coverage data"
+      
+  downstream_agents:
+    - agent: "manuscript_acquisition_agent"
+      interaction: "sends manuscript opportunities"
+      
+    - agent: "research_planner"
+      interaction: "sends research questions"
+      
+  human_touchpoints:
+    - point: "Gap Validation"
+      when: "after gap detection"
+      purpose: "تأكيد أهمية الفجوة"
+      
+    - point: "Opportunity Prioritization"
+      when: "before opportunity report"
+      purpose: "ترتيب الأولويات"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              أمثلة الاستخدام
+# ═══════════════════════════════════════════════════════════════════════════════
+
+usage_examples:
+
+  example_1:
+    name: "مسح التغطية للفقه الحنفي"
+    input:
+      operation: "coverage_scan"
+      scope:
+        domains: ["فقه"]
+        filters:
+          school: "حنفي"
+      dimensions: ["temporal", "genre", "geographic"]
+    expected_output:
+      - "خريطة حرارية للتغطية عبر القرون"
+      - "قائمة الفجوات الزمنية"
+      - "قائمة الأنواع الناقصة"
+
+  example_2:
+    name: "صيد شرارات في علم الكلام"
+    input:
+      operation: "spark_hunting"
+      scope:
+        domains: ["علم الكلام", "فلسفة"]
+      seed_concepts: ["الجوهر", "العرض", "الذات الإلهية"]
+      novelty_threshold: 0.8
+    expected_output:
+      - "روابط غير متوقعة بين المفاهيم"
+      - "أسئلة بحثية مبتكرة"
+
+  example_3:
+    name: "صيد العلماء المهملين في القرن 8"
+    input:
+      operation: "neglected_scholar_hunt"
+      scope:
+        date_range:
+          start: "700H"
+          end: "800H"
+    expected_output:
+      - "قائمة علماء ذوي تأثير عالٍ لم يُدرسوا"
+      - "اقتراحات بحثية لكل عالم"
+
+# ═══════════════════════════════════════════════════════════════════════════════

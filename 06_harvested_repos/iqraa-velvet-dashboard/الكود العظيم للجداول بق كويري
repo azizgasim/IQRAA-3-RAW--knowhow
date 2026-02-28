@@ -1,0 +1,7130 @@
+-- ==========================================================
+-- [001] agent_behavioral_rules
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.agent_behavioral_rules`
+(
+    rule_id STRING NOT NULL,
+
+    agent_type STRING,
+
+    decision_context STRUCT<
+        context_name STRING
+    >,
+
+    state_variables ARRAY<
+        STRUCT<
+            variable_name STRING,
+            variable_type STRING,
+            current_value_range STRING
+        >
+    >,
+
+    possible_actions ARRAY<STRING>,
+
+    decision_rule STRUCT<
+        rule_type STRING,
+        condition_action_pairs ARRAY<
+            STRUCT<
+                condition STRING,
+                action STRING,
+                probability FLOAT64,
+                utility_function STRING,
+                parameters JSON
+            >
+        >,
+        noise_level FLOAT64,
+        is_adaptive BOOLEAN,
+        adaptation_rule STRING
+    >,
+
+    calibration STRUCT<
+        calibrated_from ARRAY<
+            STRUCT<
+                historical_case_id STRING,
+                case_description STRING,
+                fit_quality FLOAT64
+            >
+        >,
+        validation_cases ARRAY<STRING>,
+        goodness_of_fit STRUCT<
+            r_squared FLOAT64,
+            prediction_accuracy FLOAT64,
+            confidence_interval STRING
+        >
+    >,
+
+    contextual_modifiers ARRAY<
+        STRUCT<
+            modifier_type STRING,
+            modifier_value STRING,
+            effect_on_rule STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        evidence_base STRING,
+        confidence_level STRING
+    >
+)
+CLUSTER BY agent_type;
+
+
+-- ==========================================================
+-- [002] alternative_trajectories_counterfactuals
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.alternative_trajectories_counterfactuals`
+(
+    scenario_id STRING NOT NULL,
+
+    divergence_point STRUCT<
+        divergence_date DATE,
+        divergence_century_hijri STRING
+    >,
+
+    actual_event STRUCT<
+        event_id STRING,
+        event_description STRING
+    >,
+
+    counterfactual_event STRUCT<
+        alternative_description STRING,
+        plausibility STRING,
+        why_didnt_happen ARRAY<
+            STRUCT<
+                reason_type STRING,
+                reason_description STRING
+            >
+        >
+    >,
+
+    alternative_scenario STRUCT<
+        scenario_name STRING,
+        scenario_description STRING,
+        logical_chain ARRAY<
+            STRUCT<
+                step_number INT64,
+                step_description STRING,
+                probability_assessment STRING,
+                assumptions ARRAY<STRING>
+            >
+        >,
+        overall_plausibility STRUCT<
+            plausibility_score FLOAT64,
+            assessment_rationale STRING,
+            supporting_factors ARRAY<STRING>,
+            opposing_factors ARRAY<STRING>
+        >
+    >,
+
+    projected_outcomes STRUCT<
+        short_term ARRAY<
+            STRUCT<
+                domain STRING,
+                projected_change STRING,
+                confidence STRING
+            >
+        >,
+        medium_term ARRAY<
+            STRUCT<
+                domain STRING,
+                projected_change STRING,
+                confidence STRING
+            >
+        >,
+        long_term ARRAY<
+            STRUCT<
+                domain STRING,
+                projected_change STRING,
+                confidence STRING
+            >
+        >
+    >,
+
+    intellectual_trajectory_impact STRUCT<
+        enabled_ideas ARRAY<
+            STRUCT<
+                idea_description STRING,
+                likelihood STRING,
+                potential_impact STRING
+            >
+        >,
+        suppressed_ideas ARRAY<
+            STRUCT<
+                idea_description STRING,
+                likelihood STRING
+            >
+        >,
+        affected_schools ARRAY<
+            STRUCT<
+                school_id STRING,
+                projected_fate STRING
+            >
+        >
+    >,
+
+    actual_vs_counterfactual STRUCT<
+        key_differences ARRAY<
+            STRUCT<
+                dimension STRING,
+                actual STRING,
+                counterfactual STRING,
+                significance STRING
+            >
+        >,
+        insights_gained ARRAY<STRING>
+    >,
+
+    supporting_evidence STRUCT<
+        analogous_cases ARRAY<
+            STRUCT<
+                case_description STRING,
+                similarity STRING,
+                outcome STRING
+            >
+        >,
+        simulation_results STRUCT<
+            simulation_method STRING,
+            simulation_outcome STRING,
+            confidence STRING
+        >
+    >,
+
+    explanatory_value STRUCT<
+        clarifies ARRAY<STRING>,
+        debunked_inevitabilities ARRAY<STRING>,
+        revealed_forces ARRAY<STRING>
+    >,
+
+    metadata STRUCT<
+        scenario_author STRING,
+        peer_review_status STRING,
+        criticism ARRAY<STRING>,
+        revision_history JSON
+    >)
+CLUSTER BY scenario_id;
+
+
+-- ==========================================================
+-- [001] agent_behavioral_rules
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.agent_behavioral_rules`
+(
+    rule_id STRING NOT NULL,
+
+    agent_type STRING,
+
+    decision_context STRUCT<
+        context_name STRING
+    >,
+
+    state_variables ARRAY<
+        STRUCT<
+            variable_name STRING,
+            variable_type STRING,
+            current_value_range STRING
+        >
+    >,
+
+    possible_actions ARRAY<STRING>,
+
+    decision_rule STRUCT<
+        rule_type STRING,
+        condition_action_pairs ARRAY<
+            STRUCT<
+                condition STRING,
+                action STRING,
+                probability FLOAT64,
+                utility_function STRING,
+                parameters JSON
+            >
+        >,
+        noise_level FLOAT64,
+        is_adaptive BOOLEAN,
+        adaptation_rule STRING
+    >,
+
+    calibration STRUCT<
+        calibrated_from ARRAY<
+            STRUCT<
+                historical_case_id STRING,
+                case_description STRING,
+                fit_quality FLOAT64
+            >
+        >,
+        validation_cases ARRAY<STRING>,
+        goodness_of_fit STRUCT<
+            r_squared FLOAT64,
+            prediction_accuracy FLOAT64,
+            confidence_interval STRING
+        >
+    >,
+
+    contextual_modifiers ARRAY<
+        STRUCT<
+            modifier_type STRING,
+            modifier_value STRING,
+            effect_on_rule STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        evidence_base STRING,
+        confidence_level STRING
+    >
+)
+CLUSTER BY agent_type;
+
+
+-- ==========================================================
+-- [002] alternative_trajectories_counterfactuals
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.alternative_trajectories_counterfactuals`
+(
+    scenario_id STRING NOT NULL,
+
+    divergence_point STRUCT<
+        divergence_date DATE,
+        divergence_century_hijri STRING
+    >,
+
+    actual_event STRUCT<
+        event_id STRING,
+        event_description STRING
+    >,
+
+    counterfactual_event STRUCT<
+        alternative_description STRING,
+        plausibility STRING,
+        why_didnt_happen ARRAY<
+            STRUCT<
+                reason_type STRING,
+                reason_description STRING
+            >
+        >
+    >,
+
+    alternative_scenario STRUCT<
+        scenario_name STRING,
+        scenario_description STRING,
+        logical_chain ARRAY<
+            STRUCT<
+                step_number INT64,
+                step_description STRING,
+                probability_assessment STRING,
+                assumptions ARRAY<STRING>
+            >
+        >,
+        overall_plausibility STRUCT<
+            plausibility_score FLOAT64,
+            assessment_rationale STRING,
+            supporting_factors ARRAY<STRING>,
+            opposing_factors ARRAY<STRING>
+        >
+    >,
+
+    projected_outcomes STRUCT<
+        short_term ARRAY<
+            STRUCT<
+                domain STRING,
+                projected_change STRING,
+                confidence STRING
+            >
+        >,
+        medium_term ARRAY<
+            STRUCT<
+                domain STRING,
+                projected_change STRING,
+                confidence STRING
+            >
+        >,
+        long_term ARRAY<
+            STRUCT<
+                domain STRING,
+                projected_change STRING,
+                confidence STRING
+            >
+        >
+    >,
+
+    intellectual_trajectory_impact STRUCT<
+        enabled_ideas ARRAY<
+            STRUCT<
+                idea_description STRING,
+                likelihood STRING,
+                potential_impact STRING
+            >
+        >,
+        suppressed_ideas ARRAY<
+            STRUCT<
+                idea_description STRING,
+                likelihood STRING
+            >
+        >,
+        affected_schools ARRAY<
+            STRUCT<
+                school_id STRING,
+                projected_fate STRING
+            >
+        >
+    >,
+
+    actual_vs_counterfactual STRUCT<
+        key_differences ARRAY<
+            STRUCT<
+                dimension STRING,
+                actual STRING,
+                counterfactual STRING,
+                significance STRING
+            >
+        >,
+        insights_gained ARRAY<STRING>
+    >,
+
+    supporting_evidence STRUCT<
+        analogous_cases ARRAY<
+            STRUCT<
+                case_description STRING,
+                similarity STRING,
+                outcome STRING
+            >
+        >,
+        simulation_results STRUCT<
+            simulation_method STRING,
+            simulation_outcome STRING,
+            confidence STRING
+        >
+    >,
+
+    explanatory_value STRUCT<
+        clarifies ARRAY<STRING>,
+        debunked_inevitabilities ARRAY<STRING>,
+        revealed_forces ARRAY<STRING>
+    >,
+
+    metadata STRUCT<
+        scenario_author STRING,
+        peer_review_status STRING,
+        criticism ARRAY<STRING>,
+        revision_history JSON
+    >
+)
+CLUSTER BY
+    divergence_point.divergence_century_hijri,
+    alternative_scenario.overall_plausibility.plausibility_score;
+-- ==========================================================
+-- [003] argumentation_methods_and_logic
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.argumentation_methods_and_logic`
+(
+    method_id STRING NOT NULL,
+    method_name STRING,
+    logic_type STRING
+);
+
+
+-- ==========================================================
+-- [004] arts_architecture_and_aesthetics
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.arts_architecture_and_aesthetics`
+(
+    artifact_id STRING,
+    name_ar STRING,
+    name_en STRING,
+
+    category STRING,
+    subcategory STRING,
+
+    creation_year INT64,
+
+    location_geo GEOGRAPHY,
+
+    location_details STRUCT<
+        city STRING,
+        region STRING,
+        modern_country STRING
+    >,
+
+    patronage_info STRUCT<
+        patron_name STRING,
+        patron_role STRING,
+        political_affiliation STRING
+    >,
+
+    influences STRUCT<
+        artistic_schools ARRAY<STRING>,
+        cultural_layers ARRAY<STRING>
+    >,
+
+    materials ARRAY<STRING>,
+
+    aesthetics STRUCT<
+        dominant_style STRING,
+        decorative_elements ARRAY<STRING>
+    >,
+
+    significance STRUCT<
+        historical_value STRING,
+        artistic_value STRING,
+        cultural_value STRING
+    >,
+
+    metadata STRUCT<
+        sources ARRAY<STRING>,
+        notes STRING,
+        created_at TIMESTAMP
+    >
+)
+CLUSTER BY creation_year, category;
+
+
+-- ==========================================================
+-- [005] belief_types_and_classifications
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.belief_types_and_classifications`
+(
+    belief_id STRING NOT NULL,
+
+    belief_name STRING,
+    belief_category STRING,
+
+    detailed_structure STRUCT<
+        components ARRAY<
+            STRUCT<
+                component_name STRING,
+                component_description STRING
+            >
+        >,
+        dependencies ARRAY<
+            STRUCT<
+                dependency_type STRING,
+                dependency_target STRING
+            >
+        >
+    >,
+
+    modern_comparisons ARRAY<
+        STRUCT<
+            comparison_domain STRING,
+            similarity_note STRING,
+            difference_note STRING
+        >
+    >,
+
+    historical_notes ARRAY<
+        STRUCT<
+            period STRING,
+            evolution_note STRING
+        >
+    >,
+
+    metadata STRUCT<
+        sources ARRAY<STRING>,
+        created_at TIMESTAMP,
+        reliability STRING
+    >
+)
+CLUSTER BY belief_category;
+-- ==========================================================
+-- [006] bibliographic_entries
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.bibliographic_entries`
+(
+    entry_id STRING NOT NULL,
+
+    title STRING,
+    author STRING,
+    editor STRING,
+    publication_year INT64,
+    publication_place STRING,
+    publisher STRING,
+    edition_info STRING,
+
+    classification STRUCT<
+        category STRING,
+        subcategory STRING,
+        tags ARRAY<STRING>
+    >,
+
+    related_persons ARRAY<
+        STRUCT<
+            person_id STRING,
+            role STRING
+        >
+    >,
+
+    related_texts ARRAY<
+        STRUCT<
+            text_id STRING,
+            relation_type STRING
+        >
+    >,
+
+    metadata STRUCT<
+        sources ARRAY<STRING>,
+        notes STRING,
+        created_at TIMESTAMP
+    >
+)
+CLUSTER BY publication_year, classification.category;
+
+
+-- ==========================================================
+-- [007] biographies_summarized
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.biographies_summarized`
+(
+    bio_id STRING NOT NULL,
+
+    person_id STRING,
+    full_name STRING,
+    birth_year INT64,
+    death_year INT64,
+    region STRING,
+    main_school STRING,
+
+    summary_text STRING,
+
+    themes ARRAY<
+        STRUCT<
+            theme_name STRING,
+            theme_score FLOAT64
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY main_school, region;
+
+
+-- ==========================================================
+-- [008] book_structures_and_indices
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.book_structures_and_indices`
+(
+    book_id STRING NOT NULL,
+
+    title STRING,
+    author STRING,
+    century STRING,
+
+    structure ARRAY<
+        STRUCT<
+            level INT64,
+            heading STRING,
+            subheadings ARRAY<STRING>
+        >
+    >,
+
+    keyword_index ARRAY<
+        STRUCT<
+            keyword STRING,
+            locations ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        notes STRING,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY century;
+
+
+-- ==========================================================
+-- [009] chains_of_transmission
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.chains_of_transmission`
+(
+    chain_id STRING NOT NULL,
+
+    main_hadith_id STRING,
+    chain_order INT64,
+
+    narrators ARRAY<
+        STRUCT<
+            narrator_id STRING,
+            name STRING,
+            reliability STRING,
+            notes STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY main_hadith_id;
+
+
+-- ==========================================================
+-- [010] city_profiles_and_history
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.city_profiles_and_history`
+(
+    city_id STRING NOT NULL,
+
+    name STRING,
+    region STRING,
+    modern_country STRING,
+
+    coordinates GEOGRAPHY,
+
+    historical_layers ARRAY<
+        STRUCT<
+            period STRING,
+            description STRING
+        >
+    >,
+
+    notable_figures ARRAY<
+        STRUCT<
+            person_id STRING,
+            role STRING
+        >
+    >,
+
+    cultural_influence ARRAY<
+        STRUCT<
+            source STRING,
+            influence_description STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY region, modern_country;
+-- ==========================================================
+-- [011] classical_sources_masterlist
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.classical_sources_masterlist`
+(
+    source_id STRING NOT NULL,
+
+    title STRING,
+    author STRING,
+    century STRING,
+    category STRING,
+
+    manuscripts ARRAY<
+        STRUCT<
+            library STRING,
+            shelfmark STRING,
+            notes STRING
+        >
+    >,
+
+    editions ARRAY<
+        STRUCT<
+            publisher STRING,
+            year INT64,
+            editor STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        notes STRING
+    >
+)
+CLUSTER BY category, century;
+
+
+-- ==========================================================
+-- [012] concepts_and_definitions
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.concepts_and_definitions`
+(
+    concept_id STRING NOT NULL,
+
+    concept_name STRING,
+    category STRING,
+
+    definitions ARRAY<
+        STRUCT<
+            definition_text STRING,
+            source STRING
+        >
+    >,
+
+    related_concepts ARRAY<
+        STRUCT<
+            related_id STRING,
+            relation_type STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>,
+        notes STRING
+    >
+)
+CLUSTER BY category;
+
+
+-- ==========================================================
+-- [013] confessional_groups_and_identities
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.confessional_groups_and_identities`
+(
+    group_id STRING NOT NULL,
+
+    name STRING,
+    broad_family STRING,
+
+    defining_beliefs ARRAY<
+        STRUCT<
+            belief STRING,
+            description STRING
+        >
+    >,
+
+    historical_period STRING,
+    geographic_spread ARRAY<STRING>,
+
+    interactions ARRAY<
+        STRUCT<
+            group_name STRING,
+
+            nature_of_interaction STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        notes STRING
+    >
+)
+CLUSTER BY broad_family;
+
+
+-- ==========================================================
+-- [014] conflict_events_and_dynamics
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.conflict_events_and_dynamics`
+(
+    conflict_id STRING NOT NULL,
+
+    event_name STRING,
+    start_year INT64,
+    end_year INT64,
+    location STRING,
+
+    parties ARRAY<
+        STRUCT<
+            party_name STRING,
+            role STRING
+        >
+    >,
+
+    causes ARRAY<
+        STRUCT<
+            cause_type STRING,
+            description STRING
+        >
+    >,
+
+    outcomes ARRAY<
+        STRUCT<
+            outcome_type STRING,
+            description STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY start_year;
+
+
+-- ==========================================================
+-- [015] constitutional_structures_and_law
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.constitutional_structures_and_law`
+(
+    structure_id STRING NOT NULL,
+
+    title STRING,
+    era STRING,
+    region STRING,
+
+    principles ARRAY<
+        STRUCT<
+            principle_name STRING,
+            explanation STRING
+        >
+    >,
+
+    institutions ARRAY<
+        STRUCT<
+            institution_name STRING,
+            responsibilities ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        notes STRING,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY era, region;
+-- ==========================================================
+-- [021] educational_institutions_and_madrasas
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.educational_institutions_and_madrasas`
+(
+    institution_id STRING NOT NULL,
+
+    name STRING,
+    region STRING,
+    city STRING,
+    founding_year INT64,
+
+    founders ARRAY<
+        STRUCT<
+            founder_name STRING,
+            role STRING
+        >
+    >,
+
+    curriculum ARRAY<
+        STRUCT<
+            subject STRING,
+            level STRING
+        >
+    >,
+
+    notable_scholars ARRAY<
+        STRUCT<
+            person_id STRING,
+            contribution STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY region, founding_year;
+
+
+-- ==========================================================
+-- [022] events_comparative_timelines
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.events_comparative_timelines`
+(
+    event_id STRING NOT NULL,
+
+    event_name STRING,
+    category STRING,
+    region STRING,
+
+    hijri_year INT64,
+    gregorian_year INT64,
+
+    related_figures ARRAY<
+        STRUCT<
+            person_id STRING,
+            role STRING
+        >
+    >,
+
+    impact ARRAY<
+        STRUCT<
+            domain STRING,
+            description STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        notes STRING
+    >
+)
+CLUSTER BY category, hijri_year;
+
+
+-- ==========================================================
+-- [023] exegetical_methods_and_quranic_approaches
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.exegetical_methods_and_quranic_approaches`
+(
+    method_id STRING NOT NULL,
+
+    method_name STRING,
+    school STRING,
+
+    principles ARRAY<
+        STRUCT<
+            principle STRING,
+            explanation STRING
+        >
+    >,
+
+    examples ARRAY<
+        STRUCT<
+            verse STRING,
+            interpretation STRING,
+            source STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY school;
+
+
+-- ==========================================================
+-- [024] geographical_regions_and_routes
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.geographical_regions_and_routes`
+(
+    region_id STRING NOT NULL,
+
+    name STRING,
+    type STRING,
+
+    major_cities ARRAY<STRING>,
+
+    trade_routes ARRAY<
+        STRUCT<
+            route_name STRING,
+            description STRING
+        >
+    >,
+
+    coordinates GEOGRAPHY,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        notes STRING
+    >
+)
+CLUSTER BY type;
+
+
+-- ==========================================================
+-- [025] genealogical_trees_and_lineages
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.genealogical_trees_and_lineages`
+(
+    lineage_id STRING NOT NULL,
+
+    main_figure STRING,
+    tribe STRING,
+    region STRING,
+
+    lineage ARRAY<
+        STRUCT<
+            name STRING,
+            birth_year INT64,
+            death_year INT64
+        >
+    >,
+
+    branches ARRAY<
+        STRUCT<
+            branch_name STRING,
+            members ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY tribe, region;
+-- ==========================================================
+-- [026] hadith_collections_and_metadata
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.hadith_collections_and_metadata`
+(
+    collection_id STRING NOT NULL,
+
+    name STRING,
+    compiler STRING,
+    century STRING,
+    region STRING,
+
+    volumes INT64,
+    manuscripts ARRAY<
+        STRUCT<
+            library STRING,
+            shelfmark STRING,
+            notes STRING
+        >
+    >,
+
+    indexing STRUCT<
+        main_topics ARRAY<STRING>,
+        keywords ARRAY<STRING>,
+        volume_index JSON
+    >,
+
+    transmission STRUCT<
+        narrators ARRAY<
+            STRUCT<
+                name STRING,
+                reliability STRING,
+                isnad STRING
+            >
+        >,
+        grading STRING,
+        notes STRING
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>,
+        reliability STRING
+    >
+)
+CLUSTER BY century;
+
+
+-- ==========================================================
+-- [027] hermeneutical_frameworks_and_interpretation_models
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.hermeneutical_frameworks_and_interpretation_models`
+(
+    framework_id STRING NOT NULL,
+
+    name STRING,
+    category STRING,
+
+    principles ARRAY<
+        STRUCT<
+            principle STRING,
+            description STRING
+        >
+    >,
+
+    methods ARRAY<
+        STRUCT<
+            method_name STRING,
+            explanation STRING,
+            examples ARRAY<STRING>
+        >
+    >,
+
+    critics ARRAY<
+        STRUCT<
+            critic STRING,
+            objection STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        notes STRING,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY category;
+
+
+-- ==========================================================
+-- [028] historical_epochs_and_civilizational_phases
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.historical_epochs_and_civilizational_phases`
+(
+    epoch_id STRING NOT NULL,
+
+    name STRING,
+    start_year INT64,
+    end_year INT64,
+
+    defining_features ARRAY<
+        STRUCT<
+            feature STRING,
+            description STRING
+        >
+    >,
+
+    key_figures ARRAY<
+        STRUCT<
+            person_id STRING,
+            role STRING
+        >
+    >,
+
+    cultural_changes ARRAY<
+        STRUCT<
+            domain STRING,
+            change_description STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        notes STRING,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY start_year;
+
+
+-- ==========================================================
+-- [029] intellectual_methods_and_schools
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.intellectual_methods_and_schools`
+(
+    method_id STRING NOT NULL,
+
+    school STRING,
+    founder STRING,
+    century STRING,
+
+    method_principles ARRAY<
+        STRUCT<
+            principle STRING,
+            explanation STRING
+        >
+    >,
+
+    methodological_tools ARRAY<
+        STRUCT<
+            tool STRING,
+            usage STRING
+        >
+    >,
+
+    debates ARRAY<
+        STRUCT<
+            opponent STRING,
+            position STRING,
+            argument STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY school;
+
+
+-- ==========================================================
+-- [030] jurisprudence_topics_and_subfields
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.jurisprudence_topics_and_subfields`
+(
+    topic_id STRING NOT NULL,
+
+    main_topic STRING,
+    subtopic STRING,
+    fiqh_school STRING,
+
+    evidences ARRAY<
+        STRUCT<
+            evidence_type STRING,
+            reference STRING,
+            text STRING
+        >
+    >,
+
+    reasoning_methods ARRAY<
+        STRUCT<
+            method_name STRING,
+            application STRING
+        >
+    >,
+
+    disagreements ARRAY<
+        STRUCT<
+            school STRING,
+            position STRING,
+            justification STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY fiqh_school;
+-- ==========================================================
+-- [031] jurisprudential_maxims_and_legal_themes
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.jurisprudential_maxims_and_legal_themes`
+(
+    maxim_id STRING NOT NULL,
+
+    maxim STRING,
+    category STRING,
+
+    applications ARRAY<
+        STRUCT<
+            case_description STRING,
+            ruling STRING
+        >
+    >,
+
+    limitations ARRAY<
+        STRUCT<
+            condition STRING,
+            explanation STRING
+        >
+    >,
+
+    cross_school_comparisons ARRAY<
+        STRUCT<
+            school STRING,
+            agreement STRING,
+            disagreement STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY category;
+
+
+-- ==========================================================
+-- [032] knowledge_networks_and_transmission_lines
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.knowledge_networks_and_transmission_lines`
+(
+    network_id STRING NOT NULL,
+
+    anchor_figure STRING,
+    region STRING,
+
+    transmission ARRAY<
+        STRUCT<
+            teacher STRING,
+            student STRING,
+            link_strength FLOAT64
+        >
+    >,
+
+    schools_influenced ARRAY<
+        STRUCT<
+            school_name STRING,
+            influence_level STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        notes STRING
+    >
+)
+CLUSTER BY region;
+
+
+-- ==========================================================
+-- [033] legal_cases_and_historical_judgments
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.legal_cases_and_historical_judgments`
+(
+    case_id STRING NOT NULL,
+
+    case_name STRING,
+    region STRING,
+    century STRING,
+
+    litigants ARRAY<
+        STRUCT<
+            name STRING,
+            role STRING
+        >
+    >,
+
+    arguments ARRAY<
+        STRUCT<
+            side STRING,
+            argument STRING
+        >
+    >,
+
+    outcome STRUCT<
+        ruling STRING,
+        reasoning STRING
+    >,
+
+    references ARRAY<
+        STRUCT<
+            source STRING,
+            page STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        notes STRING
+    >
+)
+CLUSTER BY region;
+
+
+-- ==========================================================
+-- [034] manuscript_catalogs_and_copies
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.manuscript_catalogs_and_copies`
+(
+    manuscript_id STRING NOT NULL,
+
+    title STRING,
+    author STRING,
+    library STRING,
+    shelfmark STRING,
+
+    physical_description STRUCT<
+        pages INT64,
+        condition STRING,
+        notes STRING
+    >,
+
+    provenance ARRAY<
+        STRUCT<
+            owner STRING,
+            period STRING
+        >
+    >,
+
+    digitization STRUCT<
+        url STRING,
+        quality STRING,
+        date TIMESTAMP
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY library;
+
+
+-- ==========================================================
+-- [035] metaphysical_categories_and_expressions
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.metaphysical_categories_and_expressions`
+(
+    category_id STRING NOT NULL,
+
+    name STRING,
+    broad_domain STRING,
+
+    attributes ARRAY<
+        STRUCT<
+            attribute STRING,
+            description STRING
+        >
+    >,
+
+    examples ARRAY<
+        STRUCT<
+            example STRING,
+            source STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        notes STRING,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY broad_domain;
+-- ==========================================================
+-- [036] methodological_disputes_across_schools
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.methodological_disputes_across_schools`
+(
+    dispute_id STRING NOT NULL,
+
+    topic STRING,
+    schools ARRAY<STRING>,
+
+    positions ARRAY<
+        STRUCT<
+            school STRING,
+            position STRING,
+            justification STRING
+        >
+    >,
+
+    comparative_analysis ARRAY<
+        STRUCT<
+            dimension STRING,
+            comparison STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        notes STRING
+    >
+)
+CLUSTER BY topic;
+
+
+-- ==========================================================
+-- [037] moral_philosophy_and_value_structures
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.moral_philosophy_and_value_structures`
+(
+    value_id STRING NOT NULL,
+
+    name STRING,
+    category STRING,
+
+    subvalues ARRAY<
+        STRUCT<
+            subvalue STRING,
+            description STRING
+        >
+    >,
+
+    textual_evidences ARRAY<
+        STRUCT<
+            source STRING,
+            reference STRING,
+            text STRING
+        >
+    >,
+
+    philosophical_notes ARRAY<
+        STRUCT<
+            school STRING,
+            comment STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY category;
+
+
+-- ==========================================================
+-- [038] movements_intellectual_and_social
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.movements_intellectual_and_social`
+(
+    movement_id STRING NOT NULL,
+
+    name STRING,
+    era STRING,
+    region STRING,
+
+    founders ARRAY<
+        STRUCT<
+            name STRING,
+            role STRING
+        >
+    >,
+
+    doctrines ARRAY<
+        STRUCT<
+            doctrine STRING,
+            explanation STRING
+        >
+    >,
+
+    influence ARRAY<
+        STRUCT<
+            domain STRING,
+            description STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY era, region;
+
+
+-- ==========================================================
+-- [039] narrative_structures_and_story_models
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.narrative_structures_and_story_models`
+(
+    model_id STRING NOT NULL,
+
+    model_name STRING,
+
+    structural_layers ARRAY<
+        STRUCT<
+            layer_name STRING,
+            function STRING
+        >
+    >,
+
+    story_examples ARRAY<
+        STRUCT<
+            title STRING,
+            source STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        notes STRING
+    >
+)
+CLUSTER BY model_name;
+
+
+-- ==========================================================
+-- [040] networks_of_scholarly_influence
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.networks_of_scholarly_influence`
+(
+    network_id STRING NOT NULL,
+
+    central_figure STRING,
+    region STRING,
+
+    influence_links ARRAY<
+        STRUCT<
+            influenced STRING,
+            strength FLOAT64,
+            mode STRING
+        >
+    >,
+
+    periods ARRAY<
+        STRUCT<
+            period STRING,
+            description STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        notes STRING
+    >
+)
+CLUSTER BY region;
+-- ==========================================================
+-- [041] personal_life_and_social_worlds
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.personal_life_and_social_worlds`
+(
+    person_id STRING NOT NULL,
+
+    full_name STRING,
+    kunyah STRING,
+    laqab STRING,
+    lineage STRING,
+
+    birth STRUCT<
+        year STRING,
+        place STRING,
+        circumstances STRING
+    >,
+
+    death STRUCT<
+        year STRING,
+        place STRING,
+        cause STRING
+    >,
+
+    family STRUCT<
+        father STRING,
+        mother STRING,
+        siblings ARRAY<STRING>,
+        spouses ARRAY<STRING>,
+        children ARRAY<STRING>
+    >,
+
+    religious_life STRUCT<
+        memorized_quran BOOLEAN,
+        prayer_commitment STRING,
+        fasting_commitment STRING,
+        charity_habits STRING,
+        sins ARRAY<STRING>,
+        repentance_patterns ARRAY<STRING>,
+        spiritual_exercises ARRAY<STRING>
+    >,
+
+    social_presence STRUCT<
+        reputation STRING,
+        generosity STRING,
+        temperament STRING,
+        humor STRING,
+        known_flaws ARRAY<STRING>,
+        known_virtues ARRAY<STRING>
+    >,
+
+    emotional_world STRUCT<
+        recurring_fears ARRAY<STRING>,
+        recurring_desires ARRAY<STRING>,
+        griefs ARRAY<STRING>,
+        loves ARRAY<STRING>,
+        heartbreaks ARRAY<STRING>
+    >,
+
+    romantic_traces ARRAY<
+        STRUCT<
+            story_category STRING,
+            whispered_name STRING,
+            meeting_place STRING,
+            gift STRING,
+            secrecy_level STRING,
+            consequences STRING
+        >
+    >,
+
+    social_spaces STRUCT<
+        mosques_attended ARRAY<STRING>,
+        markets_frequented ARRAY<STRING>,
+        homes_visited ARRAY<STRING>,
+        bathhouses ARRAY<STRING>,
+        garden_meetings ARRAY<STRING>
+    >,
+
+    women_of_the_city ARRAY<
+        STRUCT<
+            woman_name STRING,
+            role STRING,
+            influence STRING,
+            typical_locations ARRAY<STRING>,
+            whispers ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY birth.year;
+
+
+-- ==========================================================
+-- [042] urban_life_and_city_rhythms
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.urban_life_and_city_rhythms`
+(
+    city_id STRING NOT NULL,
+
+    name STRING,
+    region STRING,
+    era STRING,
+
+    daily_rhythm ARRAY<
+        STRUCT<
+            time_of_day STRING,
+            activity STRING,
+            dominant_sounds ARRAY<STRING>,
+            dominant_smells ARRAY<STRING>,
+            typical_crowds ARRAY<STRING>
+        >
+    >,
+
+    social_classes ARRAY<
+        STRUCT<
+            class_name STRING,
+            clothing STRING,
+            food ARRAY<STRING>,
+            economic_role STRING,
+            power_dynamics STRING
+        >
+    >,
+
+    women_life ARRAY<
+        STRUCT<
+            role STRING,
+            mobility STRING,
+            influence STRING,
+            favorite_places ARRAY<STRING>,
+            marriage_customs ARRAY<STRING>,
+            love_stories ARRAY<STRING>,
+            scandalous_events ARRAY<STRING>
+        >
+    >,
+
+    markets ARRAY<
+        STRUCT<
+            market_name STRING,
+            goods ARRAY<STRING>,
+            typical_prices STRING,
+            bargaining_style STRING,
+            thieves ARRAY<STRING>,
+            entertainers ARRAY<STRING>
+        >
+    >,
+
+    caravans ARRAY<
+        STRUCT<
+            route STRING,
+            season STRING,
+            goods ARRAY<STRING>,
+            dangers ARRAY<STRING>,
+            caravan_songs ARRAY<STRING>,
+            desert_stations ARRAY<STRING>
+        >
+    >,
+
+    justice_and_crime ARRAY<
+        STRUCT<
+            crime STRING,
+            common_motive STRING,
+            punishment STRING,
+            night_patrols ARRAY<STRING>,
+            infamous_cases ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY region;
+
+
+-- ==========================================================
+-- [043] intellectual_conflicts_and_rivalries
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.intellectual_conflicts_and_rivalries`
+(
+    conflict_id STRING NOT NULL,
+
+    main_topic STRING,
+    century STRING,
+
+    rivals ARRAY<
+        STRUCT<
+            name STRING,
+            school STRING,
+            motive STRING,
+            hidden_motive STRING,
+            grudges ARRAY<STRING>,
+            alliances ARRAY<STRING>,
+            insults ARRAY<STRING>,
+            reconciliations ARRAY<STRING>
+        >
+    >,
+
+    debate_scenes ARRAY<
+        STRUCT<
+            location STRING,
+            crowd_description STRING,
+            women_presence STRING,
+            emotional_tone STRING,
+            rhetorical_moves ARRAY<STRING>,
+            final_outcome STRING
+        >
+    >,
+
+    psychological_drivers ARRAY<
+        STRUCT<
+            driver_name STRING,
+            description STRING,
+            associated_behaviors ARRAY<STRING>
+        >
+    >,
+
+    political_underpinnings ARRAY<
+        STRUCT<
+            power_figure STRING,
+            faction STRING,
+            expectation STRING,
+            interference_level STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY century;
+
+
+-- ==========================================================
+-- [044] manuscript_culture_and_scribal_life
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.manuscript_culture_and_scribal_life`
+(
+    record_id STRING NOT NULL,
+
+    scribe_name STRING,
+    city STRING,
+    century STRING,
+
+    scribal_routines ARRAY<
+        STRUCT<
+            time_of_day STRING,
+            activity STRING,
+            tools ARRAY<STRING>,
+            chants ARRAY<STRING>,
+            typical_mistakes ARRAY<STRING>,
+            corrections ARRAY<STRING>
+        >
+    >,
+
+    manuscript_chain ARRAY<
+        STRUCT<
+            owner STRING,
+            period STRING,
+            annotations ARRAY<STRING>,
+            emotional_notes ARRAY<STRING>,
+            scent STRING,
+            accidental_spills ARRAY<STRING>
+        >
+    >,
+
+    scribal_environment STRUCT<
+        lighting STRING,
+        ventilation STRING,
+        neighbors ARRAY<STRING>,
+        disturbances ARRAY<STRING>,
+        workshop_smells ARRAY<STRING>
+    >,
+
+    women_in_scribal_world ARRAY<
+        STRUCT<
+            role STRING,
+            known_female_scribes ARRAY<STRING>,
+            domestic_scenes ARRAY<STRING>,
+            supportive_roles ARRAY<STRING>,
+            oppositional_roles ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY century;
+
+
+-- ==========================================================
+-- [045] political_courts_and_palace_life
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.political_courts_and_palace_life`
+(
+    court_id STRING NOT NULL,
+
+    dynasty STRING,
+    city STRING,
+    century STRING,
+
+    palace_spaces ARRAY<
+        STRUCT<
+            space_name STRING,
+            daily_function STRING,
+            political_function STRING,
+            scents ARRAY<STRING>,
+            sounds ARRAY<STRING>,
+            typical_figures ARRAY<STRING>
+        >
+    >,
+
+    women_of_the_palace ARRAY<
+        STRUCT<
+            name STRING,
+            role STRING,
+            influence STRING,
+            intrigues ARRAY<STRING>,
+            romantic_whispers ARRAY<STRING>,
+            rivalries ARRAY<STRING>
+        >
+    >,
+
+    ceremonial_life ARRAY<
+        STRUCT<
+            ceremony STRING,
+            steps ARRAY<STRING>,
+            garments ARRAY<STRING>,
+            perfumes ARRAY<STRING>,
+            poetry ARRAY<STRING>,
+            gifts ARRAY<STRING>
+        >
+    >,
+
+    political_machinery ARRAY<
+        STRUCT<
+            office_name STRING,
+            officials ARRAY<STRING>,
+            secretaries ARRAY<STRING>,
+            spies ARRAY<STRING>,
+            bribes ARRAY<STRING>,
+            scandals ARRAY<STRING>
+        >
+    >,
+
+    security_structures ARRAY<
+        STRUCT<
+            guard_name STRING,
+            shift STRING,
+            weapon_type STRING,
+            loyalty STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY century, dynasty;
+-- ==========================================================
+-- [046] public_morality_and_market_ethics
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.public_morality_and_market_ethics`
+(
+    rule_id STRING NOT NULL,
+
+    category STRING,
+    subcategory STRING,
+
+    market_scenes ARRAY<
+        STRUCT<
+            market_name STRING,
+            typical_conflicts ARRAY<STRING>,
+            moral_incidents ARRAY<
+                STRUCT<
+                    incident STRING,
+                    actors ARRAY<STRING>,
+                    emotional_tone STRING
+                >
+            >,
+            inspectors ARRAY<STRING>,
+            gossip ARRAY<STRING>
+        >
+    >,
+
+    moral_principles ARRAY<
+        STRUCT<
+            principle STRING,
+            application STRING,
+            violations ARRAY<STRING>
+        >
+    >,
+
+    social_reactions ARRAY<
+        STRUCT<
+            group_name STRING,
+            response STRING,
+            narratives ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY category;
+
+
+-- ==========================================================
+-- [047] quranic_concepts_and_thematic_universes
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.quranic_concepts_and_thematic_universes`
+(
+    concept_id STRING NOT NULL,
+
+    concept_name STRING,
+    semantic_field STRING,
+
+    occurrences ARRAY<
+        STRUCT<
+            surah STRING,
+            ayah INT64,
+            linguistic_form STRING,
+            rhetorical_function STRING
+        >
+    >,
+
+    exegetical_layers ARRAY<
+        STRUCT<
+            school STRING,
+            key_reading STRING,
+            emotions ARRAY<STRING>,
+            interpretive_moves ARRAY<STRING>
+        >
+    >,
+
+    intertexts ARRAY<
+        STRUCT<
+            source STRING,
+            reference STRING,
+            thematic_link STRING
+        >
+    >,
+
+    life_world STRUCT<
+        emotional_resonance ARRAY<STRING>,
+        social_implications ARRAY<STRING>,
+        political_implications ARRAY<STRING>,
+        spiritual_practices ARRAY<STRING>
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY semantic_field;
+
+
+-- ==========================================================
+-- [048] ritual_practices_and_devotional_life
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.ritual_practices_and_devotional_life`
+(
+    ritual_id STRING NOT NULL,
+
+    ritual_name STRING,
+    category STRING,
+
+    daily_practice STRUCT<
+        recommended_times ARRAY<STRING>,
+        preparatory_steps ARRAY<STRING>,
+        emotional_state STRING,
+        typical_companions ARRAY<STRING>
+    >,
+
+    historical_variants ARRAY<
+        STRUCT<
+            region STRING,
+            century STRING,
+            modification STRING,
+            justification STRING
+        >
+    >,
+
+    gendered_expressions ARRAY<
+        STRUCT<
+            gender STRING,
+            experiences ARRAY<STRING>,
+            special_forms ARRAY<STRING>
+        >
+    >,
+
+    transgressions ARRAY<
+        STRUCT<
+            type STRING,
+            motive STRING,
+            emotional_context STRING
+        >
+    >,
+
+    mystical_intensities ARRAY<
+        STRUCT<
+            order_name STRING,
+            practice STRING,
+            sensory_experiences ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY category;
+
+
+-- ==========================================================
+-- [049] scholarly_personalities_and_character_traits
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.scholarly_personalities_and_character_traits`
+(
+    scholar_id STRING NOT NULL,
+
+    name STRING,
+    school STRING,
+    century STRING,
+
+    temperament STRUCT<
+        baseline STRING,
+        triggers ARRAY<STRING>,
+        humor STRING,
+        patience STRING,
+        anger_patterns ARRAY<STRING>,
+        generosity STRING,
+        miserliness STRING
+    >,
+
+    social_behaviors ARRAY<
+        STRUCT<
+            behavior STRING,
+            context STRING,
+            witnesses ARRAY<STRING>,
+            emotional_tone STRING
+        >
+    >,
+
+    networks ARRAY<
+        STRUCT<
+            type STRING,
+            relations ARRAY<
+                STRUCT<
+                    name STRING,
+                    relation STRING,
+                    tension STRING,
+                    affection STRING
+                >
+            >
+        >
+    >,
+
+    romantic_shadows ARRAY<
+        STRUCT<
+            story STRING,
+            truth_level STRING,
+            emotional_trace STRING
+        >
+    >,
+
+    moral_crises ARRAY<
+        STRUCT<
+            crisis STRING,
+            cause STRING,
+            resolution STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY school;
+
+
+-- ==========================================================
+-- [050] sermon_cultures_and_public_preaching
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.sermon_cultures_and_public_preaching`
+(
+    record_id STRING NOT NULL,
+
+    preacher STRING,
+    region STRING,
+    century STRING,
+
+    sermon_scenes ARRAY<
+        STRUCT<
+            location STRING,
+            crowd_structure ARRAY<STRING>,
+            women_presence STRING,
+            children_presence STRING,
+            soundscape ARRAY<STRING>,
+            smellscape ARRAY<STRING>
+        >
+    >,
+
+    rhetorical_devices ARRAY<
+        STRUCT<
+            device STRING,
+            purpose STRING,
+            audience_effect STRING
+        >
+    >,
+
+    emotional_arcs ARRAY<
+        STRUCT<
+            stage STRING,
+            intensity STRING,
+            triggers ARRAY<STRING>
+        >
+    >,
+
+    political_edges ARRAY<
+        STRUCT<
+            faction STRING,
+            coded_messages ARRAY<STRING>,
+            risks STRING
+        >
+    >,
+
+    scandals ARRAY<
+        STRUCT<
+            description STRING,
+            reactions ARRAY<STRING>,
+            long_term_impact STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY region, century;
+-- ==========================================================
+-- [051] slavery_status_roles_and_emancipation
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.slavery_status_roles_and_emancipation`
+(
+    record_id STRING NOT NULL,
+
+    person STRING,
+    status STRING,
+    ethnicity STRING,
+    gender STRING,
+    skills ARRAY<STRING>,
+
+    household_roles ARRAY<
+        STRUCT<
+            role STRING,
+            intimacy_level STRING,
+            emotional_bonds ARRAY<STRING>,
+            conflicts ARRAY<STRING>
+        >
+    >,
+
+    market_life STRUCT<
+        price_history ARRAY<STRING>,
+        typical_markets ARRAY<STRING>,
+        trader_profiles ARRAY<STRING>
+    >,
+
+    emancipation ARRAY<
+        STRUCT<
+            method STRING,
+            conditions STRING,
+            social_consequences STRING
+        >
+    >,
+
+    personal_traces STRUCT<
+        heartbreaks ARRAY<STRING>,
+        friendships ARRAY<STRING>,
+        mistreatments ARRAY<STRING>,
+        spiritual_experiences ARRAY<STRING>
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY status;
+
+
+-- ==========================================================
+-- [052] social_norms_taboo_practices_and_moral_anxieties
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.social_norms_taboo_practices_and_moral_anxieties`
+(
+    norm_id STRING NOT NULL,
+
+    name STRING,
+    category STRING,
+
+    taboo_cases ARRAY<
+        STRUCT<
+            case_description STRING,
+            actors ARRAY<STRING>,
+            emotional_tone STRING,
+            punishments ARRAY<STRING>,
+            whispers ARRAY<STRING>
+        >
+    >,
+
+    age_groups ARRAY<
+        STRUCT<
+            group_name STRING,
+            typical_behaviors ARRAY<STRING>,
+            anxieties ARRAY<STRING>
+        >
+    >,
+
+    hidden_subcultures ARRAY<
+        STRUCT<
+            type STRING,
+            locations ARRAY<STRING>,
+            practices ARRAY<STRING>,
+            risks ARRAY<STRING>
+        >
+    >,
+
+    gender_differences ARRAY<
+        STRUCT<
+            gender STRING,
+            expectations ARRAY<STRING>,
+            freedoms ARRAY<STRING>,
+            constraints ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY category;
+
+
+-- ==========================================================
+-- [053] socio_political_crises_and_collective_memory
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.socio_political_crises_and_collective_memory`
+(
+    crisis_id STRING NOT NULL,
+
+    name STRING,
+    century STRING,
+    region STRING,
+
+    triggers ARRAY<
+        STRUCT<
+            trigger STRING,
+            description STRING
+        >
+    >,
+
+    emotional_responses ARRAY<
+        STRUCT<
+          group_name STRING,
+
+            reaction STRING,
+            narratives ARRAY<STRING>
+        >
+    >,
+
+    memory_traces ARRAY<
+        STRUCT<
+            medium STRING,
+            preservation STRING,
+            distortions ARRAY<STRING>
+        >
+    >,
+
+    gendered_experience ARRAY<
+        STRUCT<
+            gender STRING,
+            stories ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY century;
+
+
+-- ==========================================================
+-- [054] spiritual_experiences_and_inner_worlds
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.spiritual_experiences_and_inner_worlds`
+(
+    experience_id STRING NOT NULL,
+
+    category STRING,
+    intensity STRING,
+
+    sensory_experiences ARRAY<
+        STRUCT<
+            sense STRING,
+            description STRING
+        >
+    >,
+
+    emotional_waves ARRAY<
+        STRUCT<
+            wave STRING,
+            triggers ARRAY<STRING>
+        >
+    >,
+
+    nocturnal_events ARRAY<
+        STRUCT<
+            event STRING,
+            location STRING,
+            companions ARRAY<STRING>,
+            fear_level STRING
+        >
+    >,
+
+    mystical_encounters ARRAY<
+        STRUCT<
+            entity STRING,
+            message STRING,
+            impact STRING
+        >
+    >,
+
+    aftermath STRUCT<
+        behavioral_changes ARRAY<STRING>,
+        recurring_memories ARRAY<STRING>
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY category;
+
+
+-- ==========================================================
+-- [055] street_life_entertainers_criminals_and_night_scapes
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.street_life_entertainers_criminals_and_night_scapes`
+(
+    record_id STRING NOT NULL,
+
+    area STRING,
+    city STRING,
+    century STRING,
+
+    entertainers ARRAY<
+        STRUCT<
+            type STRING,
+            names ARRAY<STRING>,
+            instruments ARRAY<STRING>,
+            typical_nights ARRAY<STRING>,
+            scandalous_tales ARRAY<STRING>
+        >
+    >,
+
+    criminals ARRAY<
+        STRUCT<
+            type STRING,
+            motives ARRAY<STRING>,
+            signature_methods ARRAY<STRING>,
+            cases ARRAY<STRING>
+        >
+    >,
+
+    nightlife STRUCT<
+        sounds ARRAY<STRING>,
+        smells ARRAY<STRING>,
+        alley_names ARRAY<STRING>,
+        lovers_meetings ARRAY<STRING>,
+        brawls ARRAY<STRING>
+    >,
+
+    public_moods ARRAY<
+        STRUCT<
+            time_of_night STRING,
+            mood STRING,
+            typical_activities ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY city;
+-- ==========================================================
+-- [056] household_life_gender_roles_and_domestic_realities
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.household_life_gender_roles_and_domestic_realities`
+(
+    household_id STRING NOT NULL,
+
+    city STRING,
+    century STRING,
+
+    family_structure STRUCT<
+        head STRING,
+        wives ARRAY<STRING>,
+        children ARRAY<STRING>,
+        extended_members ARRAY<STRING>,
+        servants ARRAY<STRING>
+    >,
+
+    daily_cycles ARRAY<
+        STRUCT<
+            time STRING,
+            sounds ARRAY<STRING>,
+            smells ARRAY<STRING>,
+            activities ARRAY<STRING>,
+            emotional_climate STRING
+        >
+    >,
+
+    women_world ARRAY<
+        STRUCT<
+            role STRING,
+            influence STRING,
+            domestic_networks ARRAY<STRING>,
+            intimacy_circles ARRAY<STRING>,
+            secret_meetings ARRAY<STRING>,
+            rivalries ARRAY<STRING>,
+            scandalous_whispers ARRAY<STRING>
+        >
+    >,
+
+    men_world ARRAY<
+        STRUCT<
+            responsibilities ARRAY<STRING>,
+            social_pressures ARRAY<STRING>,
+            confidants ARRAY<STRING>,
+            tavern_traces ARRAY<STRING>,
+            shame_incidents ARRAY<STRING>
+        >
+    >,
+
+    rites_of_passage ARRAY<
+        STRUCT<
+            event STRING,
+            gender STRING,
+            age STRING,
+            ceremonial_actions ARRAY<STRING>,
+            songs ARRAY<STRING>,
+            food ARRAY<STRING>
+        >
+    >,
+
+    objects_and_material_culture ARRAY<
+        STRUCT<
+            object_name STRING,
+            material STRING,
+            sentimental_value STRING,
+            typical_owners ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY city;
+
+
+-- ==========================================================
+-- [057] trade_guilds_professions_and_craft_cosmos
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.trade_guilds_professions_and_craft_cosmos`
+(
+    guild_id STRING NOT NULL,
+
+    name STRING,
+    region STRING,
+    craft_type STRING,
+
+    craft_process STRUCT<
+        steps ARRAY<STRING>,
+        tools ARRAY<STRING>,
+        materials ARRAY<STRING>,
+        workshop_smells ARRAY<STRING>,
+        workshop_sounds ARRAY<STRING>
+    >,
+
+    hierarchy ARRAY<
+        STRUCT<
+            rank STRING,
+            privileges ARRAY<STRING>,
+            duties ARRAY<STRING>,
+            conflicts ARRAY<STRING>
+        >
+    >,
+
+    urban_presence ARRAY<
+        STRUCT<
+            market STRING,
+            alley STRING,
+            rival_guilds ARRAY<STRING>,
+            alliances ARRAY<STRING>
+        >
+    >,
+
+    women_craftspersons ARRAY<
+        STRUCT<
+            name STRING,
+            specialization STRING,
+            social_constraints ARRAY<STRING>,
+            hidden_workshops ARRAY<STRING>,
+            city_legends ARRAY<STRING>
+        >
+    >,
+
+    night_scenes ARRAY<
+        STRUCT<
+            time STRING,
+            activities ARRAY<STRING>,
+            secret_meetings ARRAY<STRING>,
+            illicit_trades ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY region;
+
+
+-- ==========================================================
+-- [058] economic_distress_famines_taxation_and_public_grievances
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.economic_distress_famines_taxation_and_public_grievances`
+(
+    grievance_id STRING NOT NULL,
+
+    region STRING,
+    century STRING,
+
+    triggers ARRAY<
+        STRUCT<
+            trigger STRING,
+            description STRING,
+            immediate_effect STRING
+        >
+    >,
+
+    famines ARRAY<
+        STRUCT<
+            year STRING,
+            cause STRING,
+            bread_prices ARRAY<STRING>,
+            riots ARRAY<STRING>,
+            charity_movements ARRAY<STRING>
+        >
+    >,
+
+    taxation STRUCT<
+        tax_types ARRAY<STRING>,
+        injustices ARRAY<STRING>,
+        avoidance_methods ARRAY<STRING>,
+        bribery_patterns ARRAY<STRING>
+    >,
+
+    public_voices ARRAY<
+        STRUCT<
+            class_name STRING,
+            griefs ARRAY<STRING>,
+            rumors ARRAY<STRING>,
+            street_poetry ARRAY<STRING>
+        >
+    >,
+
+    women_experience ARRAY<
+        STRUCT<
+            behaviors ARRAY<STRING>,
+            anxieties ARRAY<STRING>,
+            extraordinary_measures ARRAY<STRING>,
+            survival_tactics ARRAY<STRING>
+        >
+    >,
+
+    violence ARRAY<
+        STRUCT<
+            actors ARRAY<STRING>,
+            causes ARRAY<STRING>,
+            casualties STRING,
+            aftermath STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY century;
+
+
+-- ==========================================================
+-- [059] maritime_life_ports_seafaring_and_pirate_narratives
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.maritime_life_ports_seafaring_and_pirate_narratives`
+(
+    maritime_id STRING NOT NULL,
+
+    port STRING,
+    region STRING,
+    era STRING,
+
+    port_life ARRAY<
+        STRUCT<
+            time STRING,
+            ship_types ARRAY<STRING>,
+            dock_noises ARRAY<STRING>,
+            foreign_merchants ARRAY<STRING>,
+            intoxicants ARRAY<STRING>,
+            nightlife ARRAY<STRING>
+        >
+    >,
+
+    sailors ARRAY<
+        STRUCT<
+            name STRING,
+            origin STRING,
+            superstitions ARRAY<STRING>,
+            loves ARRAY<STRING>,
+            scars ARRAY<STRING>,
+            songs ARRAY<STRING>
+        >
+    >,
+
+    pirate_activity ARRAY<
+        STRUCT<
+            pirate_name STRING,
+            tactics ARRAY<STRING>,
+            raids ARRAY<STRING>,
+            betrayals ARRAY<STRING>,
+            ransoms ARRAY<STRING>,
+            legendary_incidents ARRAY<STRING>
+        >
+    >,
+
+    maritime_routes ARRAY<
+        STRUCT<
+            route STRING,
+            dangers ARRAY<STRING>,
+            weather_patterns ARRAY<STRING>,
+            desertion_spots ARRAY<STRING>
+        >
+    >,
+
+    ship_culture STRUCT<
+        hierarchies ARRAY<STRING>,
+        punishments ARRAY<STRING>,
+        rituals ARRAY<STRING>,
+        storm_behaviors ARRAY<STRING>
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY region;
+
+
+-- ==========================================================
+-- [060] festivals_celebrations_and_public_spectacles
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.festivals_celebrations_and_public_spectacles`
+(
+    festival_id STRING NOT NULL,
+
+    name STRING,
+    region STRING,
+    century STRING,
+
+    rituals ARRAY<
+        STRUCT<
+            action STRING,
+            participants ARRAY<STRING>,
+            chants ARRAY<STRING>,
+            instruments ARRAY<STRING>,
+            scents ARRAY<STRING>,
+            gifts ARRAY<STRING>
+        >
+    >,
+
+    social_dynamics ARRAY<
+        STRUCT<
+            class_name STRING,
+            behaviors ARRAY<STRING>,
+            flirtations ARRAY<STRING>,
+            rivalries ARRAY<STRING>,
+            scandals ARRAY<STRING>
+        >
+    >,
+
+    merchant_influx ARRAY<
+        STRUCT<
+            good STRING,
+            sellers ARRAY<STRING>,
+            prices STRING,
+            haggling_styles ARRAY<STRING>
+        >
+    >,
+
+    children_universe ARRAY<
+        STRUCT<
+            games ARRAY<STRING>,
+            sweets ARRAY<STRING>,
+            fears ARRAY<STRING>,
+            nighttime_races ARRAY<STRING>
+        >
+    >,
+
+    storytelling_scenes ARRAY<
+        STRUCT<
+            storyteller STRING,
+            tale STRING,
+            reactions ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY region, century;
+-- ==========================================================
+-- [061] foodways_culinary_cultures_and_gastronomic_memory
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.foodways_culinary_cultures_and_gastronomic_memory`
+(
+    record_id STRING NOT NULL,
+
+    region STRING,
+    century STRING,
+
+    staple_foods ARRAY<
+        STRUCT<
+            name STRING,
+            preparation STRING,
+            ingredients ARRAY<STRING>,
+            associated_classes ARRAY<STRING>,
+            emotional_resonance STRING
+        >
+    >,
+
+    street_food ARRAY<
+        STRUCT<
+            vendor_type STRING,
+            prices STRING,
+            typical_clients ARRAY<STRING>,
+            social_interactions ARRAY<STRING>,
+            scandals ARRAY<STRING>
+        >
+    >,
+
+    banquet_scenes ARRAY<
+        STRUCT<
+            host STRING,
+            guest_classes ARRAY<STRING>,
+            courses ARRAY<STRING>,
+            etiquette_notes ARRAY<STRING>,
+            political_subtexts ARRAY<STRING>,
+            female_presence STRING
+        >
+    >,
+
+    famine_substitutes ARRAY<
+        STRUCT<
+            item STRING,
+            method STRING,
+            desperation_signals ARRAY<STRING>
+        >
+    >,
+
+    scents_sounds STRUCT<
+        kitchen_sounds ARRAY<STRING>,
+        kitchen_scents ARRAY<STRING>,
+        market_cries ARRAY<STRING>
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY region;
+
+
+-- ==========================================================
+-- [062] environmental_realities_climate_patterns_and_disasters
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.environmental_realities_climate_patterns_and_disasters`
+(
+    env_id STRING NOT NULL,
+
+    region STRING,
+    century STRING,
+
+    climate_profile STRUCT<
+        temperature_range STRING,
+        dominant_winds ARRAY<STRING>,
+        seasonal_patterns ARRAY<STRING>,
+        humidity STRING
+    >,
+
+    disasters ARRAY<
+        STRUCT<
+            type STRING,
+            year STRING,
+            casualties STRING,
+            economic_aftershocks ARRAY<STRING>,
+            social_disruptions ARRAY<STRING>,
+            religious_interpretations ARRAY<STRING>
+        >
+    >,
+
+    cityscape_responses ARRAY<
+        STRUCT<
+            adaptation STRING,
+            new_structures ARRAY<STRING>,
+            rituals ARRAY<STRING>,
+            migrations ARRAY<STRING>
+        >
+    >,
+
+    women_experience ARRAY<
+        STRUCT<
+            event STRING,
+            fears ARRAY<STRING>,
+            survival_methods ARRAY<STRING>,
+            nursing_roles ARRAY<STRING>,
+            mourning_rituals ARRAY<STRING>
+        >
+    >,
+
+    environmental_sounds ARRAY<
+        STRUCT<
+            moment STRING,
+            sounds ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY region;
+
+
+-- ==========================================================
+-- [063] love_poetry_emotional_expression_and_urban_romances
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.love_poetry_emotional_expression_and_urban_romances`
+(
+    poem_id STRING NOT NULL,
+
+    poet STRING,
+    century STRING,
+    city STRING,
+
+    beloved STRUCT<
+        name STRING,
+        family STRING,
+        social_class STRING,
+        meeting_places ARRAY<STRING>,
+        veiling_customs ARRAY<STRING>,
+        rivalry_incidents ARRAY<STRING>
+    >,
+
+    emotional_tones ARRAY<
+        STRUCT<
+            tone STRING,
+            triggers ARRAY<STRING>,
+            nocturnal_states ARRAY<STRING>,
+            jealousy_patterns ARRAY<STRING>
+        >
+    >,
+
+    city_romance_scenes ARRAY<
+        STRUCT<
+            alley STRING,
+            time STRING,
+            scents ARRAY<STRING>,
+            sounds ARRAY<STRING>,
+            stolen_glances ARRAY<STRING>,
+            obstacles ARRAY<STRING>
+        >
+    >,
+
+    poetic_devices ARRAY<
+        STRUCT<
+            device STRING,
+            example STRING
+        >
+    >,
+
+    aftermath STRUCT<
+        heartbreaks ARRAY<STRING>,
+        reconciliations ARRAY<STRING>,
+        duels ARRAY<STRING>,
+        public_gossip ARRAY<STRING>
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY city;
+
+
+-- ==========================================================
+-- [064] merchants_trade_networks_and_hidden_economies
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.merchants_trade_networks_and_hidden_economies`
+(
+    trade_id STRING NOT NULL,
+
+    merchant STRING,
+    region STRING,
+    century STRING,
+
+    caravan_life ARRAY<
+        STRUCT<
+            route STRING,
+            goods ARRAY<STRING>,
+            bribes ARRAY<STRING>,
+            desert_nights ARRAY<STRING>,
+            raiders ARRAY<STRING>,
+            romantic_encounters ARRAY<STRING>
+        >
+    >,
+
+    market_presence ARRAY<
+        STRUCT<
+            market STRING,
+            rival_merchants ARRAY<STRING>,
+            female_buyers ARRAY<STRING>,
+            haggling_strategies ARRAY<STRING>,
+            secret_deals ARRAY<STRING>
+        >
+    >,
+
+    hidden_economies ARRAY<
+        STRUCT<
+            type STRING,
+            gatekeepers ARRAY<STRING>,
+            risks ARRAY<STRING>,
+            rewards ARRAY<STRING>
+        >
+    >,
+
+    documentation STRUCT<
+        contracts ARRAY<STRING>,
+        witnesses ARRAY<STRING>,
+        forged_papers ARRAY<STRING>,
+        disputes ARRAY<STRING>
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY region;
+
+
+-- ==========================================================
+-- [065] warfare_experience_battlefields_and_emotional_histories
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.warfare_experience_battlefields_and_emotional_histories`
+(
+    battle_id STRING NOT NULL,
+
+    battle_name STRING,
+    region STRING,
+    century STRING,
+
+    units ARRAY<
+        STRUCT<
+            type STRING,
+            commanders ARRAY<STRING>,
+            chants ARRAY<STRING>,
+            armor ARRAY<STRING>,
+            animal_presence ARRAY<STRING>
+        >
+    >,
+
+    battlefield_atmosphere STRUCT<
+        dust_levels STRING,
+        screams ARRAY<STRING>,
+        smells ARRAY<STRING>,
+        banners ARRAY<STRING>,
+        omens ARRAY<STRING>
+    >,
+
+    emotional_histories ARRAY<
+        STRUCT<
+            class STRING,
+            fear STRING,
+            courage STRING,
+            betrayals ARRAY<STRING>,
+            heroic_tales ARRAY<STRING>
+        >
+    >,
+
+    aftermath STRUCT<
+        burials ARRAY<STRING>,
+        widows ARRAY<STRING>,
+        wounded ARRAY<STRING>,
+        trauma_notes ARRAY<STRING>,
+        songs_of_remembrance ARRAY<STRING>
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<
+            STRING
+        >
+    >
+)
+CLUSTER BY region;
+-- ==========================================================
+-- [066] childhood_worlds_play_learning_and_city_innocence
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.childhood_worlds_play_learning_and_city_innocence`
+(
+    child_id STRING NOT NULL,
+
+    name STRING,
+    gender STRING,
+    city STRING,
+    century STRING,
+
+    family_context STRUCT<
+        father STRING,
+        mother STRING,
+        caregivers ARRAY<STRING>,
+        household_tensions ARRAY<STRING>
+    >,
+
+    play_scenes ARRAY<
+        STRUCT<
+            location STRING,
+            games ARRAY<STRING>,
+            shouts ARRAY<STRING>,
+            rivalries ARRAY<STRING>,
+            street_sweets ARRAY<STRING>,
+            seasonal_fears ARRAY<STRING>
+        >
+    >,
+
+    early_learning STRUCT<
+        quran_school STRING,
+        teacher STRING,
+        punishments ARRAY<STRING>,
+        rewards ARRAY<STRING>,
+        recitation_style STRING,
+        memorization_progress STRING
+    >,
+
+    emotional_world ARRAY<
+        STRUCT<
+            theme STRING,
+            triggers ARRAY<STRING>,
+            imaginary_friends ARRAY<STRING>,
+            early_traumas ARRAY<STRING>
+        >
+    >,
+
+    city_experiences ARRAY<
+        STRUCT<
+            event STRING,
+            location STRING,
+            smells ARRAY<STRING>,
+            sounds ARRAY<STRING>,
+            passersby ARRAY<STRING>
+        >
+    >,
+
+    peers ARRAY<
+        STRUCT<
+            name STRING,
+            bond STRING,
+            betrayals ARRAY<STRING>,
+            shared_mischiefs ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY city;
+
+
+-- ==========================================================
+-- [067] old_age_experience_memory_decay_and_social_withdrawal
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.old_age_experience_memory_decay_and_social_withdrawal`
+(
+    elder_id STRING NOT NULL,
+
+    name STRING,
+    gender STRING,
+    city STRING,
+    century STRING,
+
+    bodily_changes ARRAY<
+        STRUCT<
+            symptom STRING,
+            intensity STRING,
+            daily_impact STRING
+        >
+    >,
+
+    memory_patterns ARRAY<
+        STRUCT<
+            type STRING,
+            clarity STRING,
+            recurring_scenes ARRAY<STRING>,
+            forgotten_names ARRAY<STRING>
+        >
+    >,
+
+    spiritual_turns ARRAY<
+        STRUCT<
+            practice STRING,
+            emotional_depth STRING,
+            nighttime_states ARRAY<STRING>
+        >
+    >,
+
+    loneliness_layers ARRAY<
+        STRUCT<
+            cause STRING,
+            behaviors ARRAY<STRING>,
+            coping_mechanisms ARRAY<STRING>
+        >
+    >,
+
+    family_dynamics ARRAY<
+        STRUCT<
+            member STRING,
+            relationship STRING,
+            warmth STRING,
+            neglect STRING,
+            inheritance_tensions ARRAY<STRING>
+        >
+    >,
+
+    city_echoes ARRAY<
+        STRUCT<
+            location STRING,
+            past_image STRING,
+            present_reality STRING,
+            emotional_shift STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY city;
+
+
+-- ==========================================================
+-- [068] architectural_spaces_homes_markets_gardens_and_mosques
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.architectural_spaces_homes_markets_gardens_and_mosques`
+(
+    space_id STRING NOT NULL,
+
+    name STRING,
+    city STRING,
+    century STRING,
+    type STRING,
+
+    sensory_profile STRUCT<
+        scents ARRAY<STRING>,
+        sounds ARRAY<STRING>,
+        textures ARRAY<STRING>,
+        temperature STRING
+    >,
+
+    home_details STRUCT<
+        rooms ARRAY<STRING>,
+        courtyard STRING,
+        rooftop_uses ARRAY<STRING>,
+        water_sources ARRAY<STRING>,
+        nightly_rhythms ARRAY<STRING>
+    >,
+
+    market_details STRUCT<
+        stalls ARRAY<STRING>,
+        hawkers ARRAY<STRING>,
+        commodity_clusters ARRAY<STRING>,
+        crime_patterns ARRAY<STRING>,
+        flirting_patterns ARRAY<STRING>
+    >,
+
+    garden_details STRUCT<
+        trees ARRAY<STRING>,
+        flowers ARRAY<STRING>,
+        water_features ARRAY<STRING>,
+        hidden_meetings ARRAY<STRING>,
+        poetic_scenes ARRAY<STRING>
+    >,
+
+    mosque_details STRUCT<
+        prayer_sounds ARRAY<STRING>,
+        architectural_style STRING,
+        learning_circles ARRAY<STRING>,
+        women_sections ARRAY<STRING>,
+        community_conflicts ARRAY<STRING>
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY city;
+
+
+-- ==========================================================
+-- [069] psychological_archetypes_in_islamic_civilization
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.psychological_archetypes_in_islamic_civilization`
+(
+    archetype_id STRING NOT NULL,
+
+    archetype_name STRING,
+    century STRING,
+
+    emotional_profile STRUCT<
+        base_emotion STRING,
+        triggers ARRAY<STRING>,
+        obsessions ARRAY<STRING>,
+        fears ARRAY<STRING>,
+        delights ARRAY<STRING>
+    >,
+
+    social_role STRUCT<
+        formal_role STRING,
+        informal_influence ARRAY<STRING>,
+        alliances ARRAY<STRING>,
+        rivalries ARRAY<STRING>
+    >,
+
+    behavioral_patterns ARRAY<
+        STRUCT<
+            situation STRING,
+            behavior STRING,
+            audience STRING,
+            sensory_marks ARRAY<STRING>
+        >
+    >,
+
+    gendered_expressions ARRAY<
+        STRUCT<
+            gender STRING,
+            traits ARRAY<STRING>,
+            tensions ARRAY<STRING>
+        >
+    >,
+
+    shadow_side STRUCT<
+        vices ARRAY<STRING>,
+        hidden_desires ARRAY<STRING>,
+        shame_triggers ARRAY<STRING>,
+        dangerous_behaviors ARRAY<STRING>
+    >,
+
+    archetype_legends ARRAY<
+        STRUCT<
+            tale STRING,
+            setting STRING,
+            exaggerations ARRAY<STRING>,
+            symbolic_meaning STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY century;
+
+
+-- ==========================================================
+-- [070] pilgrimage_routes_ritual_intensity_and_sacred_geographies
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.pilgrimage_routes_ritual_intensity_and_sacred_geographies`
+(
+    route_id STRING NOT NULL,
+
+    route_name STRING,
+    origin STRING,
+    destination STRING,
+    century STRING,
+
+    caravan_structure ARRAY<
+        STRUCT<
+            group_name STRING,
+            composition ARRAY<STRING>,
+            chants ARRAY<STRING>,
+            supplies ARRAY<STRING>,
+            disputes ARRAY<STRING>
+        >
+    >,
+
+    ritual_intensities ARRAY<
+        STRUCT<
+            station STRING,
+            emotions ARRAY<STRING>,
+            bodily_strain STRING,
+            spiritual_surge STRING
+        >
+    >,
+
+    sacred_geographies ARRAY<
+        STRUCT<
+            landmark STRING,
+            associated_story STRING,
+            miracle_traditions ARRAY<STRING>,
+            women_presence STRING
+        >
+    >,
+
+    survival_challenges ARRAY<
+        STRUCT<
+            challenge STRING,
+            difficulty STRING,
+            night_sounds ARRAY<STRING>,
+            desert_smells ARRAY<STRING>
+        >
+    >,
+
+    acts_of_kindness ARRAY<
+        STRUCT<
+            giver STRING,
+            act STRING,
+            emotional_effect STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY century;
+-- ==========================================================
+-- [071] poetic_imaginations_night_visions_and_sensory_realms
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.poetic_imaginations_night_visions_and_sensory_realms`
+(
+    imagination_id STRING NOT NULL,
+
+    poet STRING,
+    century STRING,
+    city STRING,
+
+    night_visions ARRAY<
+        STRUCT<
+            setting STRING,
+            celestial_signs ARRAY<STRING>,
+            lover_presence STRING,
+            metaphors ARRAY<STRING>,
+            tears ARRAY<STRING>,
+            fragrances ARRAY<STRING>
+        >
+    >,
+
+    sensory_realms STRUCT<
+        sounds ARRAY<STRING>,
+        scents ARRAY<STRING>,
+        tactile_impressions ARRAY<STRING>,
+        emotional_surges ARRAY<STRING>
+    >,
+
+    poetic_worlds ARRAY<
+        STRUCT<
+            world_name STRING,
+            inhabitants ARRAY<STRING>,
+            symbolic_objects ARRAY<STRING>,
+            mystical_doors ARRAY<STRING>
+        >
+    >,
+
+    heartbreak_and_healing STRUCT<
+        wounds ARRAY<STRING>,
+        recovery_acts ARRAY<STRING>,
+        loneliness_rituals ARRAY<STRING>
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY century;
+
+
+-- ==========================================================
+-- [072] judicial_practices_courtroom_dramas_and_legal_politics
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.judicial_practices_courtroom_dramas_and_legal_politics`
+(
+    case_id STRING NOT NULL,
+
+    courthouse STRING,
+    city STRING,
+    century STRING,
+
+    courtroom_scenes ARRAY<
+        STRUCT<
+            time STRING,
+            crowd ARRAY<STRING>,
+            women_presence STRING,
+            street_sounds ARRAY<STRING>,
+            smellscape ARRAY<STRING>,
+            dramatic_events ARRAY<STRING>
+        >
+    >,
+
+    litigants ARRAY<
+        STRUCT<
+            name STRING,
+            social_class STRING,
+            gestures ARRAY<STRING>,
+            fears ARRAY<STRING>,
+            outrages ARRAY<STRING>
+        >
+    >,
+
+    judges ARRAY<
+        STRUCT<
+            name STRING,
+            school STRING,
+            internal_conflicts ARRAY<STRING>,
+            political_pressure ARRAY<STRING>,
+            bribe_attempts ARRAY<STRING>
+        >
+    >,
+
+    testimonies ARRAY<
+        STRUCT<
+            witness STRING,
+            contradictions ARRAY<STRING>,
+            emotional_state STRING
+        >
+    >,
+
+    verdict STRUCT<
+        decision STRING,
+        reasoning STRING,
+        public_reaction ARRAY<STRING>
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY city;
+
+
+-- ==========================================================
+-- [073] interfaith_encounters_dialogues_and_conflict_geometries
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.interfaith_encounters_dialogues_and_conflict_geometries`
+(
+    encounter_id STRING NOT NULL,
+
+    century STRING,
+    region STRING,
+
+    communities ARRAY<
+        STRUCT<
+            group_name STRING,
+            identity_markers ARRAY<STRING>,
+            sacred_symbols ARRAY<STRING>,
+            daily_practices ARRAY<STRING>
+        >
+    >,
+
+    encounters ARRAY<
+        STRUCT<
+            setting STRING,
+            participants ARRAY<STRING>,
+            emotional_tone STRING,
+            debate_topics ARRAY<STRING>,
+            rhetorical_moves ARRAY<STRING>,
+            audience_reactions ARRAY<STRING>
+        >
+    >,
+
+    conflict_triggers ARRAY<
+        STRUCT<
+            trigger STRING,
+            description STRING,
+            escalation_steps ARRAY<STRING>,
+            reconciliation_attempts ARRAY<STRING>
+        >
+    >,
+
+    shared_spaces ARRAY<
+        STRUCT<
+            space_name STRING,
+            cohabitation_patterns ARRAY<STRING>,
+            disputes ARRAY<STRING>,
+            mutual_services ARRAY<STRING>
+        >
+    >,
+
+    legends ARRAY<
+        STRUCT<
+            tale STRING,
+            exaggerations ARRAY<STRING>,
+            symbolic_lessons STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY region;
+
+
+-- ==========================================================
+-- [074] textile_world_weaving_dyes_looms_and_female_economies
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.textile_world_weaving_dyes_looms_and_female_economies`
+(
+    textile_id STRING NOT NULL,
+
+    region STRING,
+    century STRING,
+
+    female_workshops ARRAY<
+        STRUCT<
+            mistress STRING,
+            apprentices ARRAY<STRING>,
+            secret_patterns ARRAY<STRING>,
+            social_constraints ARRAY<STRING>,
+            marriage_impacts ARRAY<STRING>
+        >
+    >,
+
+    materials_and_dyes ARRAY<
+        STRUCT<
+            dye STRING,
+            source STRING,
+            scent STRING,
+            rarity STRING,
+            trade_routes ARRAY<STRING>
+        >
+    >,
+
+    loom_culture STRUCT<
+        sounds ARRAY<STRING>,
+        rhythms ARRAY<STRING>,
+        communal_songs ARRAY<STRING>,
+        emotional_signatures ARRAY<STRING>
+    >,
+
+    scandals_and_rivalries ARRAY<
+        STRUCT<
+            event STRING,
+            involved ARRAY<STRING>,
+            consequences ARRAY<STRING>
+        >
+    >,
+
+    prestige_patterns ARRAY<
+        STRUCT<
+            pattern STRING,
+            meaning STRING,
+            class_association STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY region;
+
+
+-- ==========================================================
+-- [075] memory_households_genealogies_and_private_archives
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.memory_households_genealogies_and_private_archives`
+(
+    archive_id STRING NOT NULL,
+
+    family_name STRING,
+    city STRING,
+    century STRING,
+
+    genealogical_layers ARRAY<
+        STRUCT<
+            ancestor STRING,
+            traits ARRAY<STRING>,
+            stories ARRAY<STRING>,
+            heroic_deeds ARRAY<STRING>,
+            scandals ARRAY<STRING>
+        >
+    >,
+
+    private_archives ARRAY<
+        STRUCT<
+            document_type STRING,
+            texts ARRAY<STRING>,
+            stains ARRAY<STRING>,
+            burn_marks ARRAY<STRING>,
+            marginalia ARRAY<STRING>
+        >
+    >,
+
+    women_memory_keepers ARRAY<
+        STRUCT<
+            name STRING,
+            role STRING,
+            secret_chants ARRAY<STRING>,
+            emotional_boosts ARRAY<STRING>,
+            hidden_records ARRAY<STRING>
+        >
+    >,
+
+    inherited_objects ARRAY<
+        STRUCT<
+            item STRING,
+            material STRING,
+            origin_story STRING,
+            scent STRING,
+            loss_story STRING
+        >
+    >,
+
+    emotional_continuities STRUCT<
+        recurring_fears ARRAY<STRING>,
+        recurring_hopes ARRAY<STRING>,
+        family_oaths ARRAY<STRING>,
+        generational_confessions ARRAY<STRING>
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY city;
+-- ==========================================================
+-- [076] culinary_geographies_kitchens_flavors_and_regional_tastes
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.culinary_geographies_kitchens_flavors_and_regional_tastes`
+(
+    entry_id STRING NOT NULL,
+
+    region STRING,
+    city STRING,
+    century STRING,
+
+    staple_dishes ARRAY<
+        STRUCT<
+            name STRING,
+            ingredients ARRAY<STRING>,
+            preparation_steps ARRAY<STRING>,
+            cooking_vessels ARRAY<STRING>,
+            fire_styles ARRAY<STRING>,
+            serving_customs ARRAY<STRING>,
+            aroma STRING,
+            texture STRING,
+            associated_classes ARRAY<STRING>
+        >
+    >,
+
+    spice_profile STRUCT<
+        dominant_spices ARRAY<STRING>,
+        winter_spices ARRAY<STRING>,
+        summer_spices ARRAY<STRING>,
+        aromatic_roots ARRAY<STRING>,
+        trade_routes ARRAY<STRING>,
+        scent_notes ARRAY<STRING>
+    >,
+
+    kitchen_life ARRAY<
+        STRUCT<
+            time_of_day STRING,
+            cooks ARRAY<STRING>,
+            sounds ARRAY<STRING>,
+            smoke_colors ARRAY<STRING>,
+            pantry_items ARRAY<STRING>,
+            quarrels ARRAY<STRING>,
+            laughter ARRAY<STRING>
+        >
+    >,
+
+    sensual_expressions STRUCT<
+        taste_notes ARRAY<STRING>,
+        smell_notes ARRAY<STRING>,
+        warmth_levels ARRAY<STRING>,
+        appetite_triggers ARRAY<STRING>
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY region;
+
+
+-- ==========================================================
+-- [077] sweets_confectionery_and_festive_delights
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.sweets_confectionery_and_festive_delights`
+(
+    sweet_id STRING NOT NULL,
+
+    region STRING,
+    century STRING,
+
+    desserts ARRAY<
+        STRUCT<
+            name STRING,
+            ingredients ARRAY<STRING>,
+            sweeteners ARRAY<STRING>,
+            fillings ARRAY<STRING>,
+            textures ARRAY<STRING>,
+            scents ARRAY<STRING>,
+            preparation STRING,
+            feast_appearance STRING,
+            children_reaction STRING,
+            women_reaction STRING,
+            scandalous_additions ARRAY<STRING>
+        >
+    >,
+
+    market_sweet_shops ARRAY<
+        STRUCT<
+            shop_name STRING,
+            owner STRING,
+            signature_item STRING,
+            queue_patterns ARRAY<STRING>,
+            gossip_density STRING,
+            nocturnal_sales ARRAY<STRING>
+        >
+    >,
+
+    medicinal_sweets ARRAY<
+        STRUCT<
+            name STRING,
+            effect STRING,
+            herbs ARRAY<STRING>,
+            rituals ARRAY<STRING>
+        >
+    >,
+
+    lovers_sweets ARRAY<
+        STRUCT<
+            item STRING,
+            symbolism STRING,
+            secret_messages ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY region;
+
+
+-- ==========================================================
+-- [078] beverages_herbal_drinks_cafes_and_social_gatherings
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.beverages_herbal_drinks_cafes_and_social_gatherings`
+(
+    beverage_id STRING NOT NULL,
+
+    region STRING,
+    century STRING,
+
+    drink_types ARRAY<
+        STRUCT<
+            name STRING,
+            base STRING,
+            herbs ARRAY<STRING>,
+            serving_temperature STRING,
+            color STRING,
+            aroma STRING,
+            mood_effect STRING,
+            social_associations ARRAY<STRING>,
+            prohibited_variants ARRAY<STRING>
+        >
+    >,
+
+    cafes ARRAY<
+        STRUCT<
+            cafe_name STRING,
+            owner STRING,
+            clientele ARRAY<STRING>,
+            music ARRAY<STRING>,
+            storytellers ARRAY<STRING>,
+            scandalous_nights ARRAY<STRING>,
+            political_conversations ARRAY<STRING>
+        >
+    >,
+
+    herbalists ARRAY<
+        STRUCT<
+            name STRING,
+            recipes ARRAY<STRING>,
+            healing_claims ARRAY<STRING>,
+            morning_routines ARRAY<STRING>,
+            secret_ingredients ARRAY<STRING>
+        >
+    >,
+
+    women_drink_circles ARRAY<
+        STRUCT<
+            hostess STRING,
+            participants ARRAY<STRING>,
+            themes ARRAY<STRING>,
+            gossip ARRAY<STRING>,
+            flirtations ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY century;
+
+
+-- ==========================================================
+-- [079] musical_traditions_instruments_singers_and_city_soundscapes
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.musical_traditions_instruments_singers_and_city_soundscapes`
+(
+    music_id STRING NOT NULL,
+
+    region STRING,
+    century STRING,
+
+    instruments ARRAY<
+        STRUCT<
+            name STRING,
+            material STRING,
+            craftsmanship_notes ARRAY<STRING>,
+            sound_color STRING,
+            emotional_effect STRING,
+            women_usage STRING
+        >
+    >,
+
+    singers ARRAY<
+        STRUCT<
+            name STRING,
+            vocal_style STRING,
+            repertoire ARRAY<STRING>,
+            scandals ARRAY<STRING>,
+            rivalries ARRAY<STRING>,
+            patrons ARRAY<STRING>
+        >
+    >,
+
+    soundscapes ARRAY<
+        STRUCT<
+            location STRING,
+            time STRING,
+            human_sounds ARRAY<STRING>,
+            market_cries ARRAY<STRING>,
+            domestic_sounds ARRAY<STRING>,
+            ritual_chants ARRAY<STRING>,
+            night_whispers ARRAY<STRING>
+        >
+    >,
+
+    dance_traditions ARRAY<
+        STRUCT<
+            dance_name STRING,
+            gender STRING,
+            rhythm STRING,
+            social_readings ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY region;
+
+
+-- ==========================================================
+-- [080] perfumery_incense_unguents_and_aromatic_cultures
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.perfumery_incense_unguents_and_aromatic_cultures`
+(
+    scent_id STRING NOT NULL,
+
+    region STRING,
+    century STRING,
+
+    perfumes ARRAY<
+        STRUCT<
+            name STRING,
+            base STRING,
+            notes ARRAY<STRING>,
+            fixatives ARRAY<STRING>,
+            preparation STRING,
+            typical_users ARRAY<STRING>,
+            emotional_valence STRING,
+            forbidden_contexts ARRAY<STRING>
+        >
+    >,
+
+    incense ARRAY<
+        STRUCT<
+            resin STRING,
+            region_of_origin STRING,
+            rituals ARRAY<STRING>,
+            burn_times ARRAY<STRING>,
+            associated_saints ARRAY<STRING>
+        >
+    >,
+
+    women_aromatics ARRAY<
+        STRUCT<
+            recipe STRING,
+            hidden_ingredients ARRAY<STRING>,
+            seduction_uses ARRAY<STRING>,
+            jealousy_triggers ARRAY<STRING>
+        >
+    >,
+
+    marketplace_scents ARRAY<
+        STRUCT<
+            stall_type STRING,
+            key_aromas ARRAY<STRING>,
+            seller_behaviors ARRAY<STRING>,
+            scent_stories ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY region;
+-- ==========================================================
+-- [081] policing_night_patrols_surveillance_and_moral_order
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.policing_night_patrols_surveillance_and_moral_order`
+(
+    record_id STRING NOT NULL,
+
+    city STRING,
+    century STRING,
+
+    patrol_units ARRAY<
+        STRUCT<
+            unit_name STRING,
+            members ARRAY<STRING>,
+            weapons ARRAY<STRING>,
+            chants ARRAY<STRING>,
+            lantern_colors ARRAY<STRING>
+        >
+    >,
+
+    night_incidents ARRAY<
+        STRUCT<
+            incident STRING,
+            perpetrators ARRAY<STRING>,
+            victims ARRAY<STRING>,
+            smells ARRAY<STRING>,
+            sounds ARRAY<STRING>,
+            emotional_tone STRING,
+            punishments ARRAY<STRING>
+        >
+    >,
+
+    surveillance_zones ARRAY<
+        STRUCT<
+            zone_name STRING,
+            risk_level STRING,
+            hidden_paths ARRAY<STRING>,
+            notorious_figures ARRAY<STRING>
+        >
+    >,
+
+    women_night_presence ARRAY<
+        STRUCT<
+            category STRING,
+            motives ARRAY<STRING>,
+            routes ARRAY<STRING>,
+            fears ARRAY<STRING>,
+            whispered_stories ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY city;
+
+
+-- ==========================================================
+-- [082] death_burial_rituals_grief_cultures_and_afterlife_imaginations
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.death_burial_rituals_grief_cultures_and_afterlife_imaginations`
+(
+    death_id STRING NOT NULL,
+
+    region STRING,
+    century STRING,
+
+    final_moments ARRAY<
+        STRUCT<
+            witness STRING,
+            final_words STRING,
+            scents ARRAY<STRING>,
+            emotional_weight STRING
+        >
+    >,
+
+    burial_rituals ARRAY<
+        STRUCT<
+            step STRING,
+            participants ARRAY<STRING>,
+            chants ARRAY<STRING>,
+            lamentations ARRAY<STRING>,
+            fragrances ARRAY<STRING>,
+            disputes ARRAY<STRING>
+        >
+    >,
+
+    women_grief ARRAY<
+        STRUCT<
+            name STRING,
+            style_of_grief STRING,
+            forbidden_expressions ARRAY<STRING>,
+            night_crying ARRAY<STRING>,
+            consolations ARRAY<STRING>
+        >
+    >,
+
+    remembrance_practices ARRAY<
+        STRUCT<
+            practice STRING,
+            location STRING,
+            seasonal_patterns ARRAY<STRING>,
+            emotional_shifts ARRAY<STRING>
+        >
+    >,
+
+    afterlife_imaginations ARRAY<
+        STRUCT<
+            description STRING,
+            sensations ARRAY<STRING>,
+            dialogues ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY region;
+
+
+-- ==========================================================
+-- [083] spiritual_orders_saints_shrines_and_miracle_legends
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.spiritual_orders_saints_shrines_and_miracle_legends`
+(
+    saint_id STRING NOT NULL,
+
+    order_name STRING,
+    region STRING,
+    century STRING,
+
+    life_scenes ARRAY<
+        STRUCT<
+            moment STRING,
+            setting STRING,
+            companions ARRAY<STRING>,
+            miracles ARRAY<STRING>,
+            scents ARRAY<STRING>,
+            night_states ARRAY<STRING>
+        >
+    >,
+
+    shrine STRUCT<
+        location STRING,
+        architecture ARRAY<STRING>,
+        scents ARRAY<STRING>,
+        rituals ARRAY<STRING>,
+        women_presence STRING,
+        offerings ARRAY<STRING>
+    >,
+
+    miracle_legends ARRAY<
+        STRUCT<
+            story STRING,
+            exaggerations ARRAY<STRING>,
+            symbolic_meaning STRING,
+            political_exploitation ARRAY<STRING>
+        >
+    >,
+
+    followers ARRAY<
+        STRUCT<
+            name STRING,
+            motivation STRING,
+            transformations ARRAY<STRING>,
+            rivalries ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY region;
+
+
+-- ==========================================================
+-- [084] prisons_torture_cells_interrogations_and_political_purges
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.prisons_torture_cells_interrogations_and_political_purges`
+(
+    cell_id STRING NOT NULL,
+
+    city STRING,
+    century STRING,
+
+    cell_conditions STRUCT<
+        darkness_level STRING,
+        dampness STRING,
+        insect_presence ARRAY<STRING>,
+        smells ARRAY<STRING>,
+        sounds ARRAY<STRING>
+    >,
+
+    prisoners ARRAY<
+        STRUCT<
+            name STRING,
+            crime STRING,
+            political_affiliation STRING,
+            torture_methods ARRAY<STRING>,
+            confessions ARRAY<STRING>,
+            emotional_collapses ARRAY<STRING>
+        >
+    >,
+
+    interrogators ARRAY<
+        STRUCT<
+            name STRING,
+            technique ARRAY<STRING>,
+            fears ARRAY<STRING>,
+            secret_sympathies ARRAY<STRING>
+        >
+    >,
+
+    underground_networks ARRAY<
+        STRUCT<
+            contact STRING,
+            smuggled_messages ARRAY<STRING>,
+            bribed_guards ARRAY<STRING>,
+            escape_attempts ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY city;
+
+
+-- ==========================================================
+-- [085] royal_ceremonies_coronations_processions_and_power_theatre
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.royal_ceremonies_coronations_processions_and_power_theatre`
+(
+    ceremony_id STRING NOT NULL,
+
+    dynasty STRING,
+    city STRING,
+    century STRING,
+
+    coronation STRUCT<
+        steps ARRAY<STRING>,
+        garments ARRAY<STRING>,
+        crowns ARRAY<STRING>,
+        scents ARRAY<STRING>,
+        chants ARRAY<STRING>,
+        political_messages ARRAY<STRING>
+    >,
+
+    processions ARRAY<
+        STRUCT<
+            route STRING,
+            heralds ARRAY<STRING>,
+            musicians ARRAY<STRING>,
+            animals ARRAY<STRING>,
+            female_presence STRING,
+            beggars ARRAY<STRING>,
+            crowd_reactions ARRAY<STRING>
+        >
+    >,
+
+    palace_spectacles ARRAY<
+        STRUCT<
+            event STRING,
+            props ARRAY<STRING>,
+            performers ARRAY<STRING>,
+            intrigues ARRAY<STRING>,
+            poetry ARRAY<STRING>,
+            foods ARRAY<STRING>
+        >
+    >,
+
+    power_theatre STRUCT<
+        invisible_choreographies ARRAY<STRING>,
+        secret_orders ARRAY<STRING>,
+        symbolic_gestures ARRAY<STRING>,
+        rival_factions ARRAY<STRING>
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY dynasty, century;
+-- ==========================================================
+-- [086] marriage_customs_intimacies_conflicts_and_hidden_economies
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.marriage_customs_intimacies_conflicts_and_hidden_economies`
+(
+    marriage_id STRING NOT NULL,
+
+    couple STRUCT<
+        husband STRING,
+        wife STRING,
+        ages ARRAY<STRING>,
+        social_classes ARRAY<STRING>,
+        family_pressures ARRAY<STRING>
+    >,
+
+    ceremonies ARRAY<
+        STRUCT<
+            step STRING,
+            chants ARRAY<STRING>,
+            food ARRAY<STRING>,
+            women_songs ARRAY<STRING>,
+            flirtations ARRAY<STRING>,
+            scandalous_incidents ARRAY<STRING>
+        >
+    >,
+
+    intimacies STRUCT<
+        affection_patterns ARRAY<STRING>,
+        shared_secrets ARRAY<STRING>,
+        private_symbols ARRAY<STRING>,
+        fragrances_used ARRAY<STRING>,
+        night_routines ARRAY<STRING>
+    >,
+
+    conflicts ARRAY<
+        STRUCT<
+            cause STRING,
+            emotional_tone STRING,
+            alliances ARRAY<STRING>,
+            interventions ARRAY<STRING>
+        >
+    >,
+
+    hidden_economies ARRAY<
+        STRUCT<
+            item STRING,
+            value STRING,
+            secrecy STRING,
+            women_networks ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY marriage_id;
+
+
+-- ==========================================================
+-- [087] literacy_bookshops_scribes_and_intellectual_economies
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.literacy_bookshops_scribes_and_intellectual_economies`
+(
+    record_id STRING NOT NULL,
+
+    city STRING,
+    century STRING,
+
+    bookshops ARRAY<
+        STRUCT<
+            shop_name STRING,
+            location STRING,
+            smells ARRAY<STRING>,
+            common_customers ARRAY<STRING>,
+            gossip ARRAY<STRING>,
+            rare_books ARRAY<STRING>
+        >
+    >,
+
+    scribes ARRAY<
+        STRUCT<
+            name STRING,
+            skill_level STRING,
+            fees STRING,
+            emotional_state STRING,
+            ink_types ARRAY<STRING>,
+            errors ARRAY<STRING>,
+            rival_scribes ARRAY<STRING>
+        >
+    >,
+
+    literacy_spread STRUCT<
+        methods ARRAY<STRING>,
+        women_participation STRING,
+        children_participation STRING,
+        adult_learning_circles ARRAY<STRING>
+        >,
+
+    manuscript_circulation ARRAY<
+        STRUCT<
+            manuscript STRING,
+            owners ARRAY<STRING>,
+            marginalia ARRAY<STRING>,
+            travel_routes ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY city;
+
+
+-- ==========================================================
+-- [088] body_health_medicine_healers_and_hidden_remedies
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.body_health_medicine_healers_and_hidden_remedies`
+(
+    medical_id STRING NOT NULL,
+
+    region STRING,
+    century STRING,
+
+    healers ARRAY<
+        STRUCT<
+            name STRING,
+            specialization STRING,
+            healing_tools ARRAY<STRING>,
+            chants ARRAY<STRING>,
+            superstitions ARRAY<STRING>,
+            conflicts_with_physicians ARRAY<STRING>
+        >
+    >,
+
+    bodily_states ARRAY<
+        STRUCT<
+            state STRING,
+            symptoms ARRAY<STRING>,
+            emotional_effects ARRAY<STRING>,
+            gender_differences ARRAY<STRING>
+        >
+    >,
+
+    remedies ARRAY<
+        STRUCT<
+            remedy STRING,
+            ingredients ARRAY<STRING>,
+            preparation STRING,
+            scent STRING,
+            time STRING,
+            forbidden_pairs ARRAY<STRING>
+        >
+    >,
+
+    women_health ARRAY<
+        STRUCT<
+            issue STRING,
+            midwives ARRAY<STRING>,
+            secret_treatments ARRAY<STRING>,
+            fertility_beliefs ARRAY<STRING>,
+            miscarriage_fears ARRAY<STRING>
+        >
+    >,
+
+    healers_markets ARRAY<
+        STRUCT<
+            market_name STRING,
+            stalls ARRAY<STRING>,
+            fraud_cases ARRAY<STRING>,
+            miraculous_stories ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY region;
+
+
+-- ==========================================================
+-- [089] bathhouses_hygiene_beauty_and_gendered_spaces
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.bathhouses_hygiene_beauty_and_gendered_spaces`
+(
+    bath_id STRING NOT NULL,
+
+    city STRING,
+    century STRING,
+
+    spaces ARRAY<
+        STRUCT<
+            room STRING,
+            heat_level STRING,
+            steam_smells ARRAY<STRING>,
+            water_sounds ARRAY<STRING>,
+            lighting STRING,
+            graffiti ARRAY<STRING>
+        >
+    >,
+
+    men_scenes ARRAY<
+        STRUCT<
+            activities ARRAY<STRING>,
+            arguments ARRAY<STRING>,
+            joking ARRAY<STRING>,
+            clandestine_trades ARRAY<STRING>
+        >
+    >,
+
+    women_scenes ARRAY<
+        STRUCT<
+            beauty_practices ARRAY<STRING>,
+            singing ARRAY<STRING>,
+            secret_confessions ARRAY<STRING>,
+            matchmaking ARRAY<STRING>,
+            mysteries ARRAY<STRING>
+        >
+    >,
+
+    attendants ARRAY<
+        STRUCT<
+            name STRING,
+            role STRING,
+            secrets ARRAY<STRING>,
+            rivalries ARRAY<STRING>
+        >
+    >,
+
+    rituals ARRAY<
+        STRUCT<
+            type STRING,
+            herbs ARRAY<STRING>,
+            utensils ARRAY<STRING>,
+            sensory_notes ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY city;
+
+
+-- ==========================================================
+-- [090] magic_sorcery_omens_divination_and_occult_practices
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.magic_sorcery_omens_divination_and_occult_practices`
+(
+    magic_id STRING NOT NULL,
+
+    region STRING,
+    century STRING,
+
+    sorcerers ARRAY<
+        STRUCT<
+            name STRING,
+            reputation STRING,
+            tools ARRAY<STRING>,
+            spirit_guides ARRAY<STRING>,
+            fragrances ARRAY<STRING>,
+            forbidden_rites ARRAY<STRING>
+        >
+    >,
+
+    omens ARRAY<
+        STRUCT<
+            sign STRING,
+            interpretation STRING,
+            emotional_weight STRING,
+            public_reactions ARRAY<STRING>
+        >
+    >,
+
+    divination_methods ARRAY<
+        STRUCT<
+            method STRING,
+            items ARRAY<STRING>,
+            night_scenes ARRAY<STRING>,
+            accuracy STRING,
+            scandalous_uses ARRAY<STRING>
+        >
+    >,
+
+    victims ARRAY<
+        STRUCT<
+            name STRING,
+            perceived_curse STRING,
+            symptoms ARRAY<STRING>,
+            healers ARRAY<STRING>
+        >
+    >,
+
+    occult_markets ARRAY<
+        STRUCT<
+            market STRING,
+            items ARRAY<STRING>,
+            clandestine_actors ARRAY<STRING>,
+            legal_risks ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY region;
+-- ==========================================================
+-- [091] seasonal_life_rhythms_festivities_migrations_and_city_tempos
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.seasonal_life_rhythms_festivities_migrations_and_city_tempos`
+(
+    season_id STRING NOT NULL,
+
+    region STRING,
+    century STRING,
+
+    climate_patterns ARRAY<
+        STRUCT<
+            month STRING,
+            winds ARRAY<STRING>,
+            temperature STRING,
+            scents ARRAY<STRING>,
+            animal_behaviors ARRAY<STRING>
+        >
+    >,
+
+    migration_patterns ARRAY<
+        STRUCT<
+           group_name STRING,
+            destinations ARRAY<STRING>,
+            triggers ARRAY<STRING>,
+            songs ARRAY<STRING>,
+            rituals ARRAY<STRING>
+        >
+    >,
+
+    seasonal_markets ARRAY<
+        STRUCT<
+            market STRING,
+            goods ARRAY<STRING>,
+            vendors ARRAY<STRING>,
+            prices STRING,
+            celebrations ARRAY<STRING>,
+            quarrels ARRAY<STRING>
+        >
+    >,
+
+    women_rhythms ARRAY<
+        STRUCT<
+            tasks ARRAY<STRING>,
+            gatherings ARRAY<STRING>,
+            anxieties ARRAY<STRING>,
+            flirtation_spikes ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY region;
+
+
+-- ==========================================================
+-- [092] water_systems_irrigation_baths_wells_and_desert_oases
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.water_systems_irrigation_baths_wells_and_desert_oases`
+(
+    water_id STRING NOT NULL,
+
+    region STRING,
+    century STRING,
+
+    wells ARRAY<
+        STRUCT<
+            name STRING,
+            depth STRING,
+            associated_legends ARRAY<STRING>,
+            women_gathering_patterns ARRAY<STRING>,
+            disputes ARRAY<STRING>
+        >
+    >,
+
+    irrigation ARRAY<
+        STRUCT<
+            method STRING,
+            tools ARRAY<STRING>,
+            conflicts ARRAY<STRING>,
+            songs_of_workers ARRAY<STRING>,
+            night_maintenance_notes ARRAY<STRING>
+        >
+    >,
+
+    bath_complexes ARRAY<
+        STRUCT<
+            name STRING,
+            heating_method STRING,
+            women_hours STRING,
+            men_hours STRING,
+            scents ARRAY<STRING>,
+            mischief_incidents ARRAY<STRING>
+        >
+    >,
+
+    desert_oases ARRAY<
+        STRUCT<
+            name STRING,
+            palm_varieties ARRAY<STRING>,
+            water_taste STRING,
+            caravans ARRAY<STRING>,
+            romantic_folklore ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY region;
+
+
+-- ==========================================================
+-- [093] textile_markets_artisans_embroidery_and_symbolic_patterns
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.textile_markets_artisans_embroidery_and_symbolic_patterns`
+(
+    record_id STRING NOT NULL,
+
+    city STRING,
+    century STRING,
+
+    textile_stalls ARRAY<
+        STRUCT<
+            stall_name STRING,
+            women_customers ARRAY<STRING>,
+            bargaining_styles ARRAY<STRING>,
+            prized_items ARRAY<STRING>,
+            scent_clouds ARRAY<STRING>
+        >
+    >,
+
+    embroidery_schools ARRAY<
+        STRUCT<
+            school_name STRING,
+            stitches ARRAY<STRING>,
+            motifs ARRAY<STRING>,
+            secret_codes ARRAY<STRING>,
+            rivalries ARRAY<STRING>
+        >
+    >,
+
+    artisans ARRAY<
+        STRUCT<
+            name STRING,
+            social_class STRING,
+            emotional_state STRING,
+            dyes ARRAY<STRING>,
+            songs ARRAY<STRING>,
+            tragedies ARRAY<STRING>
+        >
+    >,
+
+    symbolic_patterns ARRAY<
+        STRUCT<
+            pattern STRING,
+            meaning STRING,
+            taboo_associations ARRAY<STRING>,
+            story_traces ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY city;
+
+
+-- ==========================================================
+-- [094] literary_salons_readings_recitations_and_poetic_competitions
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.literary_salons_readings_recitations_and_poetic_competitions`
+(
+    salon_id STRING NOT NULL,
+
+    city STRING,
+    century STRING,
+
+    host STRUCT<
+        name STRING,
+        lineage STRING,
+        poetic_taste STRING,
+        political_ties ARRAY<STRING>
+    >,
+
+    guests ARRAY<
+        STRUCT<
+            name STRING,
+            school STRING,
+            emotional_tone STRING,
+            secrets ARRAY<STRING>,
+            flirtations ARRAY<STRING>
+        >
+    >,
+
+    reading_sessions ARRAY<
+        STRUCT<
+            theme STRING,
+            texts ARRAY<STRING>,
+            women_presence STRING,
+            audience_noises ARRAY<STRING>,
+            emotional_spikes ARRAY<STRING>
+        >
+    >,
+
+    competitions ARRAY<
+        STRUCT<
+            type STRING,
+            participants ARRAY<STRING>,
+            scandals ARRAY<STRING>,
+            bribes ARRAY<STRING>
+        >
+    >,
+
+    refreshments ARRAY<
+        STRUCT<
+            item STRING,
+            preparation STRING,
+            scent STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY century;
+
+
+-- ==========================================================
+-- [095] children_street_games_riddles_stories_and_hidden_cultures
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.children_street_games_riddles_stories_and_hidden_cultures`
+(
+    record_id STRING NOT NULL,
+
+    city STRING,
+    century STRING,
+
+    street_games ARRAY<
+        STRUCT<
+            name STRING,
+            rules ARRAY<STRING>,
+            shouts ARRAY<STRING>,
+            rivalries ARRAY<STRING>,
+            alley_zones ARRAY<STRING>
+        >
+    >,
+
+    riddles ARRAY<
+        STRUCT<
+            riddle TEXT,
+            answers ARRAY<STRING>,
+            common_wrong_answers ARRAY<STRING>,
+            laughter_triggers ARRAY<STRING>
+        >
+    >,
+
+    nighttime_adventures ARRAY<
+        STRUCT<
+            place STRING,
+            fears ARRAY<STRING>,
+            secret_routes ARRAY<STRING>,
+            forbidden_dares ARRAY<STRING>
+        >
+    >,
+
+    childhood_stories ARRAY<
+        STRUCT<
+            tale STRING,
+            storyteller STRING,
+            exaggerations ARRAY<STRING>,
+            emotional_effect STRING
+        >
+    >,
+
+    hidden_cultures ARRAY<
+        STRUCT<
+            type STRING,
+            members ARRAY<STRING>,
+            codes ARRAY<STRING>,
+            rituals ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY city;
+-- ==========================================================
+-- [096] market_cries_vendors_gestures_and_public_humor
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.market_cries_vendors_gestures_and_public_humor`
+(
+    record_id STRING NOT NULL,
+
+    city STRING,
+    century STRING,
+
+    vendor_types ARRAY<
+        STRUCT<
+            type STRING,
+            signature_cries ARRAY<STRING>,
+            gestures ARRAY<STRING>,
+            tricks ARRAY<STRING>,
+            women_interactions ARRAY<STRING>
+        >
+    >,
+
+    humor ARRAY<
+        STRUCT<
+            joke STRING,
+            target STRING,
+            laughter_patterns ARRAY<STRING>,
+            scandalous_reactions ARRAY<STRING>
+        >
+    >,
+
+    disputes ARRAY<
+        STRUCT<
+            type STRING,
+            participants ARRAY<STRING>,
+            escalation ARRAY<STRING>,
+            intervention ARRAY<STRING>
+        >
+    >,
+
+    sensory_crowds STRUCT<
+        scents ARRAY<STRING>,
+        sounds ARRAY<STRING>,
+        textures ARRAY<STRING>,
+        visual_clutter ARRAY<STRING>
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY city;
+
+
+-- ==========================================================
+-- [097] shadow_economies_theft_smuggling_counterfeits_and_black_markets
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.shadow_economies_theft_smuggling_counterfeits_and_black_markets`
+(
+    shadow_id STRING NOT NULL,
+
+    region STRING,
+    century STRING,
+
+    theft_networks ARRAY<
+        STRUCT<
+            leader STRING,
+            members ARRAY<STRING>,
+            techniques ARRAY<STRING>,
+            safehouses ARRAY<STRING>,
+            scents ARRAY<STRING>
+        >
+    >,
+
+    smuggling_routes ARRAY<
+        STRUCT<
+            route STRING,
+            goods ARRAY<STRING>,
+            bribed_officials ARRAY<STRING>,
+            night_sounds ARRAY<STRING>,
+            desert_signals ARRAY<STRING>
+        >
+    >,
+
+    counterfeits ARRAY<
+        STRUCT<
+            item STRING,
+            methods ARRAY<STRING>,
+            markets ARRAY<STRING>,
+            detection_tips ARRAY<STRING>
+        >
+    >,
+
+    black_markets ARRAY<
+        STRUCT<
+            district STRING,
+            main_goods ARRAY<STRING>,
+            hidden_auctions ARRAY<STRING>,
+            women_presence STRING,
+            silent_whispers ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY region;
+
+
+-- ==========================================================
+-- [098] caravans_travel_stories_desert_survival_and_wilderness_life
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.caravans_travel_stories_desert_survival_and_wilderness_life`
+(
+    caravan_id STRING NOT NULL,
+
+    route STRING,
+    century STRING,
+    region STRING,
+
+    travelers ARRAY<
+        STRUCT<
+            name STRING,
+            role STRING,
+            fears ARRAY<STRING>,
+            songs ARRAY<STRING>,
+            secret_loves ARRAY<STRING>
+        >
+    >,
+
+    desert_signs ARRAY<
+        STRUCT<
+            sign STRING,
+            interpretation STRING,
+            dangers ARRAY<STRING>,
+            seasons ARRAY<STRING>
+        >
+    >,
+
+    survival_kits ARRAY<
+        STRUCT<
+            item STRING,
+            use STRING,
+            scent STRING
+        >
+    >,
+
+    oasis_scenes ARRAY<
+        STRUCT<
+            oasis STRING,
+            food ARRAY<STRING>,
+            water_taste STRING,
+            romances ARRAY<STRING>,
+            desert_jokes ARRAY<STRING>
+        >
+    >,
+
+    night_scenes ARRAY<
+        STRUCT<
+            stars ARRAY<STRING>,
+            animal_sounds ARRAY<STRING>,
+            fire_behaviors ARRAY<STRING>,
+            ghost_tales ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY region;
+
+
+-- ==========================================================
+-- [099] social_whispers_rumors_scandals_and_city_gossip
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.social_whispers_rumors_scandals_and_city_gossip`
+(
+    whisper_id STRING NOT NULL,
+
+    city STRING,
+    century STRING,
+
+    rumor_sources ARRAY<
+        STRUCT<
+            source STRING,
+            credibility STRING,
+            gender STRING,
+            motives ARRAY<STRING>,
+            slang_phrases ARRAY<STRING>
+        >
+    >,
+
+    rumor_types ARRAY<
+        STRUCT<
+            type STRING,
+            targets ARRAY<STRING>,
+            emotional_weight STRING,
+            hot_spots ARRAY<STRING>,
+            women_circles ARRAY<STRING>
+        >
+    >,
+
+    propagation_paths ARRAY<
+        STRUCT<
+            path STRING,
+            intermediaries ARRAY<STRING>,
+            distortions ARRAY<STRING>,
+            gathering_points ARRAY<STRING>
+        >
+    >,
+
+    scandals ARRAY<
+        STRUCT<
+            scandal STRING,
+            actors ARRAY<STRING>,
+            consequences ARRAY<STRING>,
+            redemption_attempts ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY city;
+
+
+-- ==========================================================
+-- [100] warfare_sieges_rebellions_treason_and_political_collapses
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.warfare_sieges_rebellions_treason_and_political_collapses`
+(
+    collapse_id STRING NOT NULL,
+
+    region STRING,
+    century STRING,
+    key_city STRING,
+
+    armies ARRAY<
+        STRUCT<
+            commander STRING,
+            troops ARRAY<STRING>,
+            emotional_states ARRAY<STRING>,
+            supply_songs ARRAY<STRING>,
+            betrayals ARRAY<STRING>
+        >
+    >,
+
+    siege_techniques ARRAY<
+        STRUCT<
+            technique STRING,
+            tools ARRAY<STRING>,
+            psychological_pressure ARRAY<STRING>,
+            women_role ARRAY<STRING>
+        >
+    >,
+
+    rebellions ARRAY<
+        STRUCT<
+            leader STRING,
+            grievances ARRAY<STRING>,
+            supporters ARRAY<STRING>,
+            desertions ARRAY<STRING>,
+            passionate_speeches ARRAY<STRING>
+        >
+    >,
+
+    treason_cases ARRAY<
+        STRUCT<
+            betrayer STRING,
+            motive STRING,
+            signals ARRAY<STRING>,
+            night_meetings ARRAY<STRING>
+        >
+    >,
+
+    city_fall_scenes ARRAY<
+        STRUCT<
+            street STRING,
+            sounds ARRAY<STRING>,
+            smells ARRAY<STRING>,
+            cries ARRAY<STRING>,
+            fire_spread ARRAY<STRING>,
+            looting_scenes ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY region;
+-- ==========================================================
+-- [101] cities_memory_atlases_smells_sounds_and_human_imprints
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.cities_memory_atlases_smells_sounds_and_human_imprints`
+(
+    atlas_id STRING NOT NULL,
+
+    city STRING,
+    region STRING,
+    century STRING,
+
+    scent_map ARRAY<
+        STRUCT<
+            district STRING,
+            dominant_scents ARRAY<STRING>,
+            night_scents ARRAY<STRING>,
+            market_clouds ARRAY<STRING>,
+            scandals ARRAY<STRING>
+        >
+    >,
+
+    sound_map ARRAY<
+        STRUCT<
+            district STRING,
+            dawn_sounds ARRAY<STRING>,
+            noon_sounds ARRAY<STRING>,
+            night_sounds ARRAY<STRING>,
+            ritual_chants ARRAY<STRING>,
+            quarrels ARRAY<STRING>
+        >
+    >,
+
+    emotional_topography ARRAY<
+        STRUCT<
+            place STRING,
+            stories ARRAY<STRING>,
+            heartbreaks ARRAY<STRING>,
+            reconciliations ARRAY<STRING>,
+            omens ARRAY<STRING>
+        >
+    >,
+
+    women_routes ARRAY<
+        STRUCT<
+            purpose STRING,
+            places ARRAY<STRING>,
+            risks ARRAY<STRING>,
+            gossip_nodes ARRAY<STRING>,
+            love_traces ARRAY<STRING>
+        >
+    >,
+
+    political_pressure_points ARRAY<
+        STRUCT<
+            location STRING,
+            watchers ARRAY<STRING>,
+            bribe_networks ARRAY<STRING>,
+            alley_spies ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY city;
+
+
+-- ==========================================================
+-- [102] human_experience_emotions_virtues_vices_and_existential_states
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.human_experience_emotions_virtues_vices_and_existential_states`
+(
+    experience_id STRING NOT NULL,
+
+    century STRING,
+    region STRING,
+
+    virtues ARRAY<
+        STRUCT<
+            virtue STRING,
+            expressions ARRAY<STRING>,
+            gendered_tones ARRAY<STRING>,
+            crisis_tests ARRAY<STRING>
+        >
+    >,
+
+    vices ARRAY<
+        STRUCT<
+            vice STRING,
+            triggers ARRAY<STRING>,
+            destructive_patterns ARRAY<STRING>,
+            confessional_moments ARRAY<STRING>
+        >
+    >,
+
+    emotional_states ARRAY<
+        STRUCT<
+            state STRING,
+            sensations ARRAY<STRING>,
+            behavioral_effects ARRAY<STRING>,
+            night_variants ARRAY<STRING>
+        >
+    >,
+
+    existential_experiences ARRAY<
+        STRUCT<
+            moment STRING,
+            triggers ARRAY<STRING>,
+            bodily_responses ARRAY<STRING>,
+            visions ARRAY<STRING>,
+            aftermath ARRAY<STRING>
+        >
+    >,
+
+    transitions ARRAY<
+        STRUCT<
+            phase STRING,
+            catalysts ARRAY<STRING>,
+            losses ARRAY<STRING>,
+            transformations ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY century;
+
+
+-- ==========================================================
+-- [103] grand_unified_meta_index_of_civilizational_layers
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.grand_unified_meta_index_of_civilizational_layers`
+(
+    layer_id STRING NOT NULL,
+
+    domain STRING,
+    subdomain STRING,
+    century STRING,
+    region STRING,
+
+    textual_layers ARRAY<
+        STRUCT<
+            type STRING,
+            representative_texts ARRAY<STRING>,
+            narrative_trends ARRAY<STRING>,
+            rhetorical_signatures ARRAY<STRING>
+        >
+    >,
+
+    social_layers ARRAY<
+        STRUCT<
+            class STRING,
+            behaviors ARRAY<STRING>,
+            gender_relations ARRAY<STRING>,
+            conflicts ARRAY<STRING>,
+            solidarities ARRAY<STRING>
+        >
+    >,
+
+    emotional_layers ARRAY<
+        STRUCT<
+            emotion STRING,
+            triggers ARRAY<STRING>,
+            stories ARRAY<STRING>,
+            ritual_expressions ARRAY<STRING>
+        >
+    >,
+
+    sensory_layers ARRAY<
+        STRUCT<
+            sense STRING,
+            dominant_patterns ARRAY<STRING>,
+            city_examples ARRAY<STRING>,
+            symbolic_readings ARRAY<STRING>
+        >
+    >,
+
+    material_layers ARRAY<
+        STRUCT<
+            items ARRAY<STRING>,
+            uses ARRAY<STRING>,
+            trade_paths ARRAY<STRING>,
+            decay_notes ARRAY<STRING>
+        >
+    >,
+
+    spiritual_layers ARRAY<
+        STRUCT<
+            practice STRING,
+            aesthetic_signatures ARRAY<STRING>,
+            transformative_effects ARRAY<STRING>
+        >
+    >,
+
+    political_layers ARRAY<
+        STRUCT<
+            power_centers ARRAY<STRING>,
+            surveillance STRING,
+            rebellions ARRAY<STRING>,
+            patronage_networks ARRAY<STRING>
+        >
+    >,
+
+    civilizational_memory STRUCT<
+        myths ARRAY<STRING>,
+        heroes ARRAY<STRING>,
+        villains_ARRAY ARRAY<STRING>,
+        architectural_symbols ARRAY<STRING>,
+        cultural_scars ARRAY<STRING>
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY century, region;
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.knowledge_transfer_routes`
+(
+    route_id STRING NOT NULL,
+
+    origin_city STRING,
+    origin_region STRING,
+    destination_city STRING,
+    destination_region STRING,
+    century STRING,
+
+    intermediaries ARRAY<
+        STRUCT<
+            name STRING,
+            religion STRING,
+            language_skills ARRAY<STRING>,
+            role STRING,
+            motivations ARRAY<STRING>,
+            conflicts ARRAY<STRING>,
+            secret_affiliations ARRAY<STRING>
+        >
+    >,
+
+    travel_path ARRAY<
+        STRUCT<
+            stop STRING,
+            season STRING,
+            dangers ARRAY<STRING>,
+            caravan_types ARRAY<STRING>,
+            sea_conditions ARRAY<STRING>,
+            port_smells ARRAY<STRING>,
+            desert_sounds ARRAY<STRING>
+        >
+    >,
+
+    transferred_material ARRAY<
+        STRUCT<
+            title STRING,
+            author STRING,
+            field STRING,
+            original_language STRING,
+            translation_languages ARRAY<STRING>,
+            manuscript_state STRING,
+            marginal_notes ARRAY<STRING>,
+            ink_types ARRAY<STRING>,
+            scent STRING
+        >
+    >,
+
+    receiving_societies ARRAY<
+        STRUCT<
+            city STRING,
+            institutions ARRAY<STRING>,
+            scholars ARRAY<STRING>,
+            resistances ARRAY<STRING>,
+            misinterpretations ARRAY<STRING>,
+            enthusiastic_receptions ARRAY<STRING>
+        >
+    >,
+
+    political_conditions ARRAY<
+        STRUCT<
+            power STRING,
+            patronage_patterns ARRAY<STRING>,
+            censorship_cases ARRAY<STRING>,
+            bribe_networks ARRAY<STRING>,
+            rival_factions ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        notes ARRAY<STRING>,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY century, origin_region;
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.translation_genealogy_master`
+(
+    term_id STRING NOT NULL,
+
+    arabic_term STRING,
+    root STRING,
+    field STRING,
+    earliest_occurrence STRING,
+
+    latin_equivalents ARRAY<
+        STRUCT<
+            latin_term STRING,
+            century STRING,
+            place_of_translation STRING,
+            translator STRING,
+            accuracy_level STRING,
+            semantic_shift STRING,
+            theological_implications ARRAY<STRING>,
+            philosophical_implications ARRAY<STRING>
+        >
+    >,
+
+    translation_phases ARRAY<
+        STRUCT<
+            phase_number INT64,
+            phase_name STRING,
+            mediating_language STRING,
+            key_texts ARRAY<STRING>,
+            distortions ARRAY<STRING>,
+            improvements ARRAY<STRING>,
+            gendered_readings ARRAY<STRING>,
+            emotional_overtones ARRAY<STRING>
+        >
+    >,
+
+    semantic_evolution ARRAY<
+        STRUCT<
+            stage STRING,
+            latin_form STRING,
+            european_school STRING,
+            notable_figures ARRAY<STRING>,
+            shifts ARRAY<STRING>,
+            political_uses ARRAY<STRING>,
+            poetic_uses ARRAY<STRING>,
+            misunderstandings ARRAY<STRING>
+        >
+    >,
+
+    modern_outcomes ARRAY<
+        STRUCT<
+            modern_term STRING,
+            philosophical_school STRING,
+            semantic_gain STRING,
+            semantic_loss STRING,
+            current_challenges ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        notes ARRAY<STRING>,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY field;
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.oriental_silences_hidden_sources`
+(
+    silence_id STRING NOT NULL,
+
+    figure_name STRING,
+    century STRING,
+    region STRING,
+    field STRING,
+
+    hidden_sources ARRAY<
+        STRUCT<
+            title STRING,
+            author STRING,
+            reason_for_hiding STRING,
+            western_claimed_origin STRING,
+            actual_arabic_origin STRING,
+            marginal_confessions ARRAY<STRING>,
+            correspondence_evidence ARRAY<STRING>
+        >
+    >,
+
+    ideological_pressures ARRAY<
+        STRUCT<
+            force STRING,
+            institutions ARRAY<STRING>,
+            censorship_logs ARRAY<STRING>,
+            doctrinal_sensitivities ARRAY<STRING>,
+            political_risks ARRAY<STRING>
+        >
+    >,
+
+    textual_comparisons ARRAY<
+        STRUCT<
+            western_text STRING,
+            arabic_source STRING,
+            matching_phrases ARRAY<STRING>,
+            structural_similarities ARRAY<STRING>,
+            deliberate_misreadings ARRAY<STRING>,
+            semantic_erasures ARRAY<STRING>
+        >
+    >,
+
+    psychological_dimensions STRUCT<
+        pride ARRAY<STRING>,
+        fear ARRAY<STRING>,
+        intellectual_anxieties ARRAY<STRING>,
+        competitive_drives ARRAY<STRING>,
+        hero_complex ARRAY<STRING>
+    >,
+
+    modern_recovery ARRAY<
+        STRUCT<
+            scholar STRING,
+            discovery STRING,
+            archival_location STRING,
+            political_resistance ARRAY<STRING>,
+            impact STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY century, field;
+-- ==========================================================
+-- [109] arabic_latin_bilingual_glossary
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.arabic_latin_bilingual_glossary`
+(
+    glossary_id STRING NOT NULL,
+
+    arabic_term STRING,
+    arabic_root STRING,
+    canonical_definition STRING,
+
+    latin_equivalent STRING,
+    latin_variants ARRAY<STRING>,
+    literal_translation STRING,
+
+    translators ARRAY<
+        STRUCT<
+            name STRING,
+            century STRING,
+            school STRING,
+            language_skills ARRAY<STRING>,
+            biases ARRAY<STRING>,
+            known_errors ARRAY<STRING>
+        >
+    >,
+
+    translation_challenges ARRAY<
+        STRUCT<
+            challenge STRING,
+            examples ARRAY<STRING>,
+            latinizations ARRAY<STRING>,
+            mistranslations ARRAY<STRING>
+        >
+    >,
+
+    semantic_fields ARRAY<
+        STRUCT<
+            context STRING,
+            meanings ARRAY<STRING>,
+            overlapping_terms ARRAY<STRING>,
+            forbidden_equivalents ARRAY<STRING>
+        >
+    >,
+
+    evolution_timeline ARRAY<
+        STRUCT<
+            century STRING,
+            latin_form STRING,
+            semantic_shift STRING,
+            european_figures ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY arabic_root;
+-- ==========================================================
+-- [112] scientific_transmission_networks
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.scientific_transmission_networks`
+(
+    network_id STRING NOT NULL,
+
+    field STRING,
+    origin_city STRING,
+    european_entry_city STRING,
+    century STRING,
+
+    key_figures ARRAY<
+        STRUCT<
+            name STRING,
+            role STRING,
+            school STRING,
+            emotional_traits ARRAY<STRING>,
+            rivalries ARRAY<STRING>,
+            collaborations ARRAY<STRING>,
+            gender_influences ARRAY<STRING>
+        >
+    >,
+
+    scientific_flows ARRAY<
+        STRUCT<
+            concept STRING,
+            arabic_form STRING,
+            latin_form STRING,
+            mutation_notes ARRAY<STRING>,
+            experimental_traces ARRAY<STRING>,
+            european_expansions ARRAY<STRING>
+        >
+    >,
+
+    manuscript_paths ARRAY<
+        STRUCT<
+            copy STRING,
+            scribes ARRAY<STRING>,
+            ports ARRAY<STRING>,
+            monasteries ARRAY<STRING>,
+            smugglers ARRAY<STRING>,
+            scent STRING,
+            marginalia ARRAY<STRING>
+        >
+    >,
+
+    institutions ARRAY<
+        STRUCT<
+            name STRING,
+            city STRING,
+            political_pressure STRING,
+            censorship ARRAY<STRING>,
+            rival_institutions ARRAY<STRING>
+        >
+    >,
+
+    philosophical_impacts ARRAY<
+        STRUCT<
+            thinker STRING,
+            innovation STRING,
+            misreadings ARRAY<STRING>,
+            hybridizations ARRAY<STRING>,
+            resistance ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY field, century;
+-- ==========================================================
+-- [115] cross_civilizational_meta_relations
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.cross_civilizational_meta_relations`
+(
+    relation_id STRING NOT NULL,
+
+    islamic_century STRING,
+    european_century STRING,
+    shared_questions ARRAY<STRING>,
+    tensions ARRAY<STRING>,
+    harmonies ARRAY<STRING>,
+
+    intellectual_pairs ARRAY<
+        STRUCT<
+            islamic_figure STRING,
+            european_figure STRING,
+            shared_concepts ARRAY<STRING>,
+            contested_ideas ARRAY<STRING>,
+            emotional_tone STRING,
+            archival_links ARRAY<STRING>
+        >
+    >,
+
+    cities_of_contact ARRAY<
+        STRUCT<
+            city STRING,
+            contact_modes ARRAY<STRING>,
+            translation_schools ARRAY<STRING>,
+            philosophical_schools ARRAY<STRING>,
+            political_fevers ARRAY<STRING>
+        >
+    >,
+
+    entangled_histories ARRAY<
+        STRUCT<
+            theme STRING,
+            islamic_root ARRAY<STRING>,
+            european_flowering ARRAY<STRING>,
+            later_misreadings ARRAY<STRING>,
+            modern_resonances ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY islamic_century, european_century;
+-- ==========================================================
+-- [118] global_echoes_of_islamic_scientific_heritage
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.global_echoes_of_islamic_scientific_heritage`
+(
+    echo_id STRING NOT NULL,
+
+    field STRING,
+    region STRING,
+    century STRING,
+
+    islamic_origins ARRAY<
+        STRUCT<
+            source STRING,
+            key_figures ARRAY<STRING>,
+            breakthroughs ARRAY<STRING>,
+            manuscripts ARRAY<STRING>
+        >
+    >,
+
+    global_adaptations ARRAY<
+        STRUCT<
+            region STRING,
+            adaptation STRING,
+            scientists ARRAY<STRING>,
+            conceptual_shifts ARRAY<STRING>,
+            technical_modifications ARRAY<STRING>
+        >
+    >,
+
+    traces_in_modern_science ARRAY<
+        STRUCT<
+            discipline STRING,
+            term STRING,
+            remaining_arabic_elements ARRAY<STRING>,
+            suppressed_elements ARRAY<STRING>,
+            textbook_examples ARRAY<STRING>
+        >
+    >,
+
+    cultural_ripples ARRAY<
+        STRUCT<
+            artifact STRING,
+            practice STRING,
+            craft STRING,
+            music STRING,
+            architecture STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY field, region;
+-- ==========================================================
+-- [122] philosophical_crossovers_mega_table
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.philosophical_crossovers_mega_table`
+(
+    crossover_id STRING NOT NULL,
+
+    islamic_figure STRING,
+    european_figure STRING,
+    century STRING,
+    shared_theme STRING,
+
+    islamic_sources ARRAY<
+        STRUCT<
+            book STRING,
+            concept STRING,
+            excerpts ARRAY<STRING>,
+            core_arguments ARRAY<STRING>,
+            metaphysical_assumptions ARRAY<STRING>
+        >
+    >,
+
+    european_transformations ARRAY<
+        STRUCT<
+            text STRING,
+            reformulated_concept STRING,
+            semantic_shift STRING,
+            misalignments ARRAY<STRING>,
+            polemical_moves ARRAY<STRING>,
+            hybridizations ARRAY<STRING>
+        >
+    >,
+
+    dialogical_resonances ARRAY<
+        STRUCT<
+            axis STRING,
+            convergences ARRAY<STRING>,
+            divergences ARRAY<STRING>,
+            unresolved_questions ARRAY<STRING>
+        >
+    >,
+
+    modern_implications ARRAY<
+        STRUCT<
+            field STRING,
+            thesis STRING,
+            islamic_relevance ARRAY<STRING>,
+            critique ARRAY<STRING>,
+            restoration_potential ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY shared_theme;
+-- ==========================================================
+-- [126] convergence_divergence_history
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.convergence_divergence_history`
+(
+    record_id STRING NOT NULL,
+
+    islamic_century STRING,
+    european_century STRING,
+
+    shared_questions ARRAY<STRING>,
+    divergent_answers ARRAY<STRING>,
+    convergent_turning_points ARRAY<STRING>,
+    irreversible_breaks ARRAY<STRING>,
+
+    concept_dialogues ARRAY<
+        STRUCT<
+            concept STRING,
+            arabic_form STRING,
+            latin_form STRING,
+            european_maturity STRING,
+            arabic_trails ARRAY<STRING>,
+            misreadings ARRAY<STRING>,
+            future_reintegration ARRAY<STRING>
+        >
+    >,
+
+    sensory_histories ARRAY<
+        STRUCT<
+            city STRING,
+            scents ARRAY<STRING>,
+            sounds ARRAY<STRING>,
+            emotional_traces ARRAY<STRING>,
+            archival_ghosts ARRAY<STRING>
+        >
+    >,
+
+    philosophical_paths ARRAY<
+        STRUCT<
+            axis STRING,
+            islamic_figures ARRAY<STRING>,
+            european_figures ARRAY<STRING>,
+            points_of_contact ARRAY<STRING>,
+            tension_fields ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY islamic_century, european_century;
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.arabic_manuscript_metadata_master`
+(
+    manuscript_id STRING NOT NULL,
+
+    title STRING,
+    author STRING,
+    century STRING,
+    field STRING,
+    region STRING,
+
+    physical_description STRUCT<
+        pages INT64,
+        lines_per_page INT64,
+        script_type STRING,
+        ink_colors ARRAY<STRING>,
+        paper_type STRING,
+        binding STRING,
+        condition_notes ARRAY<STRING>,
+        scent_notes ARRAY<STRING>,
+        watermarks ARRAY<STRING>
+    >,
+
+    provenance ARRAY<
+        STRUCT<
+            owner STRING,
+            acquisition_method STRING,
+            period STRING,
+            transfer_notes ARRAY<STRING>,
+            sale_records ARRAY<STRING>,
+            bribe_traces ARRAY<STRING>,
+            political_context STRING
+        >
+    >,
+
+    scribes ARRAY<
+        STRUCT<
+            name STRING,
+            region STRING,
+            century STRING,
+            handwriting_features ARRAY<STRING>,
+            mistakes ARRAY<STRING>,
+            corrections ARRAY<STRING>,
+            emotional_notes ARRAY<STRING>,
+            chants ARRAY<STRING>,
+            workshop_sounds ARRAY<STRING>,
+            workshop_scents ARRAY<STRING>
+        >
+    >,
+
+    marginalia ARRAY<
+        STRUCT<
+            writer STRING,
+            century STRING,
+            commentary STRING,
+            emotional_tone STRING,
+            doctrinal_position STRING,
+            cross_references ARRAY<STRING>,
+            gossip_traces ARRAY<STRING>
+        >
+    >,
+
+    reading_history ARRAY<
+        STRUCT<
+            reader STRING,
+            century STRING,
+            reading_place STRING,
+            reading_motives ARRAY<STRING>,
+            intellectual_effect ARRAY<STRING>,
+            misunderstandings ARRAY<STRING>,
+            later_works_influenced ARRAY<STRING>
+        >
+    >,
+
+    libraries ARRAY<
+        STRUCT<
+            library_name STRING,
+            city STRING,
+            shelfmark STRING,
+            acquisition_story STRING,
+            cataloguers ARRAY<STRING>,
+            political_censors ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY field, century;
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.manuscript_travel_routes_gis`
+(
+    route_id STRING NOT NULL,
+
+    manuscript_id STRING,
+    origin_city STRING,
+    origin_century STRING,
+
+    travel_stages ARRAY<
+        STRUCT<
+            stage_number INT64,
+            city STRING,
+            region STRING,
+            year STRING,
+            transport_method STRING,
+            caravan_type STRING,
+            ship_type STRING,
+            risks ARRAY<STRING>,
+            port_scents ARRAY<STRING>,
+            desert_sounds ARRAY<STRING>,
+            religious_controls ARRAY<STRING>,
+            smugglers ARRAY<STRING>
+        >
+    >,
+
+    intermediaries ARRAY<
+        STRUCT<
+            name STRING,
+            identity STRING,
+            profession STRING,
+            language_skills ARRAY<STRING>,
+            motives ARRAY<STRING>,
+            rivalries ARRAY<STRING>,
+            betrayals ARRAY<STRING>,
+            secret_notes ARRAY<STRING>
+        >
+    >,
+
+    entry_points ARRAY<
+        STRUCT<
+            european_city STRING,
+            monastery STRING,
+            university STRING,
+            catalog_notes ARRAY<STRING>,
+            hiding_spots ARRAY<STRING>,
+            scribal_circles ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY origin_city;
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.manuscript_reader_lineage`
+(
+    lineage_id STRING NOT NULL,
+
+    manuscript_id STRING,
+    root_author STRING,
+    city STRING,
+    century STRING,
+
+    reader_chain ARRAY<
+        STRUCT<
+            reader STRING,
+            role STRING,
+            century STRING,
+            place_of_reading STRING,
+            emotional_reaction STRING,
+            misunderstandings ARRAY<STRING>,
+            agreements ARRAY<STRING>,
+            objections ARRAY<STRING>,
+            polemics ARRAY<STRING>,
+            later_books_authored ARRAY<STRING>,
+            students_impacted ARRAY<STRING>,
+            women_readers ARRAY<STRING>,
+            silent_transmitters ARRAY<STRING>
+        >
+    >,
+
+    intellectual_descendants ARRAY<
+        STRUCT<
+            figure STRING,
+            school STRING,
+            inherited_concepts ARRAY<STRING>,
+            mutated_concepts ARRAY<STRING>,
+            erased_layers ARRAY<STRING>,
+            quotes ARRAY<STRING>,
+            denials ARRAY<STRING>,
+            hidden_alignments ARRAY<STRING>
+        >
+    >,
+
+    european_receivers ARRAY<
+        STRUCT<
+            name STRING,
+            route STRING,
+            century STRING,
+            textual_fragments ARRAY<STRING>,
+            marginal_citations ARRAY<STRING>,
+            ideological_filters ARRAY<STRING>,
+            secret_usages ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY century;
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.arabic_to_europe_manuscript_chains`
+(
+    chain_id STRING NOT NULL,
+
+    manuscript_id STRING,
+    root_author STRING,
+    origin_city STRING,
+    origin_century STRING,
+
+    arabic_chain ARRAY<
+        STRUCT<
+            person STRING,
+            role STRING,
+            city STRING,
+            century STRING,
+            interactions ARRAY<STRING>,
+            annotations ARRAY<STRING>,
+            emotional_traces ARRAY<STRING>
+        >
+    >,
+
+    transitional_chain ARRAY<
+        STRUCT<
+            broker STRING,
+            identity STRING,
+            caravan_routes ARRAY<STRING>,
+            sea_routes ARRAY<STRING>,
+            smuggling_cases ARRAY<STRING>,
+            diplomatic_letters ARRAY<STRING>,
+            church_contacts ARRAY<STRING>,
+            scent STRING
+        >
+    >,
+
+    european_chain ARRAY<
+        STRUCT<
+            reader STRING,
+            monastery STRING,
+            university STRING,
+            century STRING,
+            marginal_quotes ARRAY<STRING>,
+            doctrinal_barriers ARRAY<STRING>,
+            rivalries ARRAY<STRING>,
+            political_interests ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY origin_city;
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.scribal_notes_and_marginalia_master`
+(
+    note_id STRING NOT NULL,
+
+    manuscript_id STRING,
+    century STRING,
+    scribe STRING,
+    region STRING,
+
+    note_content STRING,
+    doctrinal_position STRING,
+    emotional_tone STRING,
+    linguistic_features ARRAY<STRING>,
+
+    cross_references ARRAY<
+        STRUCT<
+            referenced_author STRING,
+            phrase STRING,
+            type STRING,
+            accuracy STRING
+        >
+    >,
+
+    narrative_traces ARRAY<
+        STRUCT<
+            anecdote STRING,
+            hints ARRAY<STRING>,
+            concealed_meanings ARRAY<STRING>
+        >
+    >,
+
+    sensory_notes STRUCT<
+        ink_scent STRING,
+        page_texture STRING,
+        workshop_sounds ARRAY<STRING>,
+        environmental_traces ARRAY<STRING>
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY century, region;
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.ownership_borrowing_study`
+(
+    record_id STRING NOT NULL,
+
+    manuscript_id STRING,
+    owner STRING,
+    city STRING,
+    century STRING,
+
+    ownership_events ARRAY<
+        STRUCT<
+            event STRING,
+            date STRING,
+            giver STRING,
+            receiver STRING,
+            emotional_motives ARRAY<STRING>,
+            pricing STRING,
+            scandals ARRAY<STRING>
+        >
+    >,
+
+    borrowing_events ARRAY<
+        STRUCT<
+            borrower STRING,
+            reason STRING,
+            duration STRING,
+            annotations_added ARRAY<STRING>,
+            damages ARRAY<STRING>,
+            disputes ARRAY<STRING>
+        >
+    >,
+
+    waqf_records ARRAY<
+        STRUCT<
+            institution STRING,
+            date STRING,
+            scribe STRING,
+            political_context STRING,
+            conditions ARRAY<STRING>
+        >
+    >,
+
+    loss_cases ARRAY<
+        STRUCT<
+            cause STRING,
+            century STRING,
+            suspected_persons ARRAY<STRING>,
+            libraries ARRAY<STRING>,
+            urban_disruptions ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY city;
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.printing_history_of_islamic_texts_in_europe`
+(
+    print_id STRING NOT NULL,
+
+    title STRING,
+    arabic_author STRING,
+    latin_title STRING,
+    european_printer STRING,
+    city STRING,
+    century STRING,
+
+    printing_motives ARRAY<
+        STRUCT<
+            motive STRING,
+            ideological_pressure STRING,
+            economic_interest STRING,
+            academic_need STRING,
+            theological_tension STRING
+        >
+    >,
+
+    printing_process ARRAY<
+        STRUCT<
+            stage STRING,
+            tools ARRAY<STRING>,
+            types ARRAY<STRING>,
+            workers ARRAY<STRING>,
+            errors ARRAY<STRING>,
+            corrections ARRAY<STRING>
+        >
+    >,
+
+    circulation ARRAY<
+        STRUCT<
+            region STRING,
+            buyers ARRAY<STRING>,
+            universities ARRAY<STRING>,
+            monks ARRAY<STRING>,
+            scientists ARRAY<STRING>,
+            reaction_notes ARRAY<STRING>
+        >
+    >,
+
+    suppressed_versions ARRAY<
+        STRUCT<
+            reason STRING,
+            censor STRING,
+            erased_passages ARRAY<STRING>,
+            manuscript_comparisons ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY city, century;
+-- ==========================================================
+-- [137] islamic_latin_translation_architecture
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.islamic_latin_translation_architecture`
+(
+    architecture_id STRING NOT NULL,
+
+    translation_school STRING,
+    region STRING,
+    century STRING,
+
+    input_streams ARRAY<
+        STRUCT<
+            source STRING,
+            type STRING,
+            intermediaries ARRAY<STRING>,
+            manuscript_ids ARRAY<STRING>,
+            gendered_routes ARRAY<STRING>
+        >
+    >,
+
+    processing_layers ARRAY<
+        STRUCT<
+            stage STRING,
+            philological_tools ARRAY<STRING>,
+            debates ARRAY<STRING>,
+            linguistic_collisions ARRAY<STRING>,
+            theological_fears ARRAY<STRING>,
+            political_constraints ARRAY<STRING>
+        >
+    >,
+
+    output_layers ARRAY<
+        STRUCT<
+            product STRING,
+            accuracy STRING,
+            distortions ARRAY<STRING>,
+            secret_annotations ARRAY<STRING>,
+            intended_audiences ARRAY<STRING>
+        >
+    >,
+
+    circulation_patterns ARRAY<
+        STRUCT<
+            region STRING,
+            universities ARRAY<STRING>,
+            monasteries ARRAY<STRING>,
+            book_brokers ARRAY<STRING>,
+            black_markets ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY translation_school, region;
+-- ==========================================================
+-- [141] conceptual_fusion_and_epistemic_hybrids
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.conceptual_fusion_and_epistemic_hybrids`
+(
+    fusion_id STRING NOT NULL,
+
+    islamic_concept STRING,
+    latin_concept STRING,
+    field STRING,
+    century STRING,
+
+    fusion_process ARRAY<
+        STRUCT<
+            stage STRING,
+            actors ARRAY<STRING>,
+            intellectual_forces ARRAY<STRING>,
+            emotional_pressures ARRAY<STRING>,
+            philosophical_collisions ARRAY<STRING>,
+            survival_elements ARRAY<STRING>,
+            erased_elements ARRAY<STRING>
+        >
+    >,
+
+    hybrid_forms ARRAY<
+        STRUCT<
+            hybrid_name STRING,
+            characteristics ARRAY<STRING>,
+            new_risks ARRAY<STRING>,
+            semantic_mutations ARRAY<STRING>,
+            theological_impacts ARRAY<STRING>,
+            political_potentials ARRAY<STRING>
+        >
+    >,
+
+    epistemic_consequences ARRAY<
+        STRUCT<
+            domain STRING,
+            positive_outcomes ARRAY<STRING>,
+            negative_outcomes ARRAY<STRING>,
+            future_reintegration_paths ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY field, century;
+-- ==========================================================
+-- [141] conceptual_fusion_and_epistemic_hybrids
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.conceptual_fusion_and_epistemic_hybrids`
+(
+    fusion_id STRING NOT NULL,
+
+    islamic_concept STRING,
+    latin_concept STRING,
+    field STRING,
+    century STRING,
+
+    fusion_process ARRAY<
+        STRUCT<
+            stage STRING,
+            actors ARRAY<STRING>,
+            intellectual_forces ARRAY<STRING>,
+            emotional_pressures ARRAY<STRING>,
+            philosophical_collisions ARRAY<STRING>,
+            survival_elements ARRAY<STRING>,
+            erased_elements ARRAY<STRING>
+        >
+    >,
+
+    hybrid_forms ARRAY<
+        STRUCT<
+            hybrid_name STRING,
+            characteristics ARRAY<STRING>,
+            new_risks ARRAY<STRING>,
+            semantic_mutations ARRAY<STRING>,
+            theological_impacts ARRAY<STRING>,
+            political_potentials ARRAY<STRING>
+        >
+    >,
+
+    epistemic_consequences ARRAY<
+        STRUCT<
+            domain STRING,
+            positive_outcomes ARRAY<STRING>,
+            negative_outcomes ARRAY<STRING>,
+            future_reintegration_paths ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY field, century;
+-- ==========================================================
+-- [145] multi_lingual_transmission_web_arabic_syriac_hebrew_latin
+-- ==========================================================
+
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.multi_lingual_transmission_web_arabic_syriac_hebrew_latin`
+(
+    web_id STRING NOT NULL,
+
+    arabic_source STRING,
+    field STRING,
+    century STRING,
+
+    syriac_stage ARRAY<
+        STRUCT<
+            text STRING,
+            translator STRING,
+            city STRING,
+            century STRING,
+            additions ARRAY<STRING>,
+            suppressions ARRAY<STRING>,
+            scent STRING
+        >
+    >,
+
+    hebrew_stage ARRAY<
+        STRUCT<
+            text STRING,
+            translator STRING,
+            city STRING,
+            century STRING,
+            emotional_traces ARRAY<STRING>,
+            polemical_edges ARRAY<STRING>,
+            theological_constraints ARRAY<STRING>
+        >
+    >,
+
+    latin_stage ARRAY<
+        STRUCT<
+            text STRING,
+            translator STRING,
+            city STRING,
+            century STRING,
+            hybridizations ARRAY<STRING>,
+            misreadings ARRAY<STRING>,
+            political_anxieties ARRAY<STRING>
+        >
+    >,
+
+    multi_lingual_collisions ARRAY<
+        STRUCT<
+            concept STRING,
+            variants ARRAY<STRING>,
+            misalignments ARRAY<STRING>,
+            misunderstanding_roots ARRAY<STRING>,
+            resolution_attempts ARRAY<STRING>
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY field;
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.the_arabic_text_in_renaissance_philosophy`
+(
+    record_id STRING NOT NULL,
+
+    european_thinker STRING,
+    century STRING,
+    region STRING,
+    school STRING,
+
+    arabic_sources ARRAY<
+        STRUCT<
+            text STRING,
+            author STRING,
+            century STRING,
+            manuscript_paths ARRAY<STRING>,
+            marginalia ARRAY<STRING>,
+            european_filters ARRAY<STRING>
+        >
+    >,
+
+    conceptual_interactions ARRAY<
+        STRUCT<
+            concept STRING,
+            arabic_form STRING,
+            latin_form STRING,
+            philosophical_shift STRING,
+            omissions ARRAY<STRING>,
+            emotional_overtones ARRAY<STRING>
+        >
+    >,
+
+    textual_synapses ARRAY<
+        STRUCT<
+            shared_structure STRING,
+            shared_argument STRING,
+            narrative_link STRING,
+            sensory_traces ARRAY<STRING>,
+            evidence_fragments ARRAY<STRING>
+        >
+    >,
+
+    divergences ARRAY<
+        STRUCT<
+            theme STRING,
+            european_direction STRING,
+            islamic_root ARRAY<STRING>,
+            hybridization ARRAY<STRING>,
+            philosophical_break STRING
+        >
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY european_thinker;
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.final_unified_transmission_graph`
+(
+    node_id STRING NOT NULL,
+
+    node_type STRING,    -- person/book/manuscript/city/concept/translation/event/etc.
+    label STRING,
+    century STRING,
+    region STRING,
+
+    edges ARRAY<
+        STRUCT<
+            relation_type STRING,
+            target_node STRING,
+            strength STRING,
+            emotional_weight STRING,
+            philosophical_weight STRING,
+            political_weight STRING,
+            sensory_traces ARRAY<STRING>
+        >
+    >,
+
+    narrative_layers ARRAY<
+        STRUCT<
+            layer STRING,
+            elements ARRAY<STRING>,
+            contradictions ARRAY<STRING>,
+            confirmations ARRAY<STRING>
+        >
+    >,
+
+    sensory_fingerprint STRUCT<
+        scents ARRAY<STRING>,
+        sounds ARRAY<STRING>,
+        textures ARRAY<STRING>,
+        colors ARRAY<STRING>
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY node_type, century;
+CREATE TABLE IF NOT EXISTS `iqraa-12.diwan_iqraa_elmi.global_manuscript_journey_and_final_repositories`
+(
+    journey_id STRING NOT NULL,
+
+    manuscript_id STRING,
+    title STRING,
+    author STRING,
+    origin_city STRING,
+    origin_region STRING,
+    origin_century STRING,
+
+    departure_scene STRUCT<
+        initial_owner STRING,
+        household_context ARRAY<STRING>,
+        urban_sounds ARRAY<STRING>,
+        scents ARRAY<STRING>,
+        political_climate STRING,
+        threats ARRAY<STRING>
+    >,
+
+    extraction_events ARRAY<
+        STRUCT<
+            event_type STRING,
+            actor STRING,
+            century STRING,
+            method STRING,
+            emotional_tone STRING,
+            compensation STRING,
+            coercion ARRAY<STRING>,
+            secrecy_level STRING
+        >
+    >,
+
+    long_route ARRAY<
+        STRUCT<
+            stage_number INT64,
+            from_city STRING,
+            to_city STRING,
+            stop_type STRING,
+            transport_mode STRING,
+            handler STRING,
+            companions ARRAY<STRING>,
+            dangers ARRAY<STRING>,
+            sea_sounds ARRAY<STRING>,
+            desert_smells ARRAY<STRING>,
+            port_markets ARRAY<STRING>,
+            smugglers ARRAY<STRING>,
+            bribe_events ARRAY<STRING>,
+            women_interventions ARRAY<STRING>,
+            religious_controls ARRAY<STRING>
+        >
+    >,
+
+    acquisition_history ARRAY<
+        STRUCT<
+            buyer STRING,
+            buyer_identity STRING,
+            auction_house STRING,
+            city STRING,
+            date STRING,
+            bidding_rivals ARRAY<STRING>,
+            pricing STRING,
+            emotional_clues ARRAY<STRING>,
+            political_motives ARRAY<STRING>,
+            forged_documents ARRAY<STRING>
+        >
+    >,
+
+    shipping_and_logistics ARRAY<
+        STRUCT<
+            method STRING,
+            ship_or_caravan STRING,
+            cargo_conditions ARRAY<STRING>,
+            damages ARRAY<STRING>,
+            custom_checks ARRAY<STRING>,
+            confiscations ARRAY<STRING>,
+            bribes ARRAY<STRING>,
+            insurance_records ARRAY<STRING>
+        >
+    >,
+
+    global_repositories ARRAY<
+        STRUCT<
+            institution STRING,
+            country STRING,
+            city STRING,
+            department STRING,
+            room STRING,
+            shelfmark STRING,
+            acquisition_story STRING,
+            curator STRING,
+            archivists ARRAY<STRING>,
+            gendered_access STRING,
+            political_filters ARRAY<STRING>,
+            catalog_notes ARRAY<STRING>,
+            contradictory_records ARRAY<STRING>
+        >
+    >,
+
+    storage_conditions STRUCT<
+        temperature STRING,
+        humidity STRING,
+        light_exposure STRING,
+        pests ARRAY<STRING>,
+        chemical_treatments ARRAY<STRING>,
+        restorer_notes ARRAY<STRING>,
+        scent STRING
+    >,
+
+    librarianship_process ARRAY<
+        STRUCT<
+            librarian STRING,
+            classification_method STRING,
+            shelfing_policy STRING,
+            forbidden_shelves ARRAY<STRING>,
+            movement_logs ARRAY<STRING>,
+            borrowing_restrictions ARRAY<STRING>
+        >
+    >,
+
+    hidden_archives ARRAY<
+        STRUCT<
+            section STRING,
+            secrecy_level STRING,
+            locked_drawers ARRAY<STRING>,
+            forbidden_boxes ARRAY<STRING>,
+            ghost_entries ARRAY<STRING>,
+            anomalies ARRAY<STRING>
+        >
+    >,
+
+    access_history ARRAY<
+        STRUCT<
+            scholar STRING,
+            century STRING,
+            purpose STRING,
+            pages_consulted ARRAY<STRING>,
+            marginalia_added ARRAY<STRING>,
+            misunderstandings ARRAY<STRING>,
+            breakthroughs ARRAY<STRING>,
+            emotional_reactions ARRAY<STRING>
+        >
+    >,
+
+    maintenance_and_care ARRAY<
+        STRUCT<
+            staff STRING,
+            role STRING,
+            inspections ARRAY<STRING>,
+            repairs ARRAY<STRING>,
+            emergency_events ARRAY<STRING>,
+            misplacements ARRAY<STRING>,
+            discovered_damage ARRAY<STRING>
+        >
+    >,
+
+    end_of_journey STRUCT<
+        current_location STRING,
+        stability_level STRING,
+        digitization_status STRING,
+        public_access STRING,
+        future_threats ARRAY<STRING>,
+        notes ARRAY<STRING>
+    >,
+
+    metadata STRUCT<
+        created_at TIMESTAMP,
+        sources ARRAY<STRING>
+    >
+)
+CLUSTER BY origin_city, origin_century;
+

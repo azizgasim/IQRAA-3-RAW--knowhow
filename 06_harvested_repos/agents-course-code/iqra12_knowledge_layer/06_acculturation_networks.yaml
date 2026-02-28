@@ -1,0 +1,451 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#                    IQRA-12 Acculturation Networks
+#                        شبكات التثاقف والانتقال الحضاري
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# "لا نفهم المتكلمين دون فهم آباء الكنيسة"
+# "لا نفهم الفلاسفة دون فهم اليونان"
+#
+# المبدأ الحاكم:
+# التراث الإسلامي ليس جزيرة معزولة، بل عقدة في شبكة حضارية ممتدة.
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+metadata:
+  component: "Acculturation Networks"
+  component_ar: "شبكات التثاقف"
+  version: "1.0.0"
+  purpose: "رسم خرائط الانتقال الحضاري للمفاهيم والنصوص"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              المبادئ الحاكمة
+# ═══════════════════════════════════════════════════════════════════════════════
+
+governing_principles:
+
+  principle_1:
+    name: "Civilizational Interconnection"
+    name_ar: "الترابط الحضاري"
+    rule: |
+      التراث الإسلامي عقدة في شبكة حضارية:
+      ← يستقبل من اليونان والفرس والهند
+      → يُرسل إلى أوروبا الوسيطة
+      ↔ يتبادل مع اليهود والمسيحيين
+      
+  principle_2:
+    name: "Trace Before Claim"
+    name_ar: "التتبع قبل الادعاء"
+    rule: |
+      قبل ادعاء "الأصالة" أو "التأثر"، 
+      يجب تتبع المسار الفعلي للمفهوم عبر اللغات والثقافات.
+      
+  principle_3:
+    name: "Translation as Transformation"
+    name_ar: "الترجمة كتحويل"
+    rule: |
+      الترجمة ليست نقلاً حرفياً، بل تحويل وإعادة تشكيل.
+      المفهوم يتغير عند الانتقال.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              التقاليد السابقة للإسلام
+# ═══════════════════════════════════════════════════════════════════════════════
+
+pre_islamic_roots:
+
+  description: |
+    التنقيب في المصادر السابقة للإسلام
+    لفهم جذور المفاهيم والمصطلحات.
+    
+  traditions:
+    
+    # ─────────────────────────────────────────────────────────────────────
+    # الفلسفة اليونانية
+    # ─────────────────────────────────────────────────────────────────────
+    
+    greek_philosophy:
+      name_ar: "الفلسفة اليونانية"
+      importance: "مصدر المنطق والميتافيزيقا والأخلاق"
+      key_figures:
+        - name: "أرسطو"
+          original: "Ἀριστοτέλης"
+          influence: "المنطق، الفيزياء، الميتافيزيقا"
+        - name: "أفلاطون"
+          original: "Πλάτων"
+          influence: "المثل، السياسة، الروح"
+        - name: "أفلوطين"
+          original: "Πλωτῖνος"
+          influence: "الفيض، الواحد"
+      key_concepts:
+        - greek: "οὐσία (ousia)"
+          arabic: "جوهر"
+          evolution: "من المادة إلى الوجود الذاتي"
+        - greek: "ὕλη (hyle)"
+          arabic: "هيولى"
+        - greek: "μορφή (morphe)"
+          arabic: "صورة"
+        - greek: "νοῦς (nous)"
+          arabic: "عقل"
+      corpora:
+        - "TLG (Thesaurus Linguae Graecae)"
+        - "Perseus Digital Library"
+        
+    # ─────────────────────────────────────────────────────────────────────
+    # المسيحية الشرقية
+    # ─────────────────────────────────────────────────────────────────────
+    
+    eastern_christianity:
+      name_ar: "المسيحية الشرقية"
+      importance: |
+        الوسيط في نقل الفلسفة اليونانية
+        مصدر علم الكلام الأول
+      branches:
+        - syriac: "السريانية"
+        - coptic: "القبطية"
+        - byzantine: "البيزنطية"
+      key_figures:
+        - name: "يوحنا الدمشقي"
+          importance: "المقالات في الهرطقات"
+        - name: "حنين بن إسحاق"
+          importance: "المترجم الأعظم"
+      key_concepts:
+        - syriac: "ܩܢܘܡܐ (qnoma)"
+          arabic: "أقنوم"
+        - syriac: "ܟܝܢܐ (kyana)"
+          arabic: "كيان"
+      corpora:
+        - "CSCO (Corpus Scriptorum Christianorum Orientalium)"
+        - "Patrologia Graeca"
+        - "Patrologia Latina"
+        
+    # ─────────────────────────────────────────────────────────────────────
+    # التراث الفارسي
+    # ─────────────────────────────────────────────────────────────────────
+    
+    persian_heritage:
+      name_ar: "التراث الفارسي"
+      importance: "الإدارة، الآداب، التصوف"
+      traditions:
+        - zoroastrian: "الزرادشتية"
+        - manichaean: "المانوية"
+        - sasanid: "الإدارة الساسانية"
+      key_concepts:
+        - persian: "دیوان (divan)"
+          arabic: "ديوان"
+        - persian: "وزیر (vazir)"
+          arabic: "وزير"
+          
+    # ─────────────────────────────────────────────────────────────────────
+    # التراث اليهودي
+    # ─────────────────────────────────────────────────────────────────────
+    
+    jewish_sources:
+      name_ar: "المصادر اليهودية"
+      importance: "الشريعة المقارنة، الكلام"
+      texts:
+        - talmud: "التلمود"
+        - midrash: "المدراش"
+        - jewish_philosophy: "الفلسفة اليهودية"
+      key_figures:
+        - name: "سعديا جاؤون"
+          importance: "الأمانات والاعتقادات"
+        - name: "موسى بن ميمون"
+          importance: "دلالة الحائرين"
+      corpora:
+        - "Sefaria"
+        - "Bar-Ilan Responsa Project"
+        
+    # ─────────────────────────────────────────────────────────────────────
+    # التقاليد الهندية
+    # ─────────────────────────────────────────────────────────────────────
+    
+    indian_traditions:
+      name_ar: "التقاليد الهندية"
+      importance: "الرياضيات، الفلك، بعض التصوف"
+      traditions:
+        - buddhist: "البوذية"
+        - hindu: "الهندوسية"
+      key_transfers:
+        - "الأرقام الهندية"
+        - "بعض قصص كليلة ودمنة"
+      corpora:
+        - "GRETIL (Göttingen)"
+        - "Buddhist Digital Resource Center"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              قنوات الانتقال إلى أوروبا
+# ═══════════════════════════════════════════════════════════════════════════════
+
+westward_transmission:
+
+  description: |
+    كيف انتقلت المعرفة الإسلامية إلى أوروبا الوسيطة.
+    
+  channels:
+    
+    andalusia:
+      name_ar: "الأندلس"
+      period: "القرن 8-15م"
+      key_centers:
+        - "طليطلة (مدرسة الترجمة)"
+        - "قرطبة"
+        - "إشبيلية"
+      key_figures:
+        - name: "جيرار الكريموني"
+          original: "Gerard of Cremona"
+          role: "أعظم مترجمي طليطلة"
+        - name: "مايكل سكوت"
+          original: "Michael Scot"
+          role: "مترجم ابن رشد"
+      translated_works:
+        - "الكتب الأرسطية عبر ابن رشد"
+        - "القانون لابن سينا"
+        - "الخوارزمي في الجبر"
+        
+    sicily:
+      name_ar: "صقلية"
+      period: "القرن 9-13م"
+      key_centers:
+        - "باليرمو"
+      importance: "الترجمة مباشرة من العربية للاتينية"
+      
+    crusader_contacts:
+      name_ar: "الاحتكاك الصليبي"
+      period: "القرن 11-13م"
+      type: "تبادل غير رسمي"
+      
+    byzantine_intermediary:
+      name_ar: "الوساطة البيزنطية"
+      importance: "بعض النصوص عبرت عبر اليونانية البيزنطية"
+      
+    jewish_translators:
+      name_ar: "المترجمون اليهود"
+      importance: |
+        كثير من الترجمات للاتينية مرت عبر العبرية أولاً.
+        اليهود كوسطاء ثقافيين.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              التتبع المعجمي عبر اللغات
+# ═══════════════════════════════════════════════════════════════════════════════
+
+lexical_tracing:
+
+  description: |
+    تتبع المصطلح عبر اللغات لفهم تحولاته.
+    
+  languages:
+    1: "اليونانية (المصدر)"
+    2: "السريانية (الوسيط الأول)"
+    3: "العربية (الإبداع والتطوير)"
+    4: "العبرية (وسيط ثانٍ أحياناً)"
+    5: "اللاتينية (النقل الغربي)"
+    6: "الفارسية (التوسع الشرقي)"
+    7: "التركية (الامتداد العثماني)"
+    
+  example_trace:
+    concept: "الجوهر"
+    path:
+      - language: "Greek"
+        term: "οὐσία (ousia)"
+        meaning: "الكينونة، ما يجعل الشيء شيئاً"
+        
+      - language: "Syriac"
+        term: "ܐܘܣܝܐ (usiya)"
+        meaning: "نقل شبه حرفي"
+        
+      - language: "Arabic"
+        term: "جوهر"
+        meaning: "تحول: من 'الكينونة' إلى 'الحامل المستقل'"
+        schools:
+          mutazila: "الجوهر الفرد (الذرة)"
+          asharia: "نفي الجواهر المستقلة"
+          falsafa: "الجوهر والعرض الأرسطي"
+          
+      - language: "Latin"
+        term: "substantia"
+        meaning: "عودة للمعنى الأرسطي عبر ابن رشد"
+        
+      - language: "Hebrew"
+        term: "עצם (etzem)"
+        meaning: "في الفلسفة اليهودية الوسيطة"
+        
+  corpora_for_tracing:
+    - "Lane's Lexicon (Arabic Classical)"
+    - "Comprehensive Aramaic Lexicon"
+    - "Dictionary of Medieval Latin"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              تاريخ المفاهيم (Begriffsgeschichte)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+conceptual_history:
+
+  description: |
+    منهجية تاريخ المفاهيم (Begriffsgeschichte) 
+    لتتبع تطور المعاني عبر الزمن.
+    
+  source: "Reinhart Koselleck"
+  field: "History of Concepts"
+  
+  methodology:
+    1: "تحديد المفهوم المدروس"
+    2: "جمع الاستخدامات عبر الزمن والمصادر"
+    3: "تحليل تحولات المعنى"
+    4: "ربط التحولات بالسياقات التاريخية"
+    5: "رسم خريطة التطور"
+    
+  application_to_iqra:
+    - "تتبع 'المصلحة' من الجويني إلى الشاطبي"
+    - "تتبع 'العقل' من الفلاسفة إلى المتكلمين"
+    - "تتبع 'التوحيد' عبر المذاهب الكلامية"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              التحولات والتشوهات
+# ═══════════════════════════════════════════════════════════════════════════════
+
+transformation_patterns:
+
+  description: |
+    أنماط التحول التي تحدث عند انتقال المفهوم.
+    
+  patterns:
+    
+    semantic_shift:
+      name_ar: "الانزياح الدلالي"
+      description: "المعنى يتغير مع الحفاظ على اللفظ"
+      example:
+        term: "جوهر"
+        from: "المادة الأولى (أرسطو)"
+        to: "الجوهر الفرد (المتكلمون)"
+        
+    narrowing:
+      name_ar: "التضييق"
+      description: "المفهوم يصبح أخص"
+      example:
+        term: "فلسفة"
+        from: "محبة الحكمة (عام)"
+        to: "المشائية تحديداً"
+        
+    broadening:
+      name_ar: "التوسيع"
+      description: "المفهوم يصبح أعم"
+      
+    islamization:
+      name_ar: "الأسلمة"
+      description: "إعادة تشكيل المفهوم ليتوافق مع الإسلام"
+      example:
+        concept: "العقل الفعال"
+        transformation: "من إله فرعي إلى ملك (جبريل)"
+        
+    rejection:
+      name_ar: "الرفض"
+      description: "رفض المفهوم مع الحفاظ على المصطلح للنقد"
+      example:
+        concept: "الهيولى"
+        by: "المتكلمون"
+        reason: "تعارض مع الخلق من عدم"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              الفاعلون في الانتقال
+# ═══════════════════════════════════════════════════════════════════════════════
+
+transmission_actors:
+
+  translators:
+    description: "المترجمون الكبار"
+    figures:
+      - name: "حنين بن إسحاق"
+        period: "القرن 9م"
+        languages: ["Greek", "Syriac", "Arabic"]
+        specialty: "الطب والفلسفة"
+        
+      - name: "إسحاق بن حنين"
+        period: "القرن 9م"
+        specialty: "أرسطو"
+        
+      - name: "ثابت بن قرة"
+        period: "القرن 9م"
+        specialty: "الرياضيات والفلك"
+        
+      - name: "قسطا بن لوقا"
+        period: "القرن 9-10م"
+        specialty: "الفلسفة والعلوم"
+        
+  patrons:
+    description: "الرعاة والممولون"
+    figures:
+      - name: "بنو موسى"
+        role: "تمويل الترجمات"
+        
+      - name: "المأمون"
+        role: "بيت الحكمة"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              جداول التثاقف
+# ═══════════════════════════════════════════════════════════════════════════════
+
+acculturation_tables:
+
+  concept_traces:
+    description: "تتبع المفاهيم عبر اللغات"
+    fields:
+      - trace_id
+      - concept_id
+      - language
+      - term
+      - period
+      - meaning
+      - source_evidence_id
+      - transformation_type
+      
+  transmission_events:
+    description: "أحداث النقل والترجمة"
+    fields:
+      - event_id
+      - source_work_id
+      - target_work_id
+      - translator_id
+      - patron_id
+      - date
+      - location
+      - transformation_notes
+      
+  civilizational_links:
+    description: "الروابط الحضارية"
+    fields:
+      - link_id
+      - source_tradition
+      - target_tradition
+      - link_type
+      - evidence_ids
+      - time_period
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              الكوربسات المطلوبة
+# ═══════════════════════════════════════════════════════════════════════════════
+
+required_corpora:
+  
+  for_greek_roots:
+    - "TLG (Thesaurus Linguae Graecae)"
+    - "Perseus Digital Library"
+    
+  for_christian_intermediary:
+    - "Patrologia Graeca"
+    - "Patrologia Latina"
+    - "CSCO"
+    
+  for_jewish_parallel:
+    - "Sefaria"
+    - "Bar-Ilan Responsa"
+    
+  for_latin_reception:
+    - "Corpus Thomisticum"
+    - "DARE (Digital Averroes)"
+    - "MGH"
+    
+  for_lexical_tracing:
+    - "Lane's Lexicon"
+    - "Comprehensive Aramaic Lexicon"
+    - "Dictionary of Medieval Latin"
+
+# ═══════════════════════════════════════════════════════════════════════════════

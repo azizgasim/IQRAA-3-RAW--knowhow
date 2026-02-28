@@ -1,0 +1,497 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#                         وكيل اختيار النموذج - Model Router
+#                         طبقة المستشارين | إقرأ-12 | الحزمة الثامنة
+# ═══════════════════════════════════════════════════════════════════════════════
+# "النموذج المناسب للمهمة المناسبة بالتكلفة المناسبة"
+# ═══════════════════════════════════════════════════════════════════════════════
+
+agent:
+  id: model_router
+  name_ar: وكيل اختيار النموذج
+  name_en: Model Router Agent
+  layer: advisors
+  version: "1.0.0"
+  
+  # ─────────────────────────────────────────────────────────────────────────────
+  # الهوية والشخصية
+  # ─────────────────────────────────────────────────────────────────────────────
+  persona:
+    character: |
+      مدير ذكي يوجه كل مهمة للنموذج الأنسب.
+      يوازن بين الجودة والتكلفة والسرعة.
+      يراعي طبيعة المحتوى (عربي، إسلامي، أكاديمي).
+      "لا نستخدم مدفعاً لقتل ذبابة"
+    
+    inspired_by:
+      - name: Andrew Ng
+        contribution: Model cascading and routing
+      - name: Harrison Chase
+        contribution: LangChain routing patterns
+      - name: Jordan Tigani
+        contribution: Cost optimization at scale
+    
+    core_values:
+      - الكفاءة: أقل تكلفة للجودة المطلوبة
+      - الذكاء: فهم طبيعة المهمة
+      - المرونة: التكيف مع أوضاع الميزانية
+      - الشفافية: توضيح سبب الاختيار
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # طبقات النماذج
+  # ─────────────────────────────────────────────────────────────────────────────
+  model_tiers:
+    premium:
+      description: للمهام المعقدة والحساسة
+      cost_range: "$10-20 / 1M tokens"
+      models:
+        - claude-opus
+        - gpt-4o
+        - gemini-ultra
+      use_cases:
+        - academic_writing
+        - complex_analysis
+        - shariah_audit
+        - thesis_review
+        - critical_decisions
+      characteristics:
+        - reasoning: excellent
+        - arabic: very_good
+        - context: large
+        - speed: moderate
+    
+    standard:
+      description: للمهام المتوسطة
+      cost_range: "$1-5 / 1M tokens"
+      models:
+        - claude-sonnet
+        - gpt-4o-mini
+        - gemini-pro
+        - jais-30b
+      use_cases:
+        - summarization
+        - dialogue
+        - islamic_context
+        - drafting
+        - explanation
+      characteristics:
+        - reasoning: good
+        - arabic: good
+        - context: medium
+        - speed: fast
+    
+    economy:
+      description: للمهام البسيطة والمتكررة
+      cost_range: "$0.1-1 / 1M tokens"
+      models:
+        - claude-haiku
+        - gemini-flash
+        - deepseek-v3
+        - qwen-2.5
+      use_cases:
+        - classification
+        - extraction
+        - translation
+        - simple_qa
+        - formatting
+      characteristics:
+        - reasoning: basic
+        - arabic: acceptable
+        - context: medium
+        - speed: very_fast
+    
+    embedding:
+      description: للتضمين والبحث الدلالي
+      cost_range: "$0.01-0.1 / 1M tokens"
+      models:
+        - text-embedding-005
+        - multilingual-e5-large
+        - bge-m3
+        - arabert
+      use_cases:
+        - batch_indexing
+        - online_search
+        - similarity
+        - clustering
+      selection_criteria:
+        batch_indexing: cheapest
+        online_search: fastest
+        arabic_heavy: arabert
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # خوارزمية التوجيه
+  # ─────────────────────────────────────────────────────────────────────────────
+  routing_algorithm:
+    steps:
+      - step: 1
+        name: classify_task
+        description: تصنيف نوع المهمة
+        task_types:
+          - academic_writing
+          - complex_analysis
+          - shariah_audit
+          - summarization
+          - dialogue
+          - classification
+          - extraction
+          - translation
+          - simple_qa
+          - embedding
+        
+      - step: 2
+        name: determine_base_tier
+        description: تحديد الطبقة الأساسية
+        mapping:
+          premium: [academic_writing, complex_analysis, shariah_audit]
+          standard: [summarization, dialogue, drafting, explanation]
+          economy: [classification, extraction, translation, simple_qa]
+          embedding: [embedding, indexing, search]
+        
+      - step: 3
+        name: adjust_for_budget
+        description: التعديل حسب وضع الميزانية
+        budget_modes:
+          economy:
+            rule: always_cheapest
+            override: downgrade_one_tier
+          balanced:
+            rule: quality_cost_tradeoff
+            override: none
+          quality:
+            rule: always_best
+            override: upgrade_one_tier
+        
+      - step: 4
+        name: check_special_requirements
+        description: فحص المتطلبات الخاصة
+        requirements:
+          islamic_content:
+            prefer: [jais, allam, fanar]
+            reason: better_islamic_understanding
+            
+          arabic_critical:
+            prefer: [jais, claude, gemini]
+            avoid: [gpt-3.5]
+            reason: arabic_quality
+            
+          speed_priority:
+            prefer: [gemini-flash, claude-haiku]
+            reason: latency
+            
+          privacy_sovereignty:
+            prefer: [jais, allam, local_models]
+            avoid: [western_apis]
+            reason: data_sovereignty
+            
+          long_context:
+            require: context_window > 100k
+            prefer: [claude, gemini]
+        
+      - step: 5
+        name: score_candidates
+        description: تقييم المرشحين
+        scoring_weights:
+          quality: 0.35
+          cost: 0.25
+          arabic: 0.20
+          speed: 0.10
+          reliability: 0.10
+        formula: |
+          score = (quality * w_q) + (1/cost * w_c) + 
+                  (arabic * w_a) + (speed * w_s) + (reliability * w_r)
+        
+      - step: 6
+        name: select_and_log
+        description: الاختيار والتسجيل
+        actions:
+          - select highest scoring model
+          - log selection reason
+          - track for cost reporting
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # أوضاع الميزانية
+  # ─────────────────────────────────────────────────────────────────────────────
+  budget_modes:
+    economy:
+      name_ar: اقتصادي
+      icon: "💰"
+      description: أقل تكلفة ممكنة
+      behavior:
+        - always use cheapest option
+        - accept lower quality
+        - batch when possible
+      typical_saving: "60-80%"
+      
+    balanced:
+      name_ar: متوازن
+      icon: "⚖️"
+      description: توازن بين الجودة والتكلفة
+      behavior:
+        - match tier to task
+        - no unnecessary upgrades
+        - smart fallbacks
+      typical_saving: "30-50%"
+      default: true
+      
+    quality:
+      name_ar: جودة
+      icon: "⭐"
+      description: أفضل جودة متاحة
+      behavior:
+        - always premium when available
+        - no cost constraints
+        - maximum reliability
+      typical_saving: "0%"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # كشف المحتوى الإسلامي
+  # ─────────────────────────────────────────────────────────────────────────────
+  islamic_content_detection:
+    patterns:
+      arabic:
+        - "قال الله"
+        - "قال رسول الله"
+        - "حديث"
+        - "آية"
+        - "الإمام"
+        - "المذهب"
+        - "الفقه"
+        - "الشريعة"
+        - "حلال"
+        - "حرام"
+        - "مكروه"
+        - "مستحب"
+        - "صلى الله عليه وسلم"
+        - "رضي الله عنه"
+        - "الصلاة"
+        - "الزكاة"
+        - "الصيام"
+        - "الحج"
+        - "العقيدة"
+        - "التوحيد"
+      
+      english:
+        - "hadith"
+        - "Quran"
+        - "Sunnah"
+        - "fiqh"
+        - "Shariah"
+        - "halal"
+        - "haram"
+        - "Islamic jurisprudence"
+    
+    action_if_detected: prefer_islamic_specialized_models
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # تتبع التكاليف
+  # ─────────────────────────────────────────────────────────────────────────────
+  cost_tracking:
+    per_request_logging:
+      fields:
+        - request_id
+        - timestamp
+        - task_type
+        - model_selected
+        - model_tier
+        - input_tokens
+        - output_tokens
+        - estimated_cost
+        - actual_cost
+        - budget_mode
+        - selection_reason
+    
+    aggregations:
+      daily:
+        - total_cost
+        - cost_by_model
+        - cost_by_task_type
+        - tokens_consumed
+        
+      weekly:
+        - total_cost
+        - cost_trend
+        - savings_from_routing
+        - model_distribution
+        
+      monthly:
+        - budget_vs_actual
+        - optimization_suggestions
+        - model_performance_analysis
+    
+    reports:
+      cost_report:
+        frequency: weekly
+        format: |
+          ╔════════════════════════════════════════════════════════════╗
+          ║           💰 تقرير التكاليف - الأسبوع {week}              ║
+          ╠════════════════════════════════════════════════════════════╣
+          ║                                                            ║
+          ║  📊 الإجمالي: ${total_cost}                               ║
+          ║  📈 مقارنة بالأسبوع الماضي: {comparison}%                 ║
+          ║                                                            ║
+          ║  🔢 التوزيع حسب النموذج:                                   ║
+          ║  {model_breakdown}                                         ║
+          ║                                                            ║
+          ║  📋 التوزيع حسب المهمة:                                    ║
+          ║  {task_breakdown}                                          ║
+          ║                                                            ║
+          ║  💡 الوفورات من التوجيه الذكي: ${savings_amount}          ║
+          ║                                                            ║
+          ║  ⚠️ توصيات:                                                ║
+          ║  {recommendations}                                         ║
+          ╚════════════════════════════════════════════════════════════╝
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # سجل النماذج
+  # ─────────────────────────────────────────────────────────────────────────────
+  model_registry:
+    models:
+      - id: claude-opus
+        tier: premium
+        input_cost: 0.015
+        output_cost: 0.075
+        arabic_score: 0.90
+        islamic_score: 0.70
+        speed_score: 0.60
+        context_window: 200000
+        best_for: [complex_analysis, academic_writing]
+        
+      - id: claude-sonnet
+        tier: standard
+        input_cost: 0.003
+        output_cost: 0.015
+        arabic_score: 0.88
+        islamic_score: 0.68
+        speed_score: 0.80
+        context_window: 200000
+        best_for: [general_tasks, dialogue]
+        
+      - id: claude-haiku
+        tier: economy
+        input_cost: 0.00025
+        output_cost: 0.00125
+        arabic_score: 0.82
+        islamic_score: 0.60
+        speed_score: 0.95
+        context_window: 200000
+        best_for: [classification, simple_qa]
+        
+      - id: gemini-pro
+        tier: standard
+        input_cost: 0.00125
+        output_cost: 0.005
+        arabic_score: 0.92
+        islamic_score: 0.75
+        speed_score: 0.85
+        context_window: 1000000
+        best_for: [long_context, arabic_tasks]
+        
+      - id: gemini-flash
+        tier: economy
+        input_cost: 0.000075
+        output_cost: 0.0003
+        arabic_score: 0.88
+        islamic_score: 0.70
+        speed_score: 0.98
+        context_window: 1000000
+        best_for: [speed_critical, batch]
+        
+      - id: jais-30b
+        tier: standard
+        input_cost: 0.002
+        output_cost: 0.006
+        arabic_score: 0.98
+        islamic_score: 0.95
+        speed_score: 0.70
+        context_window: 8000
+        best_for: [islamic_content, arabic_critical]
+        
+      - id: deepseek-v3
+        tier: economy
+        input_cost: 0.00027
+        output_cost: 0.0011
+        arabic_score: 0.75
+        islamic_score: 0.50
+        speed_score: 0.90
+        context_window: 64000
+        best_for: [coding, economy_mode]
+        
+      - id: qwen-2.5
+        tier: economy
+        input_cost: 0.0003
+        output_cost: 0.0012
+        arabic_score: 0.78
+        islamic_score: 0.55
+        speed_score: 0.88
+        context_window: 32000
+        best_for: [multilingual, economy]
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # واجهة البرمجة
+  # ─────────────────────────────────────────────────────────────────────────────
+  api:
+    route_request:
+      input:
+        - task_type: string
+        - content_preview: string (optional, for detection)
+        - budget_mode: enum [economy, balanced, quality]
+        - requirements: object (optional)
+      output:
+        - selected_model: string
+        - tier: string
+        - estimated_cost: float
+        - selection_reason: string
+        - alternatives: array
+    
+    get_cost_report:
+      input:
+        - period: enum [daily, weekly, monthly]
+        - start_date: date (optional)
+        - end_date: date (optional)
+      output:
+        - total_cost: float
+        - breakdown_by_model: object
+        - breakdown_by_task: object
+        - savings: float
+    
+    update_budget_mode:
+      input:
+        - mode: enum [economy, balanced, quality]
+      output:
+        - success: boolean
+        - previous_mode: string
+        - new_mode: string
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # التكامل
+  # ─────────────────────────────────────────────────────────────────────────────
+  integration:
+    receives_from:
+      - agent: observatory
+        data: model specs, scores, pricing
+        
+      - agent: all_generation_agents
+        data: routing requests
+    
+    sends_to:
+      - agent: generation_agents
+        data: model selection
+        
+      - agent: cost_estimator
+        data: usage logs
+        
+      - agent: admin_dashboard
+        data: cost reports
+    
+    used_by:
+      - academic_writing_agent
+      - summarization_agent
+      - dialogue_agent
+      - all_shura_agents
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # البيانات الوصفية
+  # ─────────────────────────────────────────────────────────────────────────────
+  metadata:
+    created: "2024-12-21"
+    author: "IQRA-12 Architecture Team"
+    status: production_ready
