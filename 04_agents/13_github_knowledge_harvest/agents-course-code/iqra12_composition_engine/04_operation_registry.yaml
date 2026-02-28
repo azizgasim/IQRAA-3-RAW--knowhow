@@ -1,0 +1,766 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#                       Operation Registry (سجل العمليات)
+#                    IQRA-12 Dynamic Composition Engine
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# الغرض: سجل مركزي لجميع العمليات مع تبعياتها وقدراتها
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+component:
+  name: "Operation Registry"
+  name_ar: "سجل العمليات"
+  version: "1.0.0"
+  
+  purpose: |
+    توفير واجهة موحدة للاستعلام عن العمليات المتاحة
+    وتبعياتها وقدراتها وتكاليفها
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              هيكل السجل
+# ═══════════════════════════════════════════════════════════════════════════════
+
+registry_structure:
+  
+  operations:
+    description: "قائمة كاملة بالعمليات المسجلة"
+    indexed_by: ["id", "category", "capability"]
+    
+  dependencies:
+    description: "رسم التبعيات بين العمليات"
+    format: "directed_acyclic_graph"
+    
+  capabilities:
+    description: "قدرات كل عملية"
+    indexed_by: ["input_type", "output_type", "domain"]
+    
+  costs:
+    description: "تكاليف تشغيل كل عملية"
+    metrics: ["compute", "tokens", "time", "monetary"]
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              سجل العمليات الكامل
+# ═══════════════════════════════════════════════════════════════════════════════
+
+operations:
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Extract Operations (الاستخراج)
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  E1:
+    id: "E1"
+    name_ar: "البحث النصي"
+    name_en: "Text Search"
+    category: "Extract"
+    
+    capabilities:
+      inputs: ["query_string", "corpus_ids"]
+      outputs: ["text_matches_with_offsets"]
+      domains: ["all"]
+      languages: ["ar", "en", "mixed"]
+      
+    dependencies:
+      requires: []
+      enables: ["E3", "E4", "E5", "E6", "A1", "A2", "A4", "A5", "L4"]
+      
+    characteristics:
+      autonomy_level: "L0"
+      is_parallelizable: true
+      is_cacheable: true
+      idempotent: true
+      
+    cost:
+      compute: "LOW"
+      tokens: 0
+      time_estimate: "5s"
+      monetary: "$0.01"
+      
+    tags: ["search", "retrieval", "fundamental"]
+    
+  E2:
+    id: "E2"
+    name_ar: "البحث الدلالي"
+    name_en: "Semantic Search"
+    category: "Extract"
+    
+    capabilities:
+      inputs: ["concept", "similarity_threshold"]
+      outputs: ["semantic_matches_with_scores"]
+      domains: ["all"]
+      languages: ["ar", "en", "multilingual"]
+      
+    dependencies:
+      requires: []
+      enables: ["E3", "E4", "E6", "A5"]
+      optional_after: ["E1"]  # can refine E1 results
+      
+    characteristics:
+      autonomy_level: "L0"
+      is_parallelizable: true
+      is_cacheable: true
+      idempotent: true
+      uses_embeddings: true
+      
+    cost:
+      compute: "MEDIUM"
+      tokens: 500
+      time_estimate: "10s"
+      monetary: "$0.02"
+      
+    tags: ["search", "semantic", "embeddings"]
+    
+  E3:
+    id: "E3"
+    name_ar: "استخراج الكيانات"
+    name_en: "Entity Extraction"
+    category: "Extract"
+    
+    capabilities:
+      inputs: ["text_spans"]
+      outputs: ["extracted_entities"]
+      entity_types: ["PERSON", "PLACE", "WORK", "SCHOOL", "TERM", "DATE", "EVENT", "INSTITUTION"]
+      domains: ["islamic_studies", "philosophy", "history"]
+      
+    dependencies:
+      requires: ["E1|E2"]  # at least one
+      enables: ["L1", "L2", "L4", "L5", "T2", "T3", "T4", "T5", "A2", "A3", "A6", "S3", "S4"]
+      
+    characteristics:
+      autonomy_level: "L1"
+      is_parallelizable: true
+      is_cacheable: true
+      requires_review: true
+      
+    cost:
+      compute: "MEDIUM"
+      tokens: 1000
+      time_estimate: "15s"
+      monetary: "$0.03"
+      
+    tags: ["ner", "entities", "fundamental"]
+    
+  E4:
+    id: "E4"
+    name_ar: "استخراج العلاقات"
+    name_en: "Relation Extraction"
+    category: "Extract"
+    
+    capabilities:
+      inputs: ["text_spans", "entities"]
+      outputs: ["extracted_relations"]
+      relation_types: ["INFLUENCED", "TAUGHT", "WROTE", "CRITICIZED", "QUOTED"]
+      
+    dependencies:
+      requires: ["E3"]
+      enables: ["L4", "L5", "T3", "S3"]
+      
+    characteristics:
+      autonomy_level: "L1"
+      is_parallelizable: true
+      is_cacheable: true
+      requires_review: true
+      
+    cost:
+      compute: "MEDIUM-HIGH"
+      tokens: 1500
+      time_estimate: "20s"
+      monetary: "$0.04"
+      
+    tags: ["relations", "links"]
+    
+  E5:
+    id: "E5"
+    name_ar: "استخراج الاستشهادات"
+    name_en: "Citation Extraction"
+    category: "Extract"
+    
+    capabilities:
+      inputs: ["text_spans"]
+      outputs: ["extracted_citations"]
+      citation_types: ["QURAN", "HADITH", "ATHAR", "QUOTE", "BOOK_REF", "VERSE_POETRY"]
+      
+    dependencies:
+      requires: ["E1"]
+      enables: ["L3", "A1", "A6"]
+      
+    characteristics:
+      autonomy_level: "L1"
+      is_parallelizable: true
+      is_cacheable: true
+      
+    cost:
+      compute: "LOW-MEDIUM"
+      tokens: 500
+      time_estimate: "10s"
+      monetary: "$0.02"
+      
+    tags: ["citations", "references", "sources"]
+    
+  E6:
+    id: "E6"
+    name_ar: "استخراج المصطلحات"
+    name_en: "Term Extraction"
+    category: "Extract"
+    
+    capabilities:
+      inputs: ["text_spans", "domain"]
+      outputs: ["extracted_terms"]
+      
+    dependencies:
+      requires: ["E1|E2"]
+      enables: ["L2", "T1", "C5", "C6"]
+      
+    characteristics:
+      autonomy_level: "L0"
+      is_parallelizable: true
+      is_cacheable: true
+      
+    cost:
+      compute: "MEDIUM"
+      tokens: 1000
+      time_estimate: "15s"
+      monetary: "$0.03"
+      
+    tags: ["terminology", "domain-specific"]
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Link Operations (الربط)
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  L1:
+    id: "L1"
+    name_ar: "حل الهوية"
+    name_en: "Entity Resolution"
+    category: "Link"
+    
+    capabilities:
+      inputs: ["entity_mentions"]
+      outputs: ["resolution_decisions"]
+      
+    dependencies:
+      requires: ["E3"]
+      enables: ["T3", "S3"]
+      
+    characteristics:
+      autonomy_level: "L1"
+      is_parallelizable: true
+      requires_review: true
+      critical_rule: "NO_AUTO_MERGE"
+      
+    cost:
+      compute: "MEDIUM"
+      tokens: 1000
+      time_estimate: "15s"
+      monetary: "$0.03"
+      
+    tags: ["entity-resolution", "disambiguation", "CRITICAL"]
+    
+  L2:
+    id: "L2"
+    name_ar: "الربط المفاهيمي"
+    name_en: "Concept Linking"
+    category: "Link"
+    
+    capabilities:
+      inputs: ["concepts", "source_context", "target_context"]
+      outputs: ["concept_links"]
+      cross_linguistic: true
+      
+    dependencies:
+      requires: ["E6"]
+      enables: ["T2"]
+      
+    characteristics:
+      autonomy_level: "L1"
+      is_parallelizable: true
+      requires_review: true
+      
+    cost:
+      compute: "MEDIUM"
+      tokens: 1500
+      time_estimate: "20s"
+      monetary: "$0.04"
+      
+    tags: ["concepts", "cross-linguistic", "semantic"]
+    
+  L3:
+    id: "L3"
+    name_ar: "الربط الاستشهادي"
+    name_en: "Citation Linking"
+    category: "Link"
+    
+    capabilities:
+      inputs: ["citations"]
+      outputs: ["verified_citations"]
+      
+    dependencies:
+      requires: ["E5"]
+      enables: ["V1"]
+      
+    characteristics:
+      autonomy_level: "L0-L1"
+      is_parallelizable: true
+      
+    cost:
+      compute: "LOW-MEDIUM"
+      tokens: 500
+      time_estimate: "10s"
+      monetary: "$0.02"
+      
+    tags: ["verification", "citations"]
+    
+  L4:
+    id: "L4"
+    name_ar: "الربط التناصي"
+    name_en: "Intertextual Linking"
+    category: "Link"
+    
+    capabilities:
+      inputs: ["text_spans", "entities"]
+      outputs: ["intertextual_links"]
+      
+    dependencies:
+      requires: ["E1", "E3"]
+      enables: ["T2", "T3"]
+      
+    characteristics:
+      autonomy_level: "L1"
+      is_parallelizable: true
+      
+    cost:
+      compute: "MEDIUM-HIGH"
+      tokens: 2000
+      time_estimate: "25s"
+      monetary: "$0.05"
+      
+    tags: ["intertextuality", "text-reuse"]
+    
+  L5:
+    id: "L5"
+    name_ar: "الربط الجينالوجي"
+    name_en: "Genealogical Linking"
+    category: "Link"
+    
+    capabilities:
+      inputs: ["entities", "relations"]
+      outputs: ["genealogy_links"]
+      
+    dependencies:
+      requires: ["E3", "E4"]
+      enables: ["T3"]
+      
+    characteristics:
+      autonomy_level: "L1"
+      is_parallelizable: true
+      
+    cost:
+      compute: "MEDIUM"
+      tokens: 1500
+      time_estimate: "20s"
+      monetary: "$0.04"
+      
+    tags: ["genealogy", "intellectual-history"]
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Trace Operations (التتبع)
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  T1:
+    id: "T1"
+    name_ar: "التتبع المعجمي"
+    name_en: "Lexical Tracing"
+    category: "Trace"
+    
+    capabilities:
+      inputs: ["terms"]
+      outputs: ["lexical_journeys"]
+      cross_linguistic: true
+      
+    dependencies:
+      requires: ["E6"]
+      enables: ["T2"]
+      
+    characteristics:
+      autonomy_level: "L0"
+      is_parallelizable: true
+      
+    cost:
+      compute: "LOW"
+      tokens: 500
+      time_estimate: "10s"
+      monetary: "$0.02"
+      
+    tags: ["etymology", "linguistics"]
+    
+  T2:
+    id: "T2"
+    name_ar: "التتبع المفاهيمي"
+    name_en: "Conceptual Tracing"
+    category: "Trace"
+    
+    capabilities:
+      inputs: ["concepts", "entities", "concept_links"]
+      outputs: ["concept_trajectories"]
+      
+    dependencies:
+      requires: ["E3"]
+      optional: ["L2", "T1"]
+      enables: ["S1", "S4"]
+      
+    characteristics:
+      autonomy_level: "L1"
+      is_parallelizable: false  # sequential by nature
+      
+    cost:
+      compute: "MEDIUM"
+      tokens: 2000
+      time_estimate: "30s"
+      monetary: "$0.05"
+      
+    tags: ["intellectual-history", "concept-evolution"]
+    
+  T3:
+    id: "T3"
+    name_ar: "التتبع الجينالوجي"
+    name_en: "Genealogical Tracing"
+    category: "Trace"
+    
+    capabilities:
+      inputs: ["entities", "relations", "resolution_decisions"]
+      outputs: ["genealogy_chains"]
+      trace_types: ["ISNAD", "TEXTUAL", "INTELLECTUAL", "INSTITUTIONAL", "PEDAGOGICAL"]
+      
+    dependencies:
+      requires: ["E3", "E4"]
+      optional: ["L1", "L5"]
+      enables: ["S1", "S3"]
+      
+    characteristics:
+      autonomy_level: "L1"
+      is_parallelizable: false
+      
+    cost:
+      compute: "MEDIUM"
+      tokens: 1500
+      time_estimate: "20s"
+      monetary: "$0.04"
+      
+    tags: ["isnad", "transmission", "genealogy"]
+    
+  T4:
+    id: "T4"
+    name_ar: "التتبع الجغرافي"
+    name_en: "Geographic Tracing"
+    category: "Trace"
+    
+    capabilities:
+      inputs: ["entities", "events"]
+      outputs: ["geographic_diffusions"]
+      
+    dependencies:
+      requires: ["E3"]
+      enables: ["S3"]
+      
+    characteristics:
+      autonomy_level: "L0-L1"
+      is_parallelizable: true
+      
+    cost:
+      compute: "LOW-MEDIUM"
+      tokens: 1000
+      time_estimate: "15s"
+      monetary: "$0.03"
+      
+    tags: ["geography", "diffusion"]
+    
+  T5:
+    id: "T5"
+    name_ar: "التتبع المؤسسي"
+    name_en: "Institutional Tracing"
+    category: "Trace"
+    
+    capabilities:
+      inputs: ["entities"]
+      outputs: ["institutional_evolutions"]
+      
+    dependencies:
+      requires: ["E3"]
+      enables: ["S4"]
+      
+    characteristics:
+      autonomy_level: "L1"
+      is_parallelizable: true
+      
+    cost:
+      compute: "MEDIUM"
+      tokens: 1500
+      time_estimate: "20s"
+      monetary: "$0.04"
+      
+    tags: ["institutions", "history"]
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Analyze Operations (التحليل)
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  A1:
+    id: "A1"
+    name_ar: "تحليل الحجة"
+    name_en: "Argument Analysis"
+    category: "Analyze"
+    
+    capabilities:
+      inputs: ["text_spans", "citations"]
+      outputs: ["argument_structures"]
+      models: ["TOULMIN", "CLASSICAL", "ISLAMIC_MANTIQ"]
+      
+    dependencies:
+      requires: ["E1"]
+      optional: ["E5"]
+      enables: ["C1"]
+      
+    characteristics:
+      autonomy_level: "L0"
+      is_parallelizable: true
+      
+    cost:
+      compute: "LOW-MEDIUM"
+      tokens: 1500
+      time_estimate: "20s"
+      monetary: "$0.04"
+      
+    tags: ["logic", "argumentation"]
+    
+  A2:
+    id: "A2"
+    name_ar: "تحليل السياق"
+    name_en: "Context Analysis"
+    category: "Analyze"
+    
+    capabilities:
+      inputs: ["text_spans", "entities"]
+      outputs: ["contextual_analyses"]
+      dimensions: ["POLITICAL", "ECONOMIC", "SOCIAL", "INTELLECTUAL", "RELIGIOUS"]
+      
+    dependencies:
+      requires: ["E1", "E3"]
+      enables: ["S1"]
+      
+    characteristics:
+      autonomy_level: "L0-L1"
+      is_parallelizable: true
+      
+    cost:
+      compute: "MEDIUM"
+      tokens: 2000
+      time_estimate: "25s"
+      monetary: "$0.05"
+      
+    tags: ["context", "historical"]
+    
+  A3:
+    id: "A3"
+    name_ar: "تحليل المقارنة"
+    name_en: "Comparative Analysis"
+    category: "Analyze"
+    
+    capabilities:
+      inputs: ["entities", "terms", "positions"]
+      outputs: ["comparative_analyses"]
+      
+    dependencies:
+      requires: ["E3"]
+      optional: ["E6"]
+      enables: ["S5"]
+      
+    characteristics:
+      autonomy_level: "L0"
+      is_parallelizable: true
+      
+    cost:
+      compute: "LOW-MEDIUM"
+      tokens: 1500
+      time_estimate: "20s"
+      monetary: "$0.04"
+      
+    tags: ["comparison", "analysis"]
+    
+  A4:
+    id: "A4"
+    name_ar: "تحليل التناقض"
+    name_en: "Contradiction Analysis"
+    category: "Analyze"
+    
+    capabilities:
+      inputs: ["text_spans", "claims"]
+      outputs: ["contradiction_analyses"]
+      
+    dependencies:
+      requires: ["E1"]
+      enables: ["V2"]
+      
+    characteristics:
+      autonomy_level: "L1"
+      is_parallelizable: true
+      
+    cost:
+      compute: "MEDIUM"
+      tokens: 2000
+      time_estimate: "25s"
+      monetary: "$0.05"
+      
+    tags: ["contradiction", "consistency"]
+    
+  A5:
+    id: "A5"
+    name_ar: "تحليل الفجوات"
+    name_en: "Gap Analysis"
+    category: "Analyze"
+    
+    capabilities:
+      inputs: ["search_results", "domain"]
+      outputs: ["gap_analyses"]
+      special: "foundation for Gap Hunter Agent"
+      
+    dependencies:
+      requires: ["E1", "E2"]
+      enables: []
+      
+    characteristics:
+      autonomy_level: "L0"
+      is_parallelizable: true
+      
+    cost:
+      compute: "LOW-MEDIUM"
+      tokens: 1000
+      time_estimate: "15s"
+      monetary: "$0.03"
+      
+    tags: ["gaps", "research-opportunities", "SPECIAL"]
+    
+  A6:
+    id: "A6"
+    name_ar: "تحليل الموقف"
+    name_en: "Position Analysis"
+    category: "Analyze"
+    
+    capabilities:
+      inputs: ["text_spans", "citations", "entities"]
+      outputs: ["position_analyses"]
+      
+    dependencies:
+      requires: ["E1", "E3"]
+      optional: ["E5"]
+      enables: ["S5"]
+      
+    characteristics:
+      autonomy_level: "L0-L1"
+      is_parallelizable: true
+      
+    cost:
+      compute: "MEDIUM"
+      tokens: 2000
+      time_estimate: "25s"
+      monetary: "$0.05"
+      
+    tags: ["positions", "scholarly-views"]
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Construct Operations (البناء) - ملخص
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  C1: {id: "C1", name_ar: "بناء حزمة الأدلة", category: "Construct", autonomy: "L0"}
+  C2: {id: "C2", name_ar: "بناء الادعاء", category: "Construct", autonomy: "L1", critical: "NO_CLAIM_WITHOUT_EVIDENCE"}
+  C3: {id: "C3", name_ar: "بناء الدليل المضاد", category: "Construct", autonomy: "L0", critical: "MANDATORY_BEFORE_PUBLISH"}
+  C4: {id: "C4", name_ar: "بناء المخطط", category: "Construct", autonomy: "L1"}
+  C5: {id: "C5", name_ar: "بناء القاموس", category: "Construct", autonomy: "L0-L1"}
+  C6: {id: "C6", name_ar: "بناء الأنطولوجيا", category: "Construct", autonomy: "L1"}
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Synthesize Operations (التركيب) - ملخص
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  S1: {id: "S1", name_ar: "التركيب السردي", category: "Synthesize", autonomy: "L1"}
+  S2: {id: "S2", name_ar: "التركيب التقريري", category: "Synthesize", autonomy: "L1-L2"}
+  S3: {id: "S3", name_ar: "تركيب الخريطة المعرفية", category: "Synthesize", autonomy: "L0"}
+  S4: {id: "S4", name_ar: "تركيب الجدول الزمني", category: "Synthesize", autonomy: "L0"}
+  S5: {id: "S5", name_ar: "التركيب المقارني", category: "Synthesize", autonomy: "L0"}
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Write Operations (الكتابة) - ملخص
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  W1: {id: "W1", name_ar: "كتابة الفقرة الموثقة", category: "Write", autonomy: "L1", critical: "NO_PARAGRAPH_WITHOUT_CITATION"}
+  W2: {id: "W2", name_ar: "كتابة القسم", category: "Write", autonomy: "L1-L2"}
+  W3: {id: "W3", name_ar: "كتابة الملخص", category: "Write", autonomy: "L1"}
+  W4: {id: "W4", name_ar: "كتابة المراجعة النقدية", category: "Write", autonomy: "L1"}
+  W5: {id: "W5", name_ar: "كتابة المقدمة والخاتمة", category: "Write", autonomy: "L1"}
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Verify Operations (التحقق) - ملخص
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  V1: {id: "V1", name_ar: "تدقيق الاستشهادات", category: "Verify", autonomy: "L0", gate: true}
+  V2: {id: "V2", name_ar: "تدقيق الاتساق", category: "Verify", autonomy: "L0-L1", gate: true}
+  V3: {id: "V3", name_ar: "تدقيق التغطية", category: "Verify", autonomy: "L0"}
+  V4: {id: "V4", name_ar: "تدقيق الأصل", category: "Verify", autonomy: "L0", gate: true}
+  V5: {id: "V5", name_ar: "تدقيق الحقوق", category: "Verify", autonomy: "L0-L1"}
+  V6: {id: "V6", name_ar: "اختبار النسق", category: "Verify", autonomy: "L0"}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              واجهات الاستعلام
+# ═══════════════════════════════════════════════════════════════════════════════
+
+query_interface:
+  
+  get_operation:
+    input: operation_id
+    output: OperationEntry
+    
+  get_by_category:
+    input: category
+    output: array[OperationEntry]
+    
+  get_dependencies:
+    input: operation_id
+    output:
+      requires: array[string]
+      enables: array[string]
+      
+  get_operations_for_capability:
+    input: capability_type
+    output: array[OperationEntry]
+    
+  get_execution_order:
+    input: array[operation_id]
+    output: array[operation_id]  # topologically sorted
+    
+  estimate_pipeline_cost:
+    input: array[operation_id]
+    output: CostEstimate
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              ملخص إحصائي
+# ═══════════════════════════════════════════════════════════════════════════════
+
+statistics:
+  total_operations: 44
+  by_category:
+    Extract: 6
+    Link: 5
+    Trace: 5
+    Analyze: 6
+    Construct: 6
+    Synthesize: 5
+    Write: 5
+    Verify: 6
+  by_autonomy:
+    L0: 18
+    L0-L1: 8
+    L1: 15
+    L1-L2: 3
+  quality_gates: 3
+  critical_operations: 5
+
+# ═══════════════════════════════════════════════════════════════════════════════

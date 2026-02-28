@@ -1,0 +1,687 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#                       Pipeline Executor (منفذ الـ Pipeline)
+#                    IQRA-12 Dynamic Composition Engine
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# الغرض: تنفيذ خطة العمليات وإدارة الحالة والأخطاء
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+component:
+  name: "Pipeline Executor"
+  name_ar: "منفذ الـ Pipeline"
+  version: "1.0.0"
+  
+  purpose: |
+    تنفيذ خطة العمليات المبنية، مع إدارة الحالة والتوازي والأخطاء
+    وتوفير التتبع والاستئناف
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              المدخلات والمخرجات
+# ═══════════════════════════════════════════════════════════════════════════════
+
+interface:
+  
+  input:
+    name: "ExecutionPlan"
+    source: "Pipeline Builder"
+    
+  output:
+    name: "ExecutionResult"
+    schema:
+      execution_id:
+        type: string
+        format: "exec_{uuid}"
+        
+      plan_id:
+        type: string
+        
+      status:
+        type: enum[COMPLETED, FAILED, PARTIAL, CANCELLED]
+        
+      started_at:
+        type: timestamp
+        
+      completed_at:
+        type: timestamp
+        
+      duration:
+        type: string
+        
+      primary_output:
+        type: any
+        description: "المخرج الرئيسي حسب نوع السؤال"
+        
+      secondary_outputs:
+        type: object
+        description: "مخرجات إضافية"
+        
+      operation_results:
+        type: array[OperationResult]
+        
+      quality_gate_results:
+        type: array[GateResult]
+        
+      provenance:
+        type: ProvenanceChain
+        description: "سلسلة الإنتاج الكاملة"
+        
+      metrics:
+        type: ExecutionMetrics
+        
+      errors:
+        type: array[ExecutionError]
+        
+      warnings:
+        type: array[ExecutionWarning]
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              المكونات الفرعية
+# ═══════════════════════════════════════════════════════════════════════════════
+
+subcomponents:
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # 1. Operation Runner (مشغّل العمليات)
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  operation_runner:
+    name: "Operation Runner"
+    name_ar: "مشغّل العمليات"
+    
+    purpose: "تنفيذ عملية واحدة مع التحقق من المدخلات والمخرجات"
+    
+    execution_flow:
+      1_validate_inputs:
+        actions:
+          - check_required_inputs
+          - validate_input_schemas
+          - verify_dependencies_completed
+        on_failure: "abort_with_error"
+        
+      2_prepare_context:
+        actions:
+          - load_required_resources
+          - initialize_operation_state
+          - set_timeout
+          
+      3_execute:
+        actions:
+          - call_operation_handler
+          - stream_progress_updates
+          - handle_intermediate_results
+          
+      4_validate_outputs:
+        actions:
+          - check_output_schema
+          - verify_guardrails
+          - validate_quality_metrics
+        on_failure: "retry_or_fail"
+        
+      5_store_results:
+        actions:
+          - save_to_state_manager
+          - update_provenance
+          - notify_dependents
+          
+    timeout_handling:
+      default_timeout: "5 minutes"
+      by_operation_type:
+        E1: "30 seconds"
+        E2: "60 seconds"
+        S1: "5 minutes"
+        S2: "10 minutes"
+        W2: "5 minutes"
+      on_timeout: "retry_with_backoff"
+      
+    retry_policy:
+      default:
+        max_retries: 3
+        backoff_strategy: "exponential"
+        base_delay: "5 seconds"
+        max_delay: "60 seconds"
+      by_error_type:
+        TRANSIENT: {max_retries: 5}
+        RATE_LIMIT: {max_retries: 10, base_delay: "30 seconds"}
+        PERMANENT: {max_retries: 0}
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # 2. State Manager (مدير الحالة)
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  state_manager:
+    name: "State Manager"
+    name_ar: "مدير الحالة"
+    
+    purpose: "إدارة حالة التنفيذ والتخزين المؤقت والاستئناف"
+    
+    state_types:
+      
+      execution_state:
+        description: "الحالة العامة للتنفيذ"
+        properties:
+          execution_id: string
+          plan_id: string
+          current_phase: integer
+          current_step: string
+          status: ExecutionStatus
+          started_at: timestamp
+          last_updated: timestamp
+          
+      operation_states:
+        description: "حالة كل عملية"
+        properties:
+          step_id: string
+          operation_id: string
+          status: enum[PENDING, RUNNING, COMPLETED, FAILED, SKIPPED]
+          started_at: timestamp
+          completed_at: timestamp
+          result: any
+          error: string
+          retries: integer
+          
+      data_store:
+        description: "مخزن البيانات الوسيطة"
+        structure: "key-value"
+        key_format: "{execution_id}:{step_id}:output"
+        ttl: "24 hours"
+        
+    persistence:
+      backend: "redis + postgresql"
+      checkpoint_storage: "object_storage"
+      
+    recovery:
+      on_crash:
+        - load_last_checkpoint
+        - restore_execution_state
+        - resume_from_last_completed
+        
+      on_resume:
+        - validate_stored_state
+        - check_data_freshness
+        - rebuild_dependency_graph
+        - continue_execution
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # 3. Parallel Executor (المنفذ المتوازي)
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  parallel_executor:
+    name: "Parallel Executor"
+    name_ar: "المنفذ المتوازي"
+    
+    purpose: "تنفيذ العمليات المتوازية بكفاءة"
+    
+    configuration:
+      max_parallel_operations: 5
+      max_parallel_per_phase: 3
+      resource_limits:
+        max_memory_per_operation: "1GB"
+        max_tokens_per_batch: 50000
+        
+    execution_strategy:
+      1: "تجميع العمليات المتوازية"
+      2: "توزيع على workers"
+      3: "انتظار اكتمال المجموعة"
+      4: "جمع النتائج"
+      5: "الانتقال للمجموعة التالية"
+      
+    synchronization:
+      barrier_points:
+        - "end of each phase"
+        - "before quality gates"
+        - "at checkpoints"
+      wait_strategy: "wait_all_or_fail_fast"
+      
+    load_balancing:
+      strategy: "least_loaded"
+      consider:
+        - operation_complexity
+        - current_load
+        - estimated_duration
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # 4. Error Handler (معالج الأخطاء)
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  error_handler:
+    name: "Error Handler"
+    name_ar: "معالج الأخطاء"
+    
+    purpose: "التعامل مع الأخطاء واتخاذ قرارات الاستمرار أو التوقف"
+    
+    error_categories:
+      
+      TRANSIENT:
+        description: "أخطاء مؤقتة قابلة للإصلاح"
+        examples:
+          - "network timeout"
+          - "rate limit"
+          - "temporary unavailable"
+        handling: "retry with backoff"
+        
+      RECOVERABLE:
+        description: "أخطاء يمكن تجاوزها"
+        examples:
+          - "optional operation failed"
+          - "secondary source unavailable"
+        handling: "skip or use fallback"
+        
+      DATA_ERROR:
+        description: "أخطاء في البيانات"
+        examples:
+          - "invalid input format"
+          - "missing required data"
+          - "schema mismatch"
+        handling: "abort step, try alternative"
+        
+      QUALITY_FAILURE:
+        description: "فشل في بوابات الجودة"
+        examples:
+          - "V1 citation audit failed"
+          - "V2 inconsistency detected"
+        handling: "return for correction"
+        
+      FATAL:
+        description: "أخطاء تستوجب التوقف"
+        examples:
+          - "core operation failed"
+          - "unrecoverable state"
+          - "security violation"
+        handling: "abort execution"
+        
+    decision_tree:
+      on_error:
+        - check_error_category
+        - if TRANSIENT:
+            - check_retry_count
+            - if within_limit: retry
+            - else: escalate_to_RECOVERABLE
+        - if RECOVERABLE:
+            - check_fallback_available
+            - if available: use_fallback
+            - else: check_if_optional
+            - if optional: skip_and_continue
+            - else: escalate_to_FATAL
+        - if DATA_ERROR:
+            - log_detailed_error
+            - notify_user
+            - await_correction_or_abort
+        - if QUALITY_FAILURE:
+            - return_to_previous_stage
+            - request_human_review
+        - if FATAL:
+            - save_state
+            - cleanup_resources
+            - abort_with_full_log
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # 5. Progress Tracker (متتبع التقدم)
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  progress_tracker:
+    name: "Progress Tracker"
+    name_ar: "متتبع التقدم"
+    
+    purpose: "تتبع تقدم التنفيذ وتوفير تحديثات للمستخدم"
+    
+    tracking_levels:
+      
+      execution_level:
+        metrics:
+          - total_operations
+          - completed_operations
+          - failed_operations
+          - current_phase
+          - overall_progress_percentage
+          - estimated_time_remaining
+          
+      phase_level:
+        metrics:
+          - phase_name
+          - operations_in_phase
+          - completed_in_phase
+          - phase_progress_percentage
+          
+      operation_level:
+        metrics:
+          - operation_name
+          - status
+          - progress_within_operation
+          - current_action
+          
+    notification_events:
+      - execution_started
+      - phase_started
+      - phase_completed
+      - operation_started
+      - operation_completed
+      - operation_failed
+      - checkpoint_reached
+      - gate_passed
+      - gate_failed
+      - execution_completed
+      - execution_failed
+      
+    update_frequency:
+      real_time: ["status_changes", "errors"]
+      periodic: ["progress_percentage"]
+      on_demand: ["detailed_metrics"]
+      
+    output_format:
+      ProgressUpdate:
+        timestamp: timestamp
+        execution_id: string
+        event_type: string
+        current_progress:
+          phase: integer
+          phase_name: string
+          operation: string
+          percentage: float
+        estimates:
+          time_remaining: string
+          operations_remaining: integer
+        message: string
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # 6. Provenance Recorder (مسجّل الأصل)
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  provenance_recorder:
+    name: "Provenance Recorder"
+    name_ar: "مسجّل الأصل"
+    
+    purpose: "تسجيل سلسلة الإنتاج الكاملة لكل مخرج"
+    
+    recorded_data:
+      
+      per_operation:
+        operation_id: string
+        step_id: string
+        started_at: timestamp
+        completed_at: timestamp
+        inputs:
+          - source_step: string
+            data_hash: string
+        outputs:
+          - output_key: string
+            data_hash: string
+        parameters: object
+        version: string
+        
+      per_data_item:
+        item_id: string
+        created_by: string  # operation
+        created_at: timestamp
+        derived_from: array[string]  # item_ids
+        transformations: array[string]
+        
+    chain_structure:
+      ProvenanceChain:
+        execution_id: string
+        created_at: timestamp
+        nodes:
+          type: array
+          items:
+            node_id: string
+            type: enum[SOURCE, OPERATION, OUTPUT]
+            details: object
+        edges:
+          type: array
+          items:
+            from: string
+            to: string
+            relation: enum[INPUT_TO, OUTPUT_OF, DERIVED_FROM]
+            
+    verification:
+      hash_algorithm: "SHA-256"
+      chain_integrity_check: true
+      tamper_detection: true
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              خوارزمية التنفيذ
+# ═══════════════════════════════════════════════════════════════════════════════
+
+execution_algorithm:
+  
+  main_loop:
+    
+    1_initialize:
+      actions:
+        - create_execution_id
+        - load_execution_plan
+        - initialize_state_manager
+        - start_progress_tracking
+        - notify: "execution_started"
+        
+    2_execute_phases:
+      for_each_phase:
+        - check_phase_dependencies
+        - notify: "phase_started"
+        - execute_phase_operations
+        - wait_for_phase_completion
+        - run_phase_checkpoints
+        - notify: "phase_completed"
+        
+    3_execute_phase_operations:
+      actions:
+        - group_parallel_operations
+        - for_each_parallel_group:
+            - dispatch_to_parallel_executor
+            - await_group_completion
+            - collect_results
+            - handle_any_failures
+            
+    4_run_quality_gates:
+      when: "after_all_phases"
+      actions:
+        - for_each_gate:
+            - execute_verification_operation
+            - if_failed:
+                - notify: "gate_failed"
+                - return_for_correction
+            - else:
+                - notify: "gate_passed"
+                
+    5_assemble_output:
+      actions:
+        - collect_primary_output
+        - collect_secondary_outputs
+        - build_provenance_chain
+        - calculate_execution_metrics
+        
+    6_finalize:
+      actions:
+        - cleanup_intermediate_data
+        - persist_final_results
+        - notify: "execution_completed"
+        - return_execution_result
+
+  error_recovery:
+    on_operation_failure:
+      - log_error
+      - check_retry_policy
+      - if_can_retry:
+          - wait_backoff
+          - retry_operation
+      - else:
+          - check_fallback
+          - if_fallback_available:
+              - execute_fallback
+          - else:
+              - escalate_error
+              
+    on_phase_failure:
+      - save_checkpoint
+      - assess_damage
+      - if_recoverable:
+          - rollback_to_checkpoint
+          - retry_phase
+      - else:
+          - abort_execution
+          
+    on_gate_failure:
+      - identify_failing_checks
+      - create_correction_report
+      - return_to_appropriate_phase
+      - await_corrections
+      - retry_from_correction_point
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              Schemas
+# ═══════════════════════════════════════════════════════════════════════════════
+
+schemas:
+  
+  OperationResult:
+    step_id: string
+    operation_id: string
+    status: enum[SUCCESS, FAILED, SKIPPED]
+    started_at: timestamp
+    completed_at: timestamp
+    duration_ms: integer
+    output: any
+    output_hash: string
+    error: string | null
+    retries: integer
+    
+  GateResult:
+    gate_id: string
+    operation_id: string
+    passed: boolean
+    details:
+      checks_performed: array
+      failures: array
+      warnings: array
+    blocking: boolean
+    
+  ExecutionMetrics:
+    total_duration: string
+    operations_executed: integer
+    operations_succeeded: integer
+    operations_failed: integer
+    operations_skipped: integer
+    total_tokens_used: integer
+    total_cost: float
+    parallelization_efficiency: float
+    
+  ExecutionError:
+    error_id: string
+    step_id: string
+    operation_id: string
+    category: ErrorCategory
+    message: string
+    details: object
+    stack_trace: string
+    occurred_at: timestamp
+    resolved: boolean
+    resolution: string | null
+    
+  ExecutionWarning:
+    warning_id: string
+    step_id: string
+    category: string
+    message: string
+    impact: enum[LOW, MEDIUM, HIGH]
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              أمثلة على تدفق التنفيذ
+# ═══════════════════════════════════════════════════════════════════════════════
+
+examples:
+  
+  successful_execution:
+    scenario: "تنفيذ ناجح لسؤال تتبع"
+    
+    flow:
+      - event: "execution_started"
+        data: {execution_id: "exec_001", total_operations: 12}
+        
+      - event: "phase_started"
+        data: {phase: 1, name: "الاستخراج الأولي", operations: 2}
+        
+      - event: "operation_completed"
+        data: {step: "s1", operation: "E1", duration: "5s"}
+        
+      - event: "operation_completed"
+        data: {step: "s2", operation: "E2", duration: "8s"}
+        
+      - event: "phase_completed"
+        data: {phase: 1, duration: "8s"}  # parallel
+        
+      # ... more phases
+        
+      - event: "gate_passed"
+        data: {gate: "V1", checks: 15, passed: 15}
+        
+      - event: "execution_completed"
+        data: {duration: "4m 32s", tokens: 23500, cost: "$0.55"}
+        
+  execution_with_retry:
+    scenario: "تنفيذ مع إعادة محاولة"
+    
+    flow:
+      - event: "operation_failed"
+        data: {step: "s3", operation: "E3", error: "rate_limit"}
+        
+      - event: "retry_scheduled"
+        data: {step: "s3", attempt: 2, delay: "10s"}
+        
+      - event: "operation_completed"
+        data: {step: "s3", operation: "E3", attempts: 2}
+        
+  execution_with_gate_failure:
+    scenario: "فشل في بوابة جودة"
+    
+    flow:
+      - event: "gate_failed"
+        data:
+          gate: "V1"
+          failures:
+            - "citation_123 not found in bibliography"
+            - "quote on page 45 mismatch"
+            
+      - event: "correction_required"
+        data:
+          return_to: "W1"
+          corrections_needed: 2
+          
+      - event: "awaiting_correction"
+        data: {timeout: "24h"}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              واجهة برمجية
+# ═══════════════════════════════════════════════════════════════════════════════
+
+api:
+  
+  execute:
+    method: "POST"
+    path: "/api/v1/execute"
+    input: ExecutionPlan
+    output: ExecutionResult
+    async: true
+    
+  get_status:
+    method: "GET"
+    path: "/api/v1/execute/{execution_id}/status"
+    output: ProgressUpdate
+    
+  cancel:
+    method: "POST"
+    path: "/api/v1/execute/{execution_id}/cancel"
+    output: {cancelled: boolean}
+    
+  resume:
+    method: "POST"
+    path: "/api/v1/execute/{execution_id}/resume"
+    input: {from_checkpoint: string}
+    output: ExecutionResult
+    async: true
+    
+  get_result:
+    method: "GET"
+    path: "/api/v1/execute/{execution_id}/result"
+    output: ExecutionResult
+
+# ═══════════════════════════════════════════════════════════════════════════════

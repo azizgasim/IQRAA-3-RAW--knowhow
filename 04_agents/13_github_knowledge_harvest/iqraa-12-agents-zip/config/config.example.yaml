@@ -1,0 +1,207 @@
+# IQRA System Configuration
+# Copy this file to config.yaml and fill in your values
+# =====================================================
+
+# Google Cloud Settings
+gcp:
+  project_id: "your-project-id"
+  region: "us-central1"  # or me-central1 for Middle East
+  
+# BigQuery Settings
+bigquery:
+  datasets:
+    ops_logs: "iqra_ops_logs"
+    kb_store: "iqra_kb_store"
+  location: "US"  # or EU, ME
+
+# Vertex AI Settings
+vertex_ai:
+  models:
+    default: "gemini-1.5-pro"
+    fast: "gemini-1.5-flash"
+    large_context: "gemini-1.5-pro-002"
+  default_temperature: 0.3
+  max_output_tokens: 8192
+
+# Agent Settings
+agents:
+  linguist:
+    enabled: true
+    timeout_seconds: 60
+    tools:
+      - camel_tools
+      - farasa
+      - arabert
+  
+  orchestrator:
+    enabled: true
+    timeout_seconds: 30
+    max_retries: 3
+  
+  guardian:
+    enabled: true
+    timeout_seconds: 20
+    cost_limit_per_run: 2.0
+  
+  archivist:
+    enabled: true
+    timeout_seconds: 30
+    cache_enabled: true
+  
+  evidencer:
+    enabled: true
+    timeout_seconds: 60
+    min_confidence: 0.7
+  
+  analyst:
+    enabled: true
+    timeout_seconds: 90
+  
+  genealogist:
+    enabled: true
+    timeout_seconds: 120
+  
+  scout:
+    enabled: true
+    timeout_seconds: 180
+    max_context_tokens: 2000000
+  
+  theorist:
+    enabled: true
+    timeout_seconds: 180
+  
+  purifier:
+    enabled: true
+    timeout_seconds: 120
+  
+  improver:
+    enabled: true
+    schedule: "0 0 * * *"  # Daily at midnight
+    error_threshold: 10
+
+# Gate Settings
+gates:
+  g0_acceptance:
+    enabled: true
+    timeout_seconds: 5
+  
+  g1_evidence:
+    enabled: true
+    timeout_seconds: 30
+    min_confidence: 0.7
+  
+  g2_falsification:
+    enabled: true
+    timeout_seconds: 60
+    hitl_topics:
+      - عقيدة
+      - فقه
+      - حكم شرعي
+  
+  g3_purification:
+    enabled: true
+    timeout_seconds: 90
+  
+  g4_grounding:
+    enabled: true
+    timeout_seconds: 120
+  
+  g5_export:
+    enabled: true
+    timeout_seconds: 30
+    min_confidence: 0.7
+
+# Caching Settings
+cache:
+  l1_hot:
+    backend: redis
+    ttl_seconds: 3600
+    host: localhost
+    port: 6379
+  
+  l2_warm:
+    backend: memorystore
+    ttl_seconds: 86400
+  
+  l3_cold:
+    backend: gcs
+    ttl_seconds: 604800
+    bucket: "iqra-cache-bucket"
+
+# RAG Pipeline Settings
+rag:
+  embedding_model: "text-multilingual-embedding-002"
+  chunk_size: 512
+  chunk_overlap: 50
+  retrieval:
+    top_k: 20
+    min_score: 0.7
+    hybrid_weight_semantic: 0.7
+    hybrid_weight_keyword: 0.3
+  reranking:
+    model: "cross-encoder/ms-marco-MiniLM-L-12-v2"
+    top_k: 10
+  context_assembly:
+    max_tokens: 8000
+
+# Human-in-the-Loop Settings
+hitl:
+  enabled: true
+  escalation_matrix:
+    low_confidence:
+      threshold: 0.5
+      action: mandatory_review
+    medium_confidence:
+      threshold: 0.7
+      action: flag_for_review
+  review_levels:
+    - level: 1
+      name: junior_reviewer
+      timeout_hours: 24
+    - level: 2
+      name: domain_expert
+      timeout_hours: 48
+    - level: 3
+      name: senior_scholar
+      timeout_hours: 72
+
+# Observability Settings
+observability:
+  tracing:
+    enabled: true
+    sample_rate: 1.0
+    exporter: cloud_trace
+  
+  metrics:
+    enabled: true
+    export_interval_seconds: 60
+  
+  logging:
+    level: INFO
+    format: json
+    export_to_cloud: true
+
+# Security Settings
+security:
+  policy_tags:
+    - name: PII
+      columns:
+        - author_name
+        - reviewer_name
+    - name: SENSITIVE_RELIGIOUS
+      columns:
+        - fatwa_text
+        - aqeedah_content
+  
+  dlp:
+    enabled: true
+    inspect_templates: true
+  
+  audit:
+    log_all_queries: true
+    log_all_exports: true
+    retention_days: 365
+  
+  encryption:
+    at_rest: google_managed
+    in_transit: tls_1_3

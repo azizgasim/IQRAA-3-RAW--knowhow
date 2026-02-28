@@ -1,0 +1,424 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#                    IQRA-12 Ontology Framework
+#                        إطار الأنطولوجيا
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# "الأنطولوجيا للمشاركة لا لفرض حقيقة واحدة"
+#
+# الدروس الحاكمة:
+# - Thomas Gruber: الحد الأدنى من الالتزام (Minimal Commitment)
+# - Nicola Guarino (DOLCE): التصنيف الوجودي الصارم
+# - Aldo Gangemi: أنماط التصميم الدلالي (ODPs)
+# - Edward Zalta: نمذجة الأشياء المجردة
+# - George Lakoff: الاستعارة والمجاز
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+metadata:
+  component: "Ontology Framework"
+  component_ar: "إطار الأنطولوجيا"
+  version: "1.0.0"
+  purpose: "البنية المفاهيمية لتمثيل المعرفة الإسلامية"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              المبادئ الحاكمة
+# ═══════════════════════════════════════════════════════════════════════════════
+
+governing_principles:
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Thomas Gruber - الحد الأدنى من الالتزام
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  principle_1:
+    name: "Minimal Ontological Commitment"
+    name_ar: "الحد الأدنى من الالتزام"
+    source: "Thomas Gruber"
+    field: "Knowledge Sharing & Ontology"
+    description: |
+      الأنطولوجيا ليست لفرض "حقيقة واحدة"، بل لتمكين "المشاركة".
+      تعريف المفاهيم في الطبقة العليا (Core) بأقل قدر من القيود.
+    implementation:
+      - "تعريف الصلاة كـ 'عبادة ذات أقوال وأفعال'"
+      - "ترك تفاصيل (النية شرط أم ركن؟) للأنطولوجيات الفرعية"
+      - "استيعاب الاختلافات المذهبية دون تعارض منطقي"
+      
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Nicola Guarino - التصنيف الوجودي
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  principle_2:
+    name: "Rigorous Ontological Classification"
+    name_ar: "التصنيف الوجودي الصارم"
+    source: "Nicola Guarino"
+    field: "Formal Ontology (DOLCE)"
+    description: |
+      تقسيم العالم إلى فئتين رئيسيتين:
+      - الجواهر (Endurants): توجد بكليتها في كل لحظة
+      - الأحداث (Perdurants): تمتد في الزمن
+    implementation:
+      - "منع: 'زيد حدث في 500'"
+      - "الصحيح: 'زيد (جوهر) شارك في حدث (ولادة) عام 500'"
+      
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Aldo Gangemi - أنماط التصميم
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  principle_3:
+    name: "Ontology Design Patterns"
+    name_ar: "أنماط التصميم الدلالي"
+    source: "Aldo Gangemi"
+    field: "Frame Semantics & ODPs"
+    description: |
+      البناء باستخدام قوالب جاهزة ومجربة.
+      تسريع البناء مع ضمان الاتساق.
+    implementation:
+      patterns:
+        - name: "Situation Pattern"
+          use: "نمذجة الفتوى"
+          elements: ["مفتي", "مستفتي", "سؤال", "حكم", "زمان", "مكان"]
+        - name: "Role Pattern"
+          use: "فصل الإنسان عن وظيفته"
+          example: "هارون الرشيد (Person) يلعب دور (Caliph)"
+        - name: "Participation Pattern"
+          use: "نمذجة الأسانيد"
+          elements: ["راوٍ", "مروي", "صيغة أداء"]
+          
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Edward Zalta - الميتافيزيقا الحاسوبية
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  principle_4:
+    name: "Abstract Objects & Modal Logic"
+    name_ar: "الأشياء المجردة والمنطق الموجه"
+    source: "Edward Zalta"
+    field: "Computational Metaphysics"
+    description: |
+      كيف يفهم الكمبيوتر العقيدة والغيبيات؟
+      الترميز vs التجسيد.
+    implementation:
+      - "العقائد = أشياء مجردة (Abstract Objects) ترمز لخصائص"
+      - "المنطق الموجه (Modal Logic):"
+      - "  □ (Box) = الوجوب"
+      - "  ◇ (Diamond) = الإمكان"
+      - "Wajib(Salah) = من الضروري شرعاً فعل الصلاة"
+      - "Haram(Riba) = من الممتنع شرعاً فعل الربا"
+      
+  # ═══════════════════════════════════════════════════════════════════════════
+  # George Lakoff - الاستعارة والمجاز
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  principle_5:
+    name: "Metaphor Engineering"
+    name_ar: "هندسة الاستعارة"
+    source: "George Lakoff"
+    field: "Cognitive Linguistics"
+    description: |
+      اللغة الدينية لغة مجازية. الفهم الحرفي كارثة.
+      المعنى ينبع من الجسد والثقافة.
+    implementation:
+      metaphor_repository:
+        description: "مستودع الاستعارات"
+        mappings:
+          - source: "طريق"
+            target: "دين"
+            examples: ["الصراط المستقيم", "ضل الطريق"]
+          - source: "نور"
+            target: "علم/هداية"
+            examples: ["نور على نور", "أخرجهم من الظلمات"]
+          - source: "تجارة"
+            target: "عمل صالح"
+            examples: ["اشتروا الضلالة بالهدى"]
+      mapping_algorithm: |
+        عندما يقرأ الوكيل "اشتروا الضلالة بالهدى":
+        1. لا يبحث عن "عملة"
+        2. يستدعي استعارة (التجارة)
+        3. يفهم: "استبدلوا الإيمان بالكفر"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              الطبقات الأنطولوجية
+# ═══════════════════════════════════════════════════════════════════════════════
+
+ontology_layers:
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # الطبقة العليا - المشتركات
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  upper_ontology:
+    name: "Core Ontology"
+    name_ar: "الأنطولوجيا الجوهرية"
+    description: "المفاهيم المشتركة بين جميع المجالات"
+    
+    categories:
+      
+      endurants:
+        name_ar: "الجواهر"
+        description: "الكيانات التي توجد بكليتها في كل لحظة"
+        subcategories:
+          - PHYSICAL_OBJECT: "جسم مادي"
+          - AGENT: "فاعل (إنسان، مؤسسة)"
+          - ABSTRACT_OBJECT: "شيء مجرد (مفهوم، نظرية)"
+          - ARTIFACT: "صنيعة (كتاب، مبنى)"
+          
+      perdurants:
+        name_ar: "الأحداث"
+        description: "الكيانات التي تمتد في الزمن"
+        subcategories:
+          - EVENT: "حدث"
+          - PROCESS: "عملية"
+          - STATE: "حالة"
+          - ACTIVITY: "نشاط"
+          
+      qualities:
+        name_ar: "الصفات"
+        description: "خصائص الكيانات"
+        subcategories:
+          - RIGID_QUALITY: "صفة صلبة (لا تتغير)"
+          - ANTI_RIGID_QUALITY: "صفة متغيرة (دور)"
+          - TEMPORAL_QUALITY: "صفة زمنية"
+          
+      relations:
+        name_ar: "العلاقات"
+        description: "الروابط بين الكيانات"
+        
+  # ═══════════════════════════════════════════════════════════════════════════
+  # أنطولوجيات المجالات
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  domain_ontologies:
+  
+    fiqh:
+      name_ar: "أنطولوجيا الفقه"
+      extends: "upper_ontology"
+      core_concepts:
+        - HUKM: "حكم شرعي"
+        - DALIL: "دليل"
+        - ILLA: "علة"
+        - MASALIH: "مصالح"
+        - MAQASID: "مقاصد"
+      relations:
+        - DERIVED_FROM: "مستنبط من"
+        - ABROGATES: "ينسخ"
+        - SPECIFIES: "يخصص"
+      modal_operators:
+        - WAJIB: "واجب (□)"
+        - MANDUB: "مندوب"
+        - MUBAH: "مباح"
+        - MAKRUH: "مكروه"
+        - HARAM: "حرام (¬◇)"
+        
+    kalam:
+      name_ar: "أنطولوجيا الكلام"
+      extends: "upper_ontology"
+      core_concepts:
+        - JAWHAR: "جوهر"
+        - ARAD: "عرض"
+        - SIFA: "صفة إلهية"
+        - DALIL_AQLI: "دليل عقلي"
+        - IJMA_AQADI: "إجماع عقدي"
+      schools_as_contexts:
+        - ASHARI: "أشعري"
+        - MATURIDI: "ماتريدي"
+        - MUTAZILI: "معتزلي"
+        - ATHARI: "أثري"
+        
+    falsafa:
+      name_ar: "أنطولوجيا الفلسفة"
+      extends: "upper_ontology"
+      core_concepts:
+        - HAYULA: "هيولى"
+        - SURA: "صورة"
+        - AQL: "عقل"
+        - NAFS: "نفس"
+        - WUJUD: "وجود"
+        - MAHIYYA: "ماهية"
+      greek_origins:
+        HAYULA: "ὕλη (hyle)"
+        SURA: "μορφή (morphe)"
+        AQL: "νοῦς (nous)"
+        
+    tasawwuf:
+      name_ar: "أنطولوجيا التصوف"
+      extends: "upper_ontology"
+      core_concepts:
+        - MAQAM: "مقام"
+        - HAL: "حال"
+        - FANA: "فناء"
+        - BAQA: "بقاء"
+        - TARIQA: "طريقة"
+        
+    hadith:
+      name_ar: "أنطولوجيا الحديث"
+      extends: "upper_ontology"
+      core_concepts:
+        - ISNAD: "إسناد"
+        - MATN: "متن"
+        - RAWI: "راوٍ"
+        - SIGHAT_ADA: "صيغة أداء"
+        - HUKM_HADITH: "حكم الحديث"
+      isnad_pattern:
+        description: "نمط الإسناد"
+        elements:
+          - HADDATHANA: "حدثنا"
+          - AKHBARANA: "أخبرنا"
+          - AN: "عن"
+          - SAMITU: "سمعت"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              النماذج الشعاعية
+# ═══════════════════════════════════════════════════════════════════════════════
+
+radial_categories:
+  
+  description: |
+    النماذج الشعاعية (Radial Categories) من George Lakoff:
+    تعريف المفاهيم ليس كصناديق مغلقة، بل كشبكة لها مركز وأطراف.
+    
+  source: "George Lakoff"
+  field: "Embodied Cognition & Prototypes"
+  
+  examples:
+    
+    water:
+      name_ar: "الماء"
+      center: "الماء المطلق (الطاهر المطهر)"
+      periphery:
+        - "الماء المستعمل"
+        - "الماء المتنجس"
+        - "ماء الورد"
+      application: "الوكيل يفهم درجة القرب من المركز"
+      
+    salah:
+      name_ar: "الصلاة"
+      center: "الصلاة المكتوبة الكاملة"
+      periphery:
+        - "النافلة"
+        - "صلاة الجنازة"
+        - "صلاة المسافر"
+        - "صلاة المريض"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              التوجيه المكاني والأخلاقي
+# ═══════════════════════════════════════════════════════════════════════════════
+
+spatial_orientation:
+  
+  description: |
+    الدلالات الأخلاقية للاتجاهات في الثقافة الإسلامية.
+    
+  source: "George Lakoff"
+  field: "Embodied Cognition"
+  
+  mappings:
+    RIGHT:
+      ar: "اليمين"
+      connotation: "خير، بركة"
+      examples: ["أصحاب اليمين", "البدء باليمين"]
+      
+    LEFT:
+      ar: "اليسار"
+      connotation: "شؤم، قذارة"
+      examples: ["أصحاب الشمال"]
+      
+    UP:
+      ar: "فوق"
+      connotation: "علو، سمو"
+      examples: ["العلي", "رفع"]
+      
+    DOWN:
+      ar: "تحت"
+      connotation: "دناءة"
+      examples: ["سفل", "هبوط"]
+      
+    FRONT:
+      ar: "أمام"
+      connotation: "مستقبل، آخرة"
+      
+    BACK:
+      ar: "خلف"
+      connotation: "ماضٍ، دنيا"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              المزج المفاهيمي
+# ═══════════════════════════════════════════════════════════════════════════════
+
+conceptual_blending:
+  
+  description: |
+    خوارزميات لدمج مفهومين لإنتاج ثالث.
+    
+  source: "George Lakoff / Gilles Fauconnier"
+  
+  examples:
+    - input_1: "عقد"
+      input_2: "زواج"
+      blend: "عقد النكاح"
+      analysis: "الوكيل يحلل الخصائص التي انتقلت من كل جانب"
+      
+    - input_1: "تجارة"
+      input_2: "آخرة"
+      blend: "تجارة لن تبور"
+      analysis: "استعارة اقتصادية للعمل الصالح"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              جداول الأنطولوجيا
+# ═══════════════════════════════════════════════════════════════════════════════
+
+ontology_tables:
+
+  concept_definitions:
+    description: "تعريفات المفاهيم"
+    fields:
+      - concept_id
+      - domain
+      - term_ar
+      - term_en
+      - definition_operational
+      - parent_concept_id
+      - is_primitive
+      - version
+      
+  concept_constraints:
+    description: "القيود على المفاهيم"
+    fields:
+      - constraint_id
+      - concept_id
+      - constraint_type
+      - constraint_expression
+      - applies_to_domain
+      
+  metaphor_mappings:
+    description: "خرائط الاستعارات"
+    fields:
+      - mapping_id
+      - source_domain
+      - target_domain
+      - examples
+      - evidence_id
+      
+  radial_categories:
+    description: "النماذج الشعاعية"
+    fields:
+      - category_id
+      - center_definition
+      - periphery_members
+      - distance_scores
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              تطبيق في BigQuery
+# ═══════════════════════════════════════════════════════════════════════════════
+
+bigquery_implementation:
+  
+  reasoning_layer: |
+    طبقة استدلال (Reasoning Layer) تعمل فوق الجداول
+    لتوليد معارف جديدة لم تذكر صراحة في النصوص.
+    
+  storage: "Knowledge Graph في BigQuery"
+  
+  inference_rules:
+    - "إذا X تلميذ Y، و Y تلميذ Z، فـ X في سلسلة Z"
+    - "إذا X يقتبس من Y كثيراً، فـ X متأثر بـ Y (تأويلي)"
+
+# ═══════════════════════════════════════════════════════════════════════════════

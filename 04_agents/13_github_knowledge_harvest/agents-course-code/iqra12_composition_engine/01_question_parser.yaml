@@ -1,0 +1,856 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#                         Question Parser (محلل الأسئلة)
+#                    IQRA-12 Dynamic Composition Engine
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# الغرض: تحليل سؤال الباحث واستخراج المكونات اللازمة لبناء الـ Pipeline
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+component:
+  name: "Question Parser"
+  name_ar: "محلل الأسئلة"
+  version: "1.0.0"
+  
+  purpose: |
+    تحويل السؤال الطبيعي إلى تمثيل هيكلي يمكن استخدامه
+    لبناء Pipeline من العمليات الذرية
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              المدخلات والمخرجات
+# ═══════════════════════════════════════════════════════════════════════════════
+
+interface:
+  
+  input:
+    name: "ResearchQuestion"
+    schema:
+      question_text:
+        type: string
+        required: true
+        description: "نص السؤال كما كتبه الباحث"
+        example: "كيف انتقل مفهوم الجوهر من أرسطو إلى علم الكلام؟"
+        
+      context:
+        type: object
+        required: false
+        properties:
+          previous_questions:
+            type: array[string]
+            description: "أسئلة سابقة في نفس الجلسة"
+          user_expertise:
+            type: enum[beginner, intermediate, graduate, expert]
+            default: "intermediate"
+          preferred_output:
+            type: enum[brief, standard, detailed, comprehensive]
+            default: "standard"
+          language:
+            type: enum[ar, en, ar_en]
+            default: "ar"
+          constraints:
+            type: object
+            properties:
+              max_time: string
+              max_cost: float
+              required_sources: array[string]
+              
+  output:
+    name: "ParsedQuestion"
+    schema:
+      parse_id:
+        type: string
+        format: "parse_{uuid}"
+        
+      original_question:
+        type: string
+        
+      question_type:
+        type: QuestionType
+        description: "التصنيف الرئيسي للسؤال"
+        
+      question_subtype:
+        type: string
+        description: "تصنيف فرعي أدق"
+        
+      classification_confidence:
+        type: float
+        range: [0, 1]
+        
+      entities:
+        type: array[ExtractedEntity]
+        
+      concepts:
+        type: array[ExtractedConcept]
+        
+      relations_implied:
+        type: array[ImpliedRelation]
+        
+      temporal_scope:
+        type: TemporalScope
+        
+      geographic_scope:
+        type: GeographicScope
+        
+      domain_scope:
+        type: array[string]
+        
+      expected_output:
+        type: ExpectedOutput
+        
+      complexity_assessment:
+        type: ComplexityAssessment
+        
+      ambiguities:
+        type: array[Ambiguity]
+        description: "نقاط غموض تحتاج توضيح"
+        
+      suggested_clarifications:
+        type: array[string]
+        description: "أسئلة توضيحية مقترحة"
+        
+      metadata:
+        type: object
+        properties:
+          parsed_at: timestamp
+          parser_version: string
+          processing_time_ms: integer
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              المكونات الفرعية
+# ═══════════════════════════════════════════════════════════════════════════════
+
+subcomponents:
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # 1. Question Classifier (مصنف الأسئلة)
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  question_classifier:
+    name: "Question Classifier"
+    name_ar: "مصنف الأسئلة"
+    
+    purpose: "تحديد نوع السؤال من بين الأنواع المدعومة"
+    
+    method: "pattern_matching + ml_classification"
+    
+    question_types:
+      
+      TRACING:
+        id: "QT_TRACE"
+        name_ar: "تتبع"
+        name_en: "Tracing"
+        
+        patterns:
+          primary:
+            - regex: "كيف (انتقل|وصل|تطور)"
+            - regex: "من أين (جاء|أتى)"
+            - regex: "ما (أصل|مصدر|جذور)"
+            - regex: "تتبع (رحلة|مسار|انتقال)"
+            - regex: "(رحلة|مسيرة|تطور) .+ (من|إلى)"
+            
+          secondary:
+            - keywords: ["انتقال", "تحول", "تطور", "أصل", "جذر", "مصدر"]
+            
+        typical_structure:
+          source: required
+          destination: required
+          traced_element: required  # مفهوم، كلمة، فكرة، نص
+          
+        output_expectations:
+          primary: "narrative_tracing"
+          secondary: ["timeline", "influence_network"]
+          
+      COMPARATIVE:
+        id: "QT_COMPARE"
+        name_ar: "مقارنة"
+        name_en: "Comparative"
+        
+        patterns:
+          primary:
+            - regex: "(ما|أين) الفرق بين"
+            - regex: "قارن (بين)?"
+            - regex: "كيف (يختلف|تختلف)"
+            - regex: "(التشابه|الاختلاف) بين"
+            - regex: "أيهما (أفضل|أدق|أصح)"
+            
+          secondary:
+            - keywords: ["مقارنة", "فرق", "تشابه", "اختلاف", "موازنة"]
+            
+        typical_structure:
+          item_a: required
+          item_b: required
+          comparison_dimensions: optional
+          
+        output_expectations:
+          primary: "comparison_matrix"
+          secondary: ["analysis_report"]
+          
+      INFLUENCE:
+        id: "QT_INFLUENCE"
+        name_ar: "تأثير"
+        name_en: "Influence"
+        
+        patterns:
+          primary:
+            - regex: "هل (أثر|تأثر)"
+            - regex: "ما (تأثير|أثر)"
+            - regex: "(العلاقة|الصلة) بين .+ و"
+            - regex: "كيف أثر"
+            
+          secondary:
+            - keywords: ["تأثير", "تأثر", "علاقة", "صلة", "ارتباط"]
+            
+        typical_structure:
+          influencer: required
+          influenced: required
+          influence_type: optional
+          
+        output_expectations:
+          primary: "evidence_bundle"
+          secondary: ["influence_network", "claim_with_evidence"]
+          
+      POSITION:
+        id: "QT_POSITION"
+        name_ar: "موقف"
+        name_en: "Position"
+        
+        patterns:
+          primary:
+            - regex: "ما (موقف|رأي|نظرة)"
+            - regex: "كيف (نظر|رأى|فهم)"
+            - regex: "ماذا قال .+ (عن|في|حول)"
+            
+          secondary:
+            - keywords: ["موقف", "رأي", "نظر", "فهم", "تفسير"]
+            
+        typical_structure:
+          person_or_school: required
+          topic: required
+          
+        output_expectations:
+          primary: "position_analysis"
+          secondary: ["evidence_bundle", "quote_collection"]
+          
+      DEFINITION:
+        id: "QT_DEFINE"
+        name_ar: "تعريف"
+        name_en: "Definition"
+        
+        patterns:
+          primary:
+            - regex: "ما (معنى|تعريف|مفهوم)"
+            - regex: "ما (هو|هي) "
+            - regex: "المقصود (بـ|من)"
+            - regex: "عرّف"
+            
+          secondary:
+            - keywords: ["معنى", "تعريف", "مفهوم", "المقصود", "دلالة"]
+            
+        typical_structure:
+          term: required
+          context: optional
+          
+        output_expectations:
+          primary: "glossary_entry"
+          secondary: ["term_evolution", "comparative_definitions"]
+          
+      NETWORK:
+        id: "QT_NETWORK"
+        name_ar: "شبكة"
+        name_en: "Network"
+        
+        patterns:
+          primary:
+            - regex: "من (تلاميذ|شيوخ|معاصرو)"
+            - regex: "(سلسلة|شبكة|علاقات)"
+            - regex: "ارسم (شبكة|خريطة)"
+            
+          secondary:
+            - keywords: ["تلاميذ", "شيوخ", "سلسلة", "شبكة", "إسناد"]
+            
+        typical_structure:
+          central_entity: required
+          relation_types: optional
+          
+        output_expectations:
+          primary: "knowledge_map"
+          secondary: ["genealogy_chain"]
+          
+      TIMELINE:
+        id: "QT_TIMELINE"
+        name_ar: "جدول زمني"
+        name_en: "Timeline"
+        
+        patterns:
+          primary:
+            - regex: "متى"
+            - regex: "(ترتيب|تسلسل|مراحل)"
+            - regex: "ارسم (جدول|خط) زمني"
+            
+          secondary:
+            - keywords: ["متى", "تاريخ", "مراحل", "تسلسل", "أحداث"]
+            
+        typical_structure:
+          subject: required
+          time_range: optional
+          
+        output_expectations:
+          primary: "timeline"
+          secondary: ["narrative"]
+          
+      GAP_DISCOVERY:
+        id: "QT_GAP"
+        name_ar: "اكتشاف فجوات"
+        name_en: "Gap Discovery"
+        
+        patterns:
+          primary:
+            - regex: "ما (المهمل|غير المدروس)"
+            - regex: "(الفجوات|النقص) في"
+            - regex: "أين (يوجد نقص|تحتاج دراسة)"
+            
+          secondary:
+            - keywords: ["مهمل", "فجوة", "نقص", "غير مدروس"]
+            
+        typical_structure:
+          domain: required
+          
+        output_expectations:
+          primary: "gap_analysis"
+          secondary: ["research_opportunities"]
+          
+      SYNTHESIS:
+        id: "QT_SYNTH"
+        name_ar: "تركيب"
+        name_en: "Synthesis"
+        
+        patterns:
+          primary:
+            - regex: "(اكتب|أعد|حضّر) (ورقة|تقرير|مقالة|فصل)"
+            - regex: "لخص"
+            - regex: "(مراجعة|عرض) (نقدية?)"
+            
+          secondary:
+            - keywords: ["اكتب", "لخص", "أعد", "تقرير", "ورقة"]
+            
+        typical_structure:
+          topic: required
+          output_format: required
+          
+        output_expectations:
+          primary: "research_report"
+          secondary: ["executive_summary"]
+
+    classification_algorithm:
+      steps:
+        1: "Pattern Matching"
+        description: "مطابقة الأنماط النصية"
+        weight: 0.4
+        
+        2: "Keyword Analysis"
+        description: "تحليل الكلمات المفتاحية"
+        weight: 0.3
+        
+        3: "Structural Analysis"
+        description: "تحليل بنية السؤال"
+        weight: 0.2
+        
+        4: "Context Consideration"
+        description: "مراعاة السياق"
+        weight: 0.1
+        
+      confidence_thresholds:
+        high: 0.85
+        medium: 0.65
+        low: 0.45
+        ambiguous: "< 0.45"
+        
+      multi_type_handling: |
+        إذا تطابق السؤال مع أكثر من نوع:
+        1. اختر النوع الأعلى ثقة
+        2. إذا تقاربت الثقة، اعتبره سؤالاً مركباً
+        3. قد يحتاج توضيح من المستخدم
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # 2. Entity Extractor (مستخرج الكيانات)
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  entity_extractor:
+    name: "Entity Extractor"
+    name_ar: "مستخرج الكيانات"
+    
+    purpose: "استخراج الكيانات المذكورة في السؤال وتصنيفها"
+    
+    entity_types:
+      
+      PERSON:
+        patterns:
+          - named_entity_recognition
+          - title_patterns: ["الشيخ", "الإمام", "أبو", "ابن"]
+          - nisba_patterns: ["ـي$", "ـوي$"]
+        examples: ["الغزالي", "ابن رشد", "أرسطو"]
+        role_detection:
+          - "source" if mentioned with "من", "عند"
+          - "target" if mentioned with "إلى", "على"
+          - "subject" if central
+          
+      WORK:
+        patterns:
+          - quoted_titles
+          - book_markers: ["كتاب", "رسالة", "مقالة"]
+        examples: ["الإحياء", "تهافت الفلاسفة", "المقولات"]
+        
+      SCHOOL:
+        patterns:
+          - school_markers: ["مذهب", "فرقة", "طائفة"]
+          - known_schools: ["الأشاعرة", "المعتزلة", "الفلاسفة"]
+        examples: ["المشائية", "الإشراقية", "الكلابية"]
+        
+      CONCEPT:
+        patterns:
+          - definition_markers: ["مفهوم", "فكرة", "نظرية"]
+          - technical_terms
+        examples: ["الجوهر", "العرض", "الكسب"]
+        
+      PLACE:
+        patterns:
+          - geographic_ner
+          - historical_places
+        examples: ["بغداد", "قرطبة", "نيسابور"]
+        
+      TIME_PERIOD:
+        patterns:
+          - century_patterns: ["القرن الخامس"]
+          - era_patterns: ["العصر العباسي"]
+          - date_patterns
+        examples: ["القرن 5 هـ", "العصر الأموي"]
+        
+      DOMAIN:
+        patterns:
+          - field_markers: ["علم", "فن"]
+          - known_domains
+        examples: ["علم الكلام", "الفقه", "المنطق"]
+        
+    output_schema:
+      ExtractedEntity:
+        id: string
+        text: string
+        type: EntityType
+        canonical_form: string
+        canonical_id: string  # if known
+        confidence: float
+        role_in_question: enum[source, target, subject, context]
+        span:
+          start: integer
+          end: integer
+        alternatives: array[string]  # possible other interpretations
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # 3. Concept Extractor (مستخرج المفاهيم)
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  concept_extractor:
+    name: "Concept Extractor"
+    name_ar: "مستخرج المفاهيم"
+    
+    purpose: "استخراج المفاهيم الفلسفية والفكرية من السؤال"
+    
+    extraction_strategies:
+      
+      explicit_concepts:
+        description: "مفاهيم مذكورة صراحة"
+        markers: ["مفهوم", "فكرة", "معنى", "المقصود بـ"]
+        
+      implicit_concepts:
+        description: "مفاهيم مستنتجة من السياق"
+        method: "semantic analysis"
+        
+      foreign_concepts:
+        description: "مفاهيم بلغات أخرى"
+        detection: "script detection + transliteration"
+        examples: ["οὐσία", "substantia", "ܐܘܣܝܐ"]
+        
+    output_schema:
+      ExtractedConcept:
+        id: string
+        term_arabic: string
+        term_original: string
+        original_language: string
+        domain: string
+        role_in_question: enum[traced, compared, defined, analyzed]
+        related_concepts: array[string]
+        confidence: float
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # 4. Scope Detector (كاشف النطاق)
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  scope_detector:
+    name: "Scope Detector"
+    name_ar: "كاشف النطاق"
+    
+    purpose: "تحديد الحدود الزمنية والجغرافية والموضوعية للسؤال"
+    
+    temporal_scope:
+      detection_methods:
+        - explicit_dates
+        - era_references
+        - person_lifetimes
+        - event_references
+        
+      output_schema:
+        TemporalScope:
+          start:
+            value: string
+            precision: enum[exact, decade, century, era, approximate]
+            calendar: enum[hijri, gregorian, both]
+          end:
+            value: string
+            precision: enum[exact, decade, century, era, approximate]
+            calendar: enum[hijri, gregorian, both]
+          is_explicit: boolean
+          inferred_from: string
+          
+    geographic_scope:
+      detection_methods:
+        - explicit_places
+        - school_locations
+        - person_origins
+        
+      output_schema:
+        GeographicScope:
+          regions: array[string]
+          is_explicit: boolean
+          inferred_from: string
+          
+    domain_scope:
+      detection_methods:
+        - explicit_domains
+        - concept_domains
+        - person_specializations
+        
+      output: array[string]
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # 5. Output Detector (كاشف المخرج المتوقع)
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  output_detector:
+    name: "Output Detector"
+    name_ar: "كاشف المخرج المتوقع"
+    
+    purpose: "تحديد نوع المخرج المتوقع من السؤال"
+    
+    output_types:
+      
+      NARRATIVE:
+        indicators: ["كيف", "اشرح", "صف"]
+        format: "prose text"
+        
+      COMPARISON_TABLE:
+        indicators: ["قارن", "الفرق", "التشابه"]
+        format: "structured table"
+        
+      TIMELINE:
+        indicators: ["متى", "ترتيب", "مراحل"]
+        format: "chronological visualization"
+        
+      KNOWLEDGE_MAP:
+        indicators: ["شبكة", "علاقات", "تلاميذ"]
+        format: "graph visualization"
+        
+      EVIDENCE_BUNDLE:
+        indicators: ["هل", "ما الدليل", "أثبت"]
+        format: "structured evidence"
+        
+      GLOSSARY_ENTRY:
+        indicators: ["ما معنى", "عرّف"]
+        format: "definition + examples"
+        
+      RESEARCH_REPORT:
+        indicators: ["اكتب ورقة", "أعد تقريراً"]
+        format: "academic paper"
+        
+      POSITION_ANALYSIS:
+        indicators: ["ما موقف", "ما رأي"]
+        format: "attributed positions with evidence"
+        
+    output_schema:
+      ExpectedOutput:
+        primary_type: OutputType
+        secondary_types: array[OutputType]
+        detail_level: enum[brief, standard, detailed, comprehensive]
+        language: enum[ar, en, ar_en]
+        format_preferences: object
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # 6. Complexity Assessor (مقيّم التعقيد)
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  complexity_assessor:
+    name: "Complexity Assessor"
+    name_ar: "مقيّم التعقيد"
+    
+    purpose: "تقدير تعقيد السؤال والموارد المطلوبة للإجابة"
+    
+    factors:
+      
+      entity_count:
+        weight: 0.15
+        scoring:
+          1: 1
+          2-3: 2
+          4-5: 3
+          ">5": 4
+          
+      temporal_span:
+        weight: 0.15
+        scoring:
+          "<50 years": 1
+          "50-200 years": 2
+          "200-500 years": 3
+          ">500 years": 4
+          
+      cross_linguistic:
+        weight: 0.2
+        scoring:
+          "single language": 1
+          "2 languages": 2
+          "3 languages": 3
+          ">3 languages": 4
+          
+      question_type:
+        weight: 0.2
+        scoring:
+          DEFINITION: 1
+          POSITION: 2
+          COMPARATIVE: 2
+          INFLUENCE: 3
+          TRACING: 4
+          SYNTHESIS: 4
+          
+      output_expectations:
+        weight: 0.15
+        scoring:
+          brief: 1
+          standard: 2
+          detailed: 3
+          comprehensive: 4
+          
+      domain_breadth:
+        weight: 0.15
+        scoring:
+          "1 domain": 1
+          "2 domains": 2
+          "3 domains": 3
+          ">3 domains": 4
+          
+    output_schema:
+      ComplexityAssessment:
+        level: enum[LOW, MEDIUM, HIGH, VERY_HIGH]
+        score: float  # 1-4
+        breakdown:
+          type: object
+          # score per factor
+        estimated_operations: integer
+        estimated_tokens: integer
+        estimated_time: string
+        estimated_cost: float
+        recommended_approach: string
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # 7. Ambiguity Detector (كاشف الغموض)
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  ambiguity_detector:
+    name: "Ambiguity Detector"
+    name_ar: "كاشف الغموض"
+    
+    purpose: "اكتشاف نقاط الغموض التي قد تحتاج توضيحاً"
+    
+    ambiguity_types:
+      
+      ENTITY_AMBIGUITY:
+        description: "كيان يمكن أن يشير لأكثر من شخص/شيء"
+        example: "'ابن رشد' - الجد أم الحفيد؟"
+        resolution: "ask for clarification or use both"
+        
+      TEMPORAL_AMBIGUITY:
+        description: "نطاق زمني غير محدد"
+        example: "'في العصر الإسلامي' - أي فترة؟"
+        resolution: "ask for period or use broad search"
+        
+      SCOPE_AMBIGUITY:
+        description: "نطاق موضوعي غير واضح"
+        example: "'تأثير الفلسفة' - أي جانب من الفلسفة؟"
+        resolution: "ask for specification"
+        
+      INTENT_AMBIGUITY:
+        description: "غموض في القصد من السؤال"
+        example: "سؤال يحتمل أكثر من تفسير"
+        resolution: "present options"
+        
+    output_schema:
+      Ambiguity:
+        id: string
+        type: AmbiguityType
+        text_span: string
+        possible_interpretations: array[string]
+        impact_level: enum[LOW, MEDIUM, HIGH]
+        suggested_clarification: string
+        can_proceed_without: boolean
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              خوارزمية التحليل
+# ═══════════════════════════════════════════════════════════════════════════════
+
+parsing_algorithm:
+  
+  steps:
+    
+    1_preprocessing:
+      name: "المعالجة الأولية"
+      actions:
+        - normalize_arabic_text
+        - handle_diacritics
+        - detect_foreign_scripts
+        - tokenize
+        
+    2_classification:
+      name: "تصنيف السؤال"
+      actions:
+        - apply_pattern_matching
+        - calculate_type_scores
+        - determine_primary_type
+        - identify_subtypes
+        
+    3_entity_extraction:
+      name: "استخراج الكيانات"
+      actions:
+        - run_ner
+        - classify_entities
+        - resolve_to_canonical
+        - assign_roles
+        
+    4_concept_extraction:
+      name: "استخراج المفاهيم"
+      actions:
+        - identify_technical_terms
+        - detect_foreign_terms
+        - link_to_domain
+        
+    5_scope_detection:
+      name: "كشف النطاق"
+      actions:
+        - extract_temporal_markers
+        - infer_time_from_entities
+        - extract_geographic_markers
+        - identify_domains
+        
+    6_output_detection:
+      name: "كشف المخرج"
+      actions:
+        - analyze_question_structure
+        - match_output_patterns
+        - consider_user_preferences
+        
+    7_complexity_assessment:
+      name: "تقييم التعقيد"
+      actions:
+        - calculate_factor_scores
+        - compute_weighted_total
+        - estimate_resources
+        
+    8_ambiguity_detection:
+      name: "كشف الغموض"
+      actions:
+        - check_entity_ambiguity
+        - check_scope_ambiguity
+        - check_intent_ambiguity
+        - generate_clarifications
+        
+    9_assembly:
+      name: "التجميع"
+      actions:
+        - assemble_parsed_question
+        - validate_completeness
+        - add_metadata
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              أمثلة
+# ═══════════════════════════════════════════════════════════════════════════════
+
+examples:
+
+  example_1:
+    input:
+      question_text: "كيف انتقل مفهوم 'الجوهر' من أرسطو إلى علم الكلام الإسلامي؟"
+      
+    output:
+      question_type: "TRACING"
+      classification_confidence: 0.95
+      
+      entities:
+        - text: "أرسطو"
+          type: "PERSON"
+          role: "source"
+          canonical_id: "aristotle"
+          
+        - text: "علم الكلام الإسلامي"
+          type: "DOMAIN"
+          role: "destination"
+          
+      concepts:
+        - term_arabic: "الجوهر"
+          original_language: "greek"
+          term_original: "οὐσία"
+          domain: "metaphysics"
+          role: "traced"
+          
+      temporal_scope:
+        start: {value: "-350", precision: "approximate"}
+        end: {value: "500 AH", precision: "approximate"}
+        is_explicit: false
+        inferred_from: "أرسطو → علم الكلام"
+        
+      expected_output:
+        primary_type: "NARRATIVE"
+        secondary_types: ["TIMELINE", "KNOWLEDGE_MAP"]
+        
+      complexity_assessment:
+        level: "HIGH"
+        score: 3.4
+        estimated_operations: 12
+        
+  example_2:
+    input:
+      question_text: "ما الفرق بين موقف الأشاعرة والمعتزلة من صفات الله؟"
+      
+    output:
+      question_type: "COMPARATIVE"
+      classification_confidence: 0.92
+      
+      entities:
+        - text: "الأشاعرة"
+          type: "SCHOOL"
+          role: "compared_item"
+          
+        - text: "المعتزلة"
+          type: "SCHOOL"
+          role: "compared_item"
+          
+      concepts:
+        - term_arabic: "صفات الله"
+          domain: "kalam"
+          role: "comparison_dimension"
+          
+      expected_output:
+        primary_type: "COMPARISON_TABLE"
+        secondary_types: ["POSITION_ANALYSIS"]
+        
+      complexity_assessment:
+        level: "MEDIUM"
+        score: 2.5
+        estimated_operations: 8
+
+# ═══════════════════════════════════════════════════════════════════════════════

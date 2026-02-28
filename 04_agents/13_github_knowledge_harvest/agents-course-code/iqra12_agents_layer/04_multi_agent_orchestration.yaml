@@ -1,0 +1,534 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#                    IQRA-12 Multi-Agent Orchestration
+#                        تنسيق متعدد الوكلاء
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# "بدل وكيل واحد لكل شيء، حوار منظم بين وكلاء بأدوار مختلفة"
+#                                    — AutoGen Team
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+metadata:
+  component: "Multi-Agent Orchestration"
+  component_ar: "تنسيق متعدد الوكلاء"
+  version: "1.0.0"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              المبادئ الحاكمة
+# ═══════════════════════════════════════════════════════════════════════════════
+
+governing_principles:
+
+  principle_1:
+    source: "Victor Lesser - Distributed AI"
+    lesson: "تفكيك المهام + السبورة المشتركة"
+    description: |
+      المهام المعقدة تُفكك إلى مهام فرعية.
+      الوكلاء يتواصلون عبر "سبورة مشتركة" (Blackboard).
+      
+  principle_2:
+    source: "Michael Wooldridge - BDI Model"
+    lesson: "معتقد-رغبة-نية (Belief-Desire-Intention)"
+    description: |
+      كل وكيل له:
+      - معتقدات (Beliefs): ما يعرفه عن العالم
+      - رغبات (Desires): الأهداف المرجوة
+      - نوايا (Intentions): الخطط الملتزم بها
+      
+  principle_3:
+    source: "Yoav Shoham - ACL"
+    lesson: "لغة تواصل مهيكلة"
+    description: |
+      الرسائل بين الوكلاء تتبع بروتوكول محدد.
+      لا رسائل حرة أو غامضة.
+      
+  principle_4:
+    source: "Barbara Grosz - SharedPlans"
+    lesson: "الخطط المشتركة"
+    description: |
+      التعاون الضمني يتطلب فهماً مشتركاً للهدف.
+      كل وكيل يعرف دوره في الخطة الكلية.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              أنماط التنسيق
+# ═══════════════════════════════════════════════════════════════════════════════
+
+orchestration_patterns:
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # التنسيق الخطي
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  linear_pipeline:
+    name: "Linear Pipeline"
+    name_ar: "التنسيق الخطي"
+    
+    description: |
+      مهام متسلسلة، كل وكيل ينتظر انتهاء السابق.
+      مناسب للعمليات المحددة خطواتها مسبقاً.
+    
+    diagram: |
+      [Ingest] → [Clean] → [Segment] → [Extract] → [Index]
+    
+    characteristics:
+      pros:
+        - "سهل التتبع والتصحيح"
+        - "تكلفة تنسيق منخفضة"
+        - "مناسب للدفعات"
+      cons:
+        - "بطيء (لا توازي)"
+        - "فشل واحد يوقف الكل"
+        
+    use_cases:
+      - "معالجة المخطوطات الجديدة"
+      - "تنظيف وتقطيع النصوص"
+      - "بناء الفهارس"
+      
+    example:
+      name: "Document Ingestion Pipeline"
+      steps:
+        - agent: "ingest_agent"
+          task: "استلام الملف وتحويله"
+          output: "raw_document"
+        - agent: "clean_agent"
+          task: "تنظيف وتوحيد الترميز"
+          output: "cleaned_document"
+        - agent: "segment_agent"
+          task: "تقطيع إلى وحدات"
+          output: "passages"
+        - agent: "entity_extractor"
+          task: "استخراج الكيانات"
+          output: "entity_proposals"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # التنسيق الجدلي
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  dialectical:
+    name: "Dialectical/Adversarial"
+    name_ar: "التنسيق الجدلي"
+    
+    description: |
+      وكيل مؤيد + وكيل معارض قبل اعتماد أي ادعاء.
+      مستوحى من منطق Hegel في تحويل التعارض إلى تحسين.
+    
+    diagram: |
+      [Claim Drafter] ─────────────────────────────────┐
+            ↓                                          │
+      [Counter-Evidence Seeker]                        │
+            ↓                                          │
+      ┌─────────────────────────┐                      │
+      │ هل يوجد تعارض جوهري؟    │                      │
+      └─────────────────────────┘                      │
+            ↓ نعم          ↓ لا                        │
+      [Claim Reviser]    [Quality Gate]               │
+            ↓                  ↓                       │
+            └──────────────────┴───────────────────────┘
+                               ↓
+                        [Reviewed Claim]
+    
+    roles:
+      advocate:
+        name_ar: "المؤيد"
+        task: "صياغة الادعاء وجمع الأدلة الداعمة"
+        agent: "claim_drafter"
+        
+      critic:
+        name_ar: "الناقد"
+        task: "البحث عن أدلة مضادة وثغرات"
+        agent: "counter_evidence_seeker"
+        
+      arbiter:
+        name_ar: "الحكم"
+        task: "تقييم التوازن واتخاذ القرار"
+        agent: "quality_gate OR human_reviewer"
+    
+    iteration_rules:
+      max_iterations: 3
+      stop_conditions:
+        - "لا أدلة مضادة جديدة"
+        - "confidence >= 0.9"
+        - "human approval"
+    
+    use_cases:
+      - "اعتماد الادعاءات البحثية"
+      - "تقييم الفتاوى المتنازع عليها"
+      - "مراجعة التفسيرات التأويلية"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # التنسيق الهرمي
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  hierarchical:
+    name: "Hierarchical"
+    name_ar: "التنسيق الهرمي"
+    
+    description: |
+      منسق رئيسي يدير وكلاء متخصصين.
+      يفكك المهمة ويوزعها ثم يجمع النتائج.
+    
+    diagram: |
+                    ┌─────────────────┐
+                    │   Orchestrator  │
+                    │     المنسق      │
+                    └────────┬────────┘
+                             │
+          ┌──────────────────┼──────────────────┐
+          │                  │                  │
+          ▼                  ▼                  ▼
+    ┌───────────┐      ┌───────────┐      ┌───────────┐
+    │ Research  │      │  Critic   │      │ Executor  │
+    │  الباحث   │      │  الناقد   │      │  المنفذ   │
+    └───────────┘      └───────────┘      └───────────┘
+    
+    roles:
+      orchestrator:
+        name_ar: "المنسق"
+        responsibilities:
+          - "تفكيك المهمة إلى مهام فرعية"
+          - "اختيار الوكيل المناسب لكل مهمة"
+          - "مراقبة التقدم"
+          - "جمع النتائج وتوليفها"
+          - "التعامل مع الفشل"
+        autonomy: "L3"
+        
+      workers:
+        name_ar: "العمال"
+        types:
+          - "Research Agent: جمع المعلومات"
+          - "Critic Agent: نقد وتقييم"
+          - "Executor Agent: تنفيذ الإجراءات"
+          - "Writer Agent: صياغة المخرجات"
+    
+    use_cases:
+      - "البحث المعقد متعدد المراحل"
+      - "إنتاج تقرير بحثي"
+      - "تحليل مقارن"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # التنسيق التشاركي
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  collaborative:
+    name: "Collaborative/Peer"
+    name_ar: "التنسيق التشاركي"
+    
+    description: |
+      وكلاء متساوون يتفاوضون للوصول لحل مشترك.
+      لا يوجد قائد ثابت.
+    
+    diagram: |
+          ┌───────────┐
+          │  Agent A  │◄────────┐
+          └─────┬─────┘         │
+                │               │
+                ▼               │
+          ┌───────────┐         │
+          │  Agent B  │◄────────┤
+          └─────┬─────┘         │
+                │               │
+                ▼               │
+          ┌───────────┐         │
+          │  Agent C  │─────────┘
+          └───────────┘
+    
+    negotiation_protocol:
+      source: "Contract Net Protocol"
+      steps:
+        - "Agent A يعلن عن مهمة"
+        - "Agents B, C يقدمون عروضاً"
+        - "Agent A يختار أفضل عرض"
+        - "الفائز ينفذ + يُبلغ بالنتيجة"
+    
+    use_cases:
+      - "مراجعة متعددة التخصصات"
+      - "حل النزاعات"
+      - "توليد الأفكار"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # التنسيق الديناميكي
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  dynamic_network:
+    name: "Dynamic Network"
+    name_ar: "الشبكة الديناميكية"
+    
+    source: "Kathleen Carley - ORA"
+    
+    description: |
+      شبكة وكلاء تتشكل وتتفكك حسب الحاجة.
+      التكوين يتغير بناءً على المهمة.
+    
+    characteristics:
+      - "لا بنية ثابتة"
+      - "وكلاء ينضمون/يغادرون حسب الحاجة"
+      - "مناسب للمهام غير المتوقعة"
+    
+    use_cases:
+      - "التعامل مع أسئلة متنوعة جداً"
+      - "البحث الاستكشافي"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              بروتوكول الرسائل
+# ═══════════════════════════════════════════════════════════════════════════════
+
+message_protocol:
+
+  description: |
+    لغة تواصل مهيكلة (ACL) بين الوكلاء.
+    كل رسالة تتبع schema محدد.
+
+  message_schema:
+    required_fields:
+      message_id:
+        type: "string"
+        format: "iqra:msg:{timestamp}:{uuid}"
+        
+      sender:
+        type: "string"
+        description: "agent_id المرسل"
+        
+      receiver:
+        type: "string"
+        description: "agent_id المستلم (أو broadcast)"
+        
+      performative:
+        type: "enum"
+        values:
+          - "REQUEST"      # طلب تنفيذ مهمة
+          - "INFORM"       # إخبار بمعلومة
+          - "QUERY"        # استفسار
+          - "PROPOSE"      # اقتراح
+          - "ACCEPT"       # قبول اقتراح
+          - "REJECT"       # رفض اقتراح
+          - "CONFIRM"      # تأكيد استلام
+          - "FAILURE"      # إبلاغ بفشل
+          - "CANCEL"       # إلغاء طلب
+          
+      content:
+        type: "object"
+        description: "محتوى الرسالة"
+        
+      conversation_id:
+        type: "string"
+        description: "معرّف المحادثة"
+        
+      in_reply_to:
+        type: "string"
+        description: "معرّف الرسالة التي يُرد عليها"
+        
+      timestamp:
+        type: "datetime"
+
+  example_conversation:
+    context: "طلب بحث عن موقف الغزالي من الفلسفة"
+    
+    messages:
+      - message_id: "msg_001"
+        sender: "orchestrator"
+        receiver: "recipe_builder"
+        performative: "REQUEST"
+        content:
+          task: "build_recipe"
+          question: "موقف الغزالي من الفلسفة"
+          constraints:
+            cost_budget: 5.0
+        conversation_id: "conv_ghazali_001"
+        
+      - message_id: "msg_002"
+        sender: "recipe_builder"
+        receiver: "orchestrator"
+        performative: "INFORM"
+        content:
+          status: "complete"
+          artifact: "recipe_ghazali_001"
+          estimated_cost: 2.3
+        conversation_id: "conv_ghazali_001"
+        in_reply_to: "msg_001"
+        
+      - message_id: "msg_003"
+        sender: "orchestrator"
+        receiver: "evidence_hunter"
+        performative: "REQUEST"
+        content:
+          task: "execute_recipe"
+          recipe_id: "recipe_ghazali_001"
+        conversation_id: "conv_ghazali_001"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              فرق العمل المعيارية
+# ═══════════════════════════════════════════════════════════════════════════════
+
+standard_teams:
+
+  research_team:
+    name_ar: "فريق البحث"
+    purpose: "إنجاز بحث كامل من السؤال إلى التقرير"
+    
+    members:
+      - role: "Orchestrator"
+        agent: "research_orchestrator"
+        autonomy: "L3"
+        
+      - role: "Recipe Builder"
+        agent: "recipe_builder"
+        autonomy: "L1"
+        
+      - role: "Evidence Hunter"
+        agent: "evidence_hunter"
+        autonomy: "L2"
+        
+      - role: "Claim Drafter"
+        agent: "claim_drafter"
+        autonomy: "L1"
+        
+      - role: "Counter-Evidence Seeker"
+        agent: "counter_evidence_seeker"
+        autonomy: "L2"
+        
+      - role: "Writer"
+        agent: "section_writer"
+        autonomy: "L1"
+        
+      - role: "Citation Auditor"
+        agent: "citation_auditor"
+        autonomy: "L2"
+    
+    workflow: "hierarchical + dialectical"
+
+  link_team:
+    name_ar: "فريق الربط"
+    purpose: "بناء وصيانة الذاكرة الدلالية"
+    
+    members:
+      - role: "Entity Extractor"
+        agent: "entity_extractor"
+        autonomy: "L1"
+        
+      - role: "Identity Resolver"
+        agent: "identity_resolver"
+        autonomy: "L1"
+        
+      - role: "Relation Proposer"
+        agent: "relation_proposer"
+        autonomy: "L1"
+        
+      - role: "Human Reviewer"
+        agent: "human (required)"
+        autonomy: "N/A"
+    
+    workflow: "linear + human-in-the-loop"
+
+  quality_team:
+    name_ar: "فريق الجودة"
+    purpose: "ضمان جودة المخرجات قبل النشر"
+    
+    members:
+      - role: "Quality Monitor"
+        agent: "quality_monitor"
+        autonomy: "L4"
+        
+      - role: "Consistency Checker"
+        agent: "consistency_checker"
+        autonomy: "L2"
+        
+      - role: "Rights Checker"
+        agent: "rights_checker"
+        autonomy: "L2"
+        
+      - role: "Publish Gate"
+        agent: "publish_gate"
+        autonomy: "L2"
+    
+    workflow: "linear with gates"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              إدارة الفشل
+# ═══════════════════════════════════════════════════════════════════════════════
+
+failure_handling:
+
+  strategies:
+    
+    retry:
+      name_ar: "إعادة المحاولة"
+      when: "فشل مؤقت (timeout, rate limit)"
+      max_retries: 3
+      backoff: "exponential"
+      
+    fallback:
+      name_ar: "البديل"
+      when: "فشل الوكيل الأساسي"
+      action: "تحويل لوكيل بديل أو نموذج أبسط"
+      
+    escalate:
+      name_ar: "التصعيد"
+      when: "فشل متكرر أو خطأ حرج"
+      action: "إخطار المراجع البشري"
+      
+    graceful_degradation:
+      name_ar: "التدهور السلس"
+      when: "لا يمكن إكمال المهمة كاملة"
+      action: "إرجاع نتيجة جزئية مع تنبيه"
+      
+    circuit_breaker:
+      name_ar: "قاطع الدائرة"
+      when: "فشل متتابع يتجاوز الحد"
+      action: "إيقاف الاستدعاءات مؤقتاً"
+      threshold: "5 failures in 1 minute"
+      cooldown: "5 minutes"
+
+  failure_logging:
+    required_fields:
+      - "run_id"
+      - "agent_id"
+      - "failure_type"
+      - "error_message"
+      - "context"
+      - "recovery_action"
+      - "resolved"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              جداول BigQuery
+# ═══════════════════════════════════════════════════════════════════════════════
+
+bigquery_tables:
+
+  conversations:
+    description: "سجل المحادثات بين الوكلاء"
+    columns:
+      - conversation_id: "معرّف المحادثة"
+      - project_id: "معرّف المشروع"
+      - orchestration_pattern: "نمط التنسيق"
+      - participants: "المشاركون (JSON)"
+      - status: "ACTIVE | COMPLETED | FAILED"
+      - started_at: "بداية المحادثة"
+      - ended_at: "نهاية المحادثة"
+
+  messages:
+    description: "سجل الرسائل بين الوكلاء"
+    columns:
+      - message_id: "معرّف الرسالة"
+      - conversation_id: "معرّف المحادثة"
+      - sender: "المرسل"
+      - receiver: "المستلم"
+      - performative: "نوع الرسالة"
+      - content_json: "المحتوى"
+      - in_reply_to: "رداً على"
+      - timestamp: "الوقت"
+
+  team_runs:
+    description: "سجل تشغيل الفرق"
+    columns:
+      - team_run_id: "معرّف تشغيل الفريق"
+      - team_type: "نوع الفريق"
+      - project_id: "معرّف المشروع"
+      - orchestration_pattern: "نمط التنسيق"
+      - members: "الأعضاء (JSON)"
+      - status: "الحالة"
+      - total_cost: "التكلفة الإجمالية"
+      - artifacts_produced: "المنتجات"
+      - started_at: "البداية"
+      - ended_at: "النهاية"
+
+# ═══════════════════════════════════════════════════════════════════════════════

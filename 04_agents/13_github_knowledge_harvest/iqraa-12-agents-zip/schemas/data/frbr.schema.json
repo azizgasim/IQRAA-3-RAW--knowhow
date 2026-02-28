@@ -1,0 +1,98 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://iqra.ai/schemas/data/frbr.schema.json",
+  "title": "FRBR Citation Model",
+  "description": "Functional Requirements for Bibliographic Records - IQRA v1.3",
+  "definitions": {
+    "Work": {
+      "type": "object",
+      "description": "Abstract intellectual creation",
+      "required": ["work_id", "title_ar", "author_ids", "creation_period"],
+      "properties": {
+        "work_id": {"type": "string", "pattern": "^WORK-[A-Z0-9]{8}$"},
+        "title_ar": {"type": "string"},
+        "title_en": {"type": "string"},
+        "author_ids": {"type": "array", "items": {"type": "string"}},
+        "creation_period": {
+          "type": "object",
+          "properties": {
+            "hijri_start": {"type": "integer"},
+            "hijri_end": {"type": "integer"},
+            "gregorian_start": {"type": "integer"},
+            "gregorian_end": {"type": "integer"}
+          }
+        },
+        "subject_tags": {"type": "array", "items": {"type": "string"}},
+        "work_type": {"type": "string", "enum": ["primary_source", "commentary", "summary", "translation", "compilation"]}
+      }
+    },
+    "Expression": {
+      "type": "object",
+      "required": ["expression_id", "work_id", "language", "expression_type"],
+      "properties": {
+        "expression_id": {"type": "string", "pattern": "^EXPR-[A-Z0-9]{8}$"},
+        "work_id": {"type": "string"},
+        "language": {"type": "string", "enum": ["ar", "ar-classic", "en", "fa", "ur", "tr"]},
+        "expression_type": {"type": "string", "enum": ["original", "translation", "revision", "abridgment"]},
+        "translator_ids": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "Manifestation": {
+      "type": "object",
+      "required": ["manifestation_id", "expression_id", "publisher"],
+      "properties": {
+        "manifestation_id": {"type": "string", "pattern": "^MANIF-[A-Z0-9]{8}$"},
+        "expression_id": {"type": "string"},
+        "publisher": {"type": "string"},
+        "publication_place": {"type": "string"},
+        "publication_year": {"type": "integer"},
+        "edition": {"type": "string"},
+        "isbn": {"type": "string"},
+        "total_volumes": {"type": "integer"},
+        "format": {"type": "string", "enum": ["print", "manuscript", "digital", "microfilm"]}
+      }
+    },
+    "Item": {
+      "type": "object",
+      "required": ["item_id", "manifestation_id"],
+      "properties": {
+        "item_id": {"type": "string", "pattern": "^ITEM-[A-Z0-9]{8}$"},
+        "manifestation_id": {"type": "string"},
+        "location": {
+          "type": "object",
+          "properties": {
+            "library": {"type": "string"},
+            "collection": {"type": "string"},
+            "call_number": {"type": "string"},
+            "digital_url": {"type": "string", "format": "uri"}
+          }
+        },
+        "access_type": {"type": "string", "enum": ["open", "restricted", "private"]},
+        "digitized": {"type": "boolean"}
+      }
+    },
+    "EvidenceUnit": {
+      "type": "object",
+      "required": ["evidence_id", "work_id", "quote_ar"],
+      "properties": {
+        "evidence_id": {"type": "string", "pattern": "^EVID-[A-Z0-9]{12}$"},
+        "work_id": {"type": "string"},
+        "expression_id": {"type": "string"},
+        "manifestation_id": {"type": "string"},
+        "item_id": {"type": "string"},
+        "volume": {"type": "integer"},
+        "page_start": {"type": "integer"},
+        "page_end": {"type": "integer"},
+        "line_start": {"type": "integer"},
+        "line_end": {"type": "integer"},
+        "quote_ar": {"type": "string"},
+        "quote_normalized": {"type": "string"},
+        "context_before": {"type": "string", "maxLength": 500},
+        "context_after": {"type": "string", "maxLength": 500},
+        "verified_against_original": {"type": "boolean", "default": false},
+        "linguistic_analysis_id": {"type": "string"},
+        "confidence_score": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    }
+  }
+}

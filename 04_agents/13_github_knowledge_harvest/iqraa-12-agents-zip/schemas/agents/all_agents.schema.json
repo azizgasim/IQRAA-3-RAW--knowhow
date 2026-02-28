@@ -1,0 +1,169 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://iqra.ai/schemas/agents/all_agents.schema.json",
+  "title": "IQRA All Agents Registry",
+  "description": "Complete registry of all 11 IQRA agents - v1.3",
+  "type": "object",
+  "properties": {
+    "version": {
+      "const": "1.3"
+    },
+    "agents": {
+      "type": "array",
+      "minItems": 11,
+      "maxItems": 11,
+      "items": {
+        "$ref": "base_agent.schema.json"
+      }
+    }
+  },
+  "definitions": {
+    "agents_registry": [
+      {
+        "agent_id": "AGT-01-LINGUIST",
+        "arabic_name": "اللغوي",
+        "english_name": "Linguist",
+        "layer": 0,
+        "autonomy_level": "L2_ADVISOR",
+        "llm_config": {
+          "model": "gemini-1.5-pro",
+          "temperature": 0.1
+        },
+        "description": "Arabic NLP preprocessing: morphology, syntax, NER, diacritization",
+        "capabilities": [
+          "morphological_analysis",
+          "syntactic_parsing",
+          "semantic_disambiguation",
+          "diacritization",
+          "named_entity_recognition"
+        ],
+        "external_tools": [
+          {"name": "CAMeL Tools", "license": "MIT"},
+          {"name": "Farasa", "license": "GPL-3.0"},
+          {"name": "AraBERT", "license": "Apache-2.0"},
+          {"name": "Qalsadi", "license": "GPL"}
+        ]
+      },
+      {
+        "agent_id": "AGT-02-ORCHESTRATOR",
+        "arabic_name": "المنسق",
+        "english_name": "Orchestrator",
+        "layer": 1,
+        "autonomy_level": "L3_DECIDER",
+        "llm_config": {
+          "model": "gemini-1.5-pro",
+          "temperature": 0.3
+        },
+        "description": "Central coordinator: query classification, task decomposition, agent routing"
+      },
+      {
+        "agent_id": "AGT-03-GUARDIAN",
+        "arabic_name": "الحارس",
+        "english_name": "Guardian",
+        "layer": 1,
+        "autonomy_level": "L3_DECIDER",
+        "llm_config": {
+          "model": "gemini-1.5-pro",
+          "temperature": 0.2
+        },
+        "description": "Quality guardian: gate enforcement, audit logging, export control"
+      },
+      {
+        "agent_id": "AGT-04-ARCHIVIST",
+        "arabic_name": "الخازن",
+        "english_name": "Archivist",
+        "layer": 2,
+        "autonomy_level": "L1_EXECUTOR",
+        "llm_config": {
+          "model": "gemini-1.5-flash",
+          "temperature": 0.1
+        },
+        "description": "BigQuery SSOT manager: CRUD operations, schema validation, data integrity"
+      },
+      {
+        "agent_id": "AGT-05-EVIDENCER",
+        "arabic_name": "المحقق",
+        "english_name": "Evidencer",
+        "layer": 2,
+        "autonomy_level": "L2_ADVISOR",
+        "llm_config": {
+          "model": "gemini-1.5-pro",
+          "temperature": 0.2
+        },
+        "description": "Evidence specialist: FRBR citations, source verification, quote extraction"
+      },
+      {
+        "agent_id": "AGT-06-ANALYST",
+        "arabic_name": "المحلل",
+        "english_name": "Analyst",
+        "layer": 2,
+        "autonomy_level": "L2_ADVISOR",
+        "llm_config": {
+          "model": "gemini-1.5-pro",
+          "temperature": 0.4
+        },
+        "description": "Epistemological analyst: concept cards, definitions, classifications"
+      },
+      {
+        "agent_id": "AGT-07-GENEALOGIST",
+        "arabic_name": "الجينيالوجي",
+        "english_name": "Genealogist",
+        "layer": 3,
+        "autonomy_level": "L2_ADVISOR",
+        "llm_config": {
+          "model": "gemini-1.5-pro",
+          "temperature": 0.5
+        },
+        "description": "Concept historian: lineage tracking, influence mapping, temporal evolution"
+      },
+      {
+        "agent_id": "AGT-08-SCOUT",
+        "arabic_name": "الرصّاد",
+        "english_name": "Scout",
+        "layer": 3,
+        "autonomy_level": "L4_INITIATOR",
+        "llm_config": {
+          "model": "gemini-1.5-pro",
+          "temperature": 0.7
+        },
+        "description": "Pattern detector: hidden connections, cross-domain links, anomalies"
+      },
+      {
+        "agent_id": "AGT-09-THEORIST",
+        "arabic_name": "المنظّر",
+        "english_name": "Theorist",
+        "layer": 4,
+        "autonomy_level": "L3_DECIDER",
+        "llm_config": {
+          "model": "gemini-1.5-pro",
+          "temperature": 0.6
+        },
+        "description": "Theory builder: hypothesis formation, framework construction, synthesis"
+      },
+      {
+        "agent_id": "AGT-10-PURIFIER",
+        "arabic_name": "المطهّر",
+        "english_name": "Purifier",
+        "layer": 4,
+        "autonomy_level": "L3_DECIDER",
+        "llm_config": {
+          "model": "gemini-1.5-pro",
+          "temperature": 0.3
+        },
+        "description": "Method purifier: bias detection, logical validation, methodology audit"
+      },
+      {
+        "agent_id": "AGT-11-IMPROVER",
+        "arabic_name": "المحسّن",
+        "english_name": "Improver",
+        "layer": 5,
+        "autonomy_level": "L3_DECIDER",
+        "llm_config": {
+          "model": "gemini-1.5-pro",
+          "temperature": 0.4
+        },
+        "description": "Meta-governance: error learning, playbook updates, self-improvement"
+      }
+    ]
+  }
+}

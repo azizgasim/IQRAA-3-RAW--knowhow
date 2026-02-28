@@ -1,0 +1,91 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://iqra.ai/schemas/agents/agent_contract.schema.json",
+  "title": "IQRA Agent Contract",
+  "description": "Schema for defining IQRA agent contracts",
+  "type": "object",
+  "required": ["agent_id", "arabic_name", "layer", "autonomy_level", "responsibilities"],
+  "properties": {
+    "agent_id": {
+      "type": "string",
+      "pattern": "^AGT-\\d{2}-[A-Z]+$",
+      "description": "Unique agent identifier (e.g., AGT-01-LINGUIST)"
+    },
+    "arabic_name": {
+      "type": "string",
+      "description": "Arabic name of the agent"
+    },
+    "layer": {
+      "type": "string",
+      "enum": [
+        "Pre-processing (Layer 0)",
+        "Governance (Layer 1)",
+        "Understanding & Analysis (Layer 2)",
+        "Exploration & Linking (Layer 3)",
+        "Building & Evaluation (Layer 4)",
+        "Meta-Governance (Layer 5)"
+      ]
+    },
+    "autonomy_level": {
+      "type": "string",
+      "enum": ["L1_EXECUTOR", "L2_ADVISOR", "L3_DECIDER", "L4_INITIATOR"],
+      "description": "L1=Follows instructions, L2=Suggests, L3=Decides, L4=Initiates"
+    },
+    "llm_model": {
+      "type": ["string", "null"],
+      "description": "LLM model to use (null for non-LLM agents)"
+    },
+    "temperature": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 0.3
+    },
+    "timeout_seconds": {
+      "type": "integer",
+      "minimum": 10,
+      "maximum": 300,
+      "default": 60
+    },
+    "responsibilities": {
+      "type": "array",
+      "items": {"type": "string"},
+      "minItems": 1
+    },
+    "inputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string"},
+          "type": {"type": "string"},
+          "required": {"type": "boolean"}
+        }
+      }
+    },
+    "outputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string"},
+          "type": {"type": "string"}
+        }
+      }
+    },
+    "gates_after": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^G-[0-5]$"
+      }
+    },
+    "playbooks": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^PB-\\d{2}$"
+      }
+    }
+  }
+}

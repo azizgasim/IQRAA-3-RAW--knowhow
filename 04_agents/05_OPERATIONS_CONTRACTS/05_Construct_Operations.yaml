@@ -1,0 +1,1153 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#                    الفئة الخامسة: البناء (Construct)
+#                    IQRA-12 Core Operations Layer
+# ═══════════════════════════════════════════════════════════════════════════════
+# 
+# الغرض: تشكيل وحدات معرفية جديدة من المواد الخام
+# العمليات: C1-C6
+# 
+# المبدأ الحاكم:
+# "كل بناء = مواد + منهج + مخرج + provenance"
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+category:
+  id: "CONSTRUCT"
+  name_ar: "البناء"
+  name_en: "Construct"
+  purpose: "تشكيل وحدات معرفية جديدة من المواد الخام المستخرجة والمحللة"
+  golden_rule: "كل بناء = مواد + منهج + مخرج + provenance (سلسلة المصدر)"
+  operations_count: 6
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# C1: بناء حزمة الأدلة (Evidence Bundle Construction)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+operations:
+
+  - id: "C1"
+    name_ar: "بناء حزمة الأدلة"
+    name_en: "Evidence Bundle Construction"
+    category: "Construct"
+    version: "1.0.0"
+    
+    purpose: |
+      تجميع الأدلة والشواهد ذات الصلة بسؤال أو ادعاء معين
+      في حزمة منظمة ومصنفة وموثقة
+    
+    inputs:
+      required:
+        - name: query
+          type: object
+          schema:
+            question: string
+            scope: string
+            type: enum[FACTUAL, INTERPRETIVE, EVALUATIVE, CAUSAL]
+            
+      optional:
+        - name: evidence_sources
+          type: array[string]
+          default: ["all_available"]
+          description: "مصادر الأدلة المحددة"
+          
+        - name: evidence_types
+          type: array[string]
+          default: ["all"]
+          values: [
+            TEXTUAL,          # نصوص
+            TESTIMONIAL,      # شهادات
+            STATISTICAL,      # إحصائيات
+            ARCHAEOLOGICAL,   # آثار
+            MANUSCRIPT,       # مخطوطات
+            COMPARATIVE,      # مقارنات
+            LOGICAL           # استدلالات منطقية
+          ]
+          
+        - name: include_counter_evidence
+          type: boolean
+          default: true
+          description: "تضمين الأدلة المعارضة"
+          
+        - name: quality_threshold
+          type: float
+          default: 0.6
+          description: "حد جودة الدليل"
+          
+        - name: max_evidence_items
+          type: integer
+          default: 50
+    
+    outputs:
+      primary:
+        name: evidence_bundle
+        type: EvidenceBundle
+        schema:
+          id: string
+          query: object
+          created_at: timestamp
+          bundle_metadata:
+            total_items: integer
+            by_type: object
+            by_source: object
+            quality_distribution: object
+          supporting_evidence:
+            type: array
+            items:
+              evidence_id: string
+              type: string
+              content:
+                text: string
+                offsets: object
+                source: object
+              relevance:
+                score: float
+                explanation: string
+                keywords_matched: array
+              quality:
+                score: float
+                factors:
+                  source_reliability: float
+                  textual_clarity: float
+                  contextual_fit: float
+              weight:
+                score: float
+                methodology: string
+              provenance:
+                extraction_operation: string
+                extraction_time: timestamp
+                original_source:
+                  work_id: string
+                  edition_id: string
+                  location: object
+              interpretation_notes: string
+              caveats: array
+          counter_evidence:
+            type: array
+            items:
+              # same structure as supporting
+              strength_against: float
+          ambiguous_evidence:
+            type: array
+            description: "أدلة يمكن قراءتها بأكثر من طريقة"
+          evidence_gaps:
+            type: array
+            description: "أدلة متوقعة لم تُوجد"
+            items:
+              expected: string
+              search_performed: string
+              possible_reasons: array
+          synthesis:
+            overall_strength: float
+            confidence_in_conclusion: float
+            key_evidence_items: array[string]
+            main_weaknesses: array
+            
+      secondary:
+        - name: evidence_graph
+          type: object
+          description: "شبكة علاقات الأدلة"
+          
+        - name: source_bibliography
+          type: array
+    
+    tools:
+      internal:
+        - name: Evidence Retriever
+          type: search
+          uses: ["E1", "E2"]
+          
+        - name: Relevance Scorer
+          type: ml_model
+          
+        - name: Quality Assessor
+          type: rule_based
+          
+        - name: Evidence Weigher
+          type: algorithm
+          
+      external: []
+    
+    resources:
+      knowledge_bases:
+        - source_reliability_ratings
+        - evidence_quality_rubrics
+      corpora:
+        - all_indexed_corpora
+    
+    guardrails:
+      pre_conditions:
+        - condition: "query is specific enough for evidence gathering"
+          error_code: "C1_VAGUE_QUERY"
+          
+      post_conditions:
+        - condition: "every evidence item has complete provenance"
+          error_code: "C1_MISSING_PROVENANCE"
+          
+        - condition: "counter_evidence is genuinely sought"
+          error_code: "C1_CONFIRMATION_BIAS"
+          
+        - condition: "quality scores are justified"
+          error_code: "C1_UNJUSTIFIED_QUALITY"
+          
+      forbidden:
+        - "hiding or downgrading counter-evidence"
+        - "evidence without source attribution"
+        - "inflating quality scores"
+        - "circular evidence (using conclusion as evidence)"
+    
+    quality_metrics:
+      - name: evidence_relevance
+        target: ">= 0.85"
+        
+      - name: provenance_completeness
+        target: "1.0"
+        
+      - name: balance_score
+        description: "توازن الأدلة المؤيدة والمعارضة"
+        target: ">= 0.7"
+    
+    cost_profile:
+      compute: "MEDIUM-HIGH"
+      tokens: "MEDIUM"
+      estimated_cost_per_call: "$0.03 - $0.15"
+    
+    autonomy_level: "L0"
+    autonomy_description: "جمع فقط، لا تقييم نهائي"
+    
+    example:
+      input:
+        query:
+          question: "هل أثر المنطق اليوناني في أصول الفقه؟"
+          scope: "القرون 2-5 هجرية"
+          type: "CAUSAL"
+        include_counter_evidence: true
+        
+      output:
+        evidence_bundle:
+          supporting_evidence:
+            - evidence_id: "ev_001"
+              type: "TEXTUAL"
+              content:
+                text: "استعمال الشافعي للحد المنطقي في الرسالة..."
+                source: {work_id: "risala_shafii"}
+              relevance: {score: 0.85}
+              quality: {score: 0.9}
+              provenance:
+                extraction_operation: "E1"
+                original_source: {work_id: "risala_shafii", page: "45"}
+          counter_evidence:
+            - evidence_id: "ev_010"
+              content:
+                text: "الشافعي لم يذكر أرسطو ولم يعرف اليونانية..."
+              strength_against: 0.6
+          synthesis:
+            overall_strength: 0.7
+            confidence_in_conclusion: 0.65
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# C2: بناء الادعاء (Claim Construction)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "C2"
+    name_ar: "بناء الادعاء"
+    name_en: "Claim Construction"
+    category: "Construct"
+    version: "1.0.0"
+    
+    purpose: |
+      صياغة ادعاء بحثي محدد ومقيد بناءً على الأدلة المتوفرة
+      مع تحديد درجة الثقة والحدود والشروط
+    
+    critical_principle: |
+      ⚠️ لا ادعاء بلا أدلة - كل ادعاء مرتبط بـ evidence_bundle_id
+      الادعاء أصغر وحدة قابلة للتقييم والدحض
+    
+    inputs:
+      required:
+        - name: evidence_bundle_id
+          type: string
+          description: "معرف حزمة الأدلة (من C1)"
+          
+        - name: claim_type
+          type: enum
+          values: [
+            DESCRIPTIVE,     # وصفي: ماذا حدث/يوجد
+            CAUSAL,          # سببي: لماذا/كيف
+            EVALUATIVE,      # تقييمي: هل هذا صحيح/جيد
+            INTERPRETIVE,    # تفسيري: ما معنى
+            COMPARATIVE,     # مقارن: كيف يختلف
+            PREDICTIVE       # توقعي: ماذا سيحدث
+          ]
+          
+      optional:
+        - name: claim_draft
+          type: string
+          description: "مسودة الادعاء إن وجدت"
+          
+        - name: confidence_target
+          type: float
+          description: "مستوى الثقة المطلوب"
+          
+        - name: scope_constraints
+          type: object
+          description: "قيود النطاق"
+    
+    outputs:
+      primary:
+        name: constructed_claim
+        type: ConstructedClaim
+        schema:
+          claim_id: string
+          evidence_bundle_id: string
+          claim:
+            statement: string
+            statement_ar: string
+            type: string
+          scope:
+            temporal: string
+            geographic: string
+            domain: string
+            entities_covered: array
+            entities_excluded: array
+          qualifications:
+            type: array
+            items:
+              qualification: string
+              reason: string
+          confidence:
+            level: float
+            factors:
+              evidence_strength: float
+              evidence_consistency: float
+              counter_evidence_weight: float
+              scholarly_support: float
+            confidence_band:
+              lower: float
+              upper: float
+          limitations:
+            type: array
+            items:
+              limitation: string
+              impact: string
+          falsifiability:
+            is_falsifiable: boolean
+            what_would_falsify: array
+            potential_tests: array
+          relationship_to_other_claims:
+            depends_on: array[string]
+            supports: array[string]
+            contradicts: array[string]
+          metadata:
+            constructed_at: timestamp
+            version: string
+            status: enum[DRAFT, REVIEWED, PUBLISHED, DEPRECATED]
+            
+      secondary:
+        - name: claim_alternatives
+          type: array
+          description: "صياغات بديلة للادعاء"
+          
+        - name: strength_analysis
+          type: object
+    
+    tools:
+      internal:
+        - name: Claim Formulator
+          type: nlp
+          
+        - name: Scope Analyzer
+          type: reasoning
+          
+        - name: Confidence Calculator
+          type: statistical
+          
+      external: []
+    
+    resources:
+      knowledge_bases:
+        - claim_templates
+        - scope_vocabulary
+    
+    guardrails:
+      pre_conditions:
+        - condition: "evidence_bundle exists and is not empty"
+          error_code: "C2_NO_EVIDENCE"
+          
+      post_conditions:
+        - condition: "claim is falsifiable"
+          error_code: "C2_UNFALSIFIABLE_CLAIM"
+          
+        - condition: "confidence is calibrated to evidence"
+          error_code: "C2_OVERCONFIDENT"
+          
+        - condition: "scope matches evidence scope"
+          error_code: "C2_SCOPE_MISMATCH"
+          
+      forbidden:
+        - "claims exceeding evidence scope"
+        - "hiding qualifications"
+        - "100% confidence claims"
+        - "claims without falsifiability conditions"
+    
+    quality_metrics:
+      - name: claim_precision
+        target: ">= 0.9"
+        
+      - name: confidence_calibration
+        target: ">= 0.85"
+        
+      - name: scope_accuracy
+        target: ">= 0.95"
+    
+    cost_profile:
+      compute: "LOW-MEDIUM"
+      tokens: "MEDIUM"
+      estimated_cost_per_call: "$0.02 - $0.08"
+    
+    autonomy_level: "L1"
+    autonomy_description: "يقترح الادعاء، يحتاج مراجعة"
+    
+    example:
+      input:
+        evidence_bundle_id: "eb_greek_logic_usul"
+        claim_type: "CAUSAL"
+        
+      output:
+        constructed_claim:
+          claim:
+            statement: "Greek logical terminology influenced the formulation of Islamic legal theory in the 3rd-5th centuries AH, primarily through indirect channels"
+            statement_ar: "أثرت المصطلحات المنطقية اليونانية في صياغة أصول الفقه الإسلامي في القرون 3-5 هـ، بشكل رئيسي عبر قنوات غير مباشرة"
+            type: "CAUSAL"
+          scope:
+            temporal: "القرون 3-5 هجرية"
+            geographic: "العالم الإسلامي الكلاسيكي"
+            domain: "أصول الفقه"
+          qualifications:
+            - qualification: "التأثير في المصطلحات لا في المحتوى بالضرورة"
+              reason: "الأدلة تدعم التأثير الشكلي أكثر من الجوهري"
+            - qualification: "عبر قنوات غير مباشرة"
+              reason: "لا دليل على قراءة مباشرة للنصوص اليونانية"
+          confidence:
+            level: 0.72
+            factors:
+              evidence_strength: 0.75
+              counter_evidence_weight: 0.25
+          falsifiability:
+            is_falsifiable: true
+            what_would_falsify:
+              - "إثبات أن المصطلحات نشأت مستقلة"
+              - "دليل على عدم وجود اتصال"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# C3: بناء الدليل المضاد (Counter-Evidence Construction)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "C3"
+    name_ar: "بناء الدليل المضاد"
+    name_en: "Counter-Evidence Construction"
+    category: "Construct"
+    version: "1.0.0"
+    
+    purpose: |
+      البحث المتعمد عن الأدلة التي تدحض أو تقيد ادعاءً معيناً
+      لضمان التوازن والموضوعية
+    
+    critical_principle: |
+      ⚠️ هذه العملية إلزامية قبل نشر أي ادعاء
+      لا نشر بدون محاولة جادة لدحض الادعاء
+    
+    inputs:
+      required:
+        - name: claim_id
+          type: string
+          description: "معرف الادعاء المراد اختباره"
+          
+      optional:
+        - name: search_strategies
+          type: array[string]
+          default: ["all"]
+          values: [
+            DIRECT_CONTRADICTION,   # بحث عن نقيض مباشر
+            ALTERNATIVE_EXPLANATION, # تفسيرات بديلة
+            SCOPE_LIMITATION,       # أدلة تقيد النطاق
+            METHODOLOGICAL_CRITIQUE, # نقد المنهج
+            HISTORICAL_COUNTER,     # سوابق تاريخية مخالفة
+            SCHOLARLY_DISSENT       # معارضة علمية
+          ]
+          
+        - name: effort_level
+          type: enum
+          values: [BASIC, THOROUGH, EXHAUSTIVE]
+          default: "THOROUGH"
+    
+    outputs:
+      primary:
+        name: counter_evidence_package
+        type: CounterEvidencePackage
+        schema:
+          claim_id: string
+          search_effort:
+            level: string
+            strategies_used: array
+            sources_searched: array
+            time_spent: string
+          counter_evidence_found:
+            type: array
+            items:
+              id: string
+              type: string
+              content:
+                text: string
+                source: object
+              counter_type: enum[
+                DIRECT_REFUTATION,    # دحض مباشر
+                ALTERNATIVE_THEORY,   # نظرية بديلة
+                LIMITING_CASE,        # حالة مقيدة
+                METHODOLOGICAL_FLAW,  # خلل منهجي
+                MISSING_EVIDENCE,     # غياب دليل متوقع
+                ANACHRONISM           # مفارقة تاريخية
+              ]
+              strength:
+                score: float
+                reasoning: string
+              implications:
+                for_claim: string
+                suggested_modification: string
+              provenance: object
+          no_counter_evidence:
+            searched_but_not_found: array
+            significance: string
+          impact_assessment:
+            claim_survives: boolean
+            required_modifications: array
+            confidence_adjustment: float
+            new_confidence: float
+          scholarly_debate:
+            existing_critiques: array
+            existing_defenses: array
+            
+      secondary:
+        - name: search_log
+          type: array
+          description: "سجل البحث الكامل"
+    
+    tools:
+      internal:
+        - name: Adversarial Searcher
+          type: search
+          description: "بحث معاكس متعمد"
+          
+        - name: Alternative Hypothesis Generator
+          type: reasoning
+          
+        - name: Critique Finder
+          type: search
+          
+      external: []
+    
+    guardrails:
+      pre_conditions:
+        - condition: "claim exists and is well-formed"
+          error_code: "C3_INVALID_CLAIM"
+          
+      post_conditions:
+        - condition: "search effort is genuine (not perfunctory)"
+          error_code: "C3_SUPERFICIAL_SEARCH"
+          
+        - condition: "findings are not hidden or minimized"
+          error_code: "C3_HIDDEN_COUNTER"
+          
+      forbidden:
+        - "superficial searching"
+        - "dismissing counter-evidence without engagement"
+        - "reporting no counter-evidence without evidence of search"
+    
+    quality_metrics:
+      - name: search_thoroughness
+        target: ">= 0.9"
+        
+      - name: counter_evidence_engagement
+        target: ">= 0.85"
+    
+    cost_profile:
+      compute: "MEDIUM-HIGH"
+      tokens: "MEDIUM"
+      estimated_cost_per_call: "$0.03 - $0.15"
+    
+    autonomy_level: "L0"
+    
+    example:
+      input:
+        claim_id: "claim_greek_logic_usul"
+        effort_level: "THOROUGH"
+        
+      output:
+        counter_evidence_package:
+          counter_evidence_found:
+            - type: "ALTERNATIVE_THEORY"
+              content:
+                text: "المصطلحات الأصولية نشأت من البيئة اللغوية العربية والممارسة الفقهية"
+              counter_type: "ALTERNATIVE_THEORY"
+              strength: {score: 0.65}
+              implications:
+                suggested_modification: "إضافة تقييد: التأثير جزئي وليس شاملاً"
+            - type: "LIMITING_CASE"
+              content:
+                text: "الشافعي لم يقرأ اليونانية ولم يذكر أرسطو"
+              strength: {score: 0.7}
+          impact_assessment:
+            claim_survives: true
+            required_modifications:
+              - "تقييد نوع التأثير"
+              - "توضيح القنوات غير المباشرة"
+            confidence_adjustment: -0.1
+            new_confidence: 0.62
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# C4: بناء المخطط (Outline Construction)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "C4"
+    name_ar: "بناء المخطط"
+    name_en: "Outline Construction"
+    category: "Construct"
+    version: "1.0.0"
+    
+    purpose: |
+      بناء هيكل منطقي متسلسل للورقة أو الفصل أو البحث
+      بناءً على الادعاءات والأدلة المتوفرة
+    
+    inputs:
+      required:
+        - name: claims
+          type: array[string]
+          description: "معرفات الادعاءات المراد تنظيمها"
+          
+        - name: output_type
+          type: enum
+          values: [PAPER, CHAPTER, THESIS, REPORT, ARTICLE, ENTRY]
+          
+      optional:
+        - name: template
+          type: string
+          description: "قالب المخطط إن وجد"
+          
+        - name: target_length
+          type: object
+          schema:
+            min_words: integer
+            max_words: integer
+            
+        - name: style_guide
+          type: string
+          description: "دليل الأسلوب المتبع"
+          
+        - name: audience
+          type: enum
+          values: [ACADEMIC, GENERAL, SPECIALIST, STUDENT]
+          default: "ACADEMIC"
+    
+    outputs:
+      primary:
+        name: outline
+        type: DocumentOutline
+        schema:
+          outline_id: string
+          output_type: string
+          title_suggestions: array[string]
+          abstract_draft: string
+          structure:
+            type: array
+            items:
+              section_id: string
+              level: integer  # 1 = chapter, 2 = section, 3 = subsection
+              title: string
+              purpose: string
+              claims_covered: array[string]
+              evidence_bundles: array[string]
+              estimated_length:
+                words: integer
+                pages: float
+              key_points:
+                type: array
+                items:
+                  point: string
+                  supporting_claim: string
+              transitions:
+                from_previous: string
+                to_next: string
+              notes: string
+              subsections: array  # recursive
+          logical_flow:
+            type: array
+            description: "سلسلة الحجج"
+            items:
+              from_section: string
+              to_section: string
+              logical_connection: string
+          bibliography_preview:
+            primary_sources: integer
+            secondary_sources: integer
+            key_works: array
+          metadata:
+            total_sections: integer
+            total_estimated_words: integer
+            total_claims: integer
+            
+      secondary:
+        - name: alternative_structures
+          type: array
+          description: "هياكل بديلة"
+          
+        - name: gap_warnings
+          type: array
+          description: "تحذيرات عن فجوات في التغطية"
+    
+    tools:
+      internal:
+        - name: Structure Generator
+          type: planning
+          
+        - name: Logical Flow Analyzer
+          type: reasoning
+          
+        - name: Length Estimator
+          type: statistical
+          
+      external: []
+    
+    resources:
+      knowledge_bases:
+        - document_templates
+        - style_guides
+    
+    guardrails:
+      pre_conditions:
+        - condition: "claims are non-empty and linked to evidence"
+          error_code: "C4_NO_CLAIMS"
+          
+      post_conditions:
+        - condition: "all claims are covered in outline"
+          error_code: "C4_UNCOVERED_CLAIMS"
+          
+        - condition: "logical flow is coherent"
+          error_code: "C4_INCOHERENT_FLOW"
+          
+      forbidden:
+        - "sections without purpose"
+        - "claims without assigned section"
+        - "circular logical flow"
+    
+    quality_metrics:
+      - name: coverage_completeness
+        target: "1.0"
+        
+      - name: logical_coherence
+        target: ">= 0.9"
+        
+      - name: balance
+        description: "توازن الأقسام"
+        target: ">= 0.8"
+    
+    cost_profile:
+      compute: "LOW"
+      tokens: "LOW-MEDIUM"
+      estimated_cost_per_call: "$0.01 - $0.05"
+    
+    autonomy_level: "L1"
+    
+    example:
+      input:
+        claims: ["claim_greek_logic_usul", "claim_indirect_channels", "claim_terminology_not_content"]
+        output_type: "PAPER"
+        target_length: {min_words: 8000, max_words: 12000}
+        
+      output:
+        outline:
+          title_suggestions:
+            - "تأثير المنطق اليوناني على صياغة أصول الفقه: دراسة في القنوات والحدود"
+          structure:
+            - section_id: "intro"
+              level: 1
+              title: "المقدمة"
+              purpose: "طرح الإشكالية ومراجعة الأدبيات"
+              claims_covered: []
+              estimated_length: {words: 1500}
+              
+            - section_id: "chapter1"
+              level: 1
+              title: "السياق التاريخي: حركة الترجمة والتثاقف"
+              claims_covered: ["claim_indirect_channels"]
+              estimated_length: {words: 2500}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# C5: بناء القاموس (Glossary Construction)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "C5"
+    name_ar: "بناء القاموس"
+    name_en: "Glossary Construction"
+    category: "Construct"
+    version: "1.0.0"
+    
+    purpose: |
+      بناء قاموس مصطلحات لمجال أو نص أو بحث
+      مع التعريفات والسياقات والعلاقات
+    
+    inputs:
+      required:
+        - name: scope
+          type: object
+          schema:
+            type: enum[DOMAIN, TEXT, PROJECT, CORPUS]
+            identifier: string
+            
+      optional:
+        - name: terms_to_include
+          type: array[string]
+          description: "مصطلحات محددة للتضمين"
+          
+        - name: extraction_source
+          type: string
+          description: "مصدر استخراج المصطلحات (من E6)"
+          
+        - name: definition_style
+          type: enum
+          values: [TECHNICAL, ACCESSIBLE, SCHOLARLY, ENCYCLOPEDIC]
+          default: "SCHOLARLY"
+          
+        - name: include_etymology
+          type: boolean
+          default: true
+          
+        - name: include_usage_examples
+          type: boolean
+          default: true
+          
+        - name: cross_reference
+          type: boolean
+          default: true
+    
+    outputs:
+      primary:
+        name: glossary
+        type: Glossary
+        schema:
+          glossary_id: string
+          scope: object
+          language: string
+          entries:
+            type: array
+            items:
+              term_id: string
+              term: string
+              transliteration: string
+              pronunciation: string
+              part_of_speech: string
+              domain: string
+              definitions:
+                type: array
+                items:
+                  definition_id: string
+                  text: string
+                  domain_specific: boolean
+                  source: string
+                  period: string
+              etymology:
+                origin: string
+                original_meaning: string
+                evolution: string
+                cognates: array
+              usage:
+                type: array
+                items:
+                  example: string
+                  source: object
+                  context: string
+              variants:
+                synonyms: array
+                antonyms: array
+                related_terms: array
+              cross_references:
+                broader: array
+                narrower: array
+                related: array
+              notes:
+                scholarly: string
+                usage_caution: string
+              metadata:
+                frequency_in_corpus: integer
+                first_attestation: object
+                status: enum[STANDARD, ARCHAIC, TECHNICAL, CONTESTED]
+          statistics:
+            total_entries: integer
+            by_domain: object
+            by_status: object
+          relationships_graph:
+            type: object
+            format: "term_network"
+            
+      secondary:
+        - name: alphabetical_index
+          type: array
+          
+        - name: thematic_index
+          type: object
+    
+    tools:
+      internal:
+        - name: Term Aggregator
+          type: aggregator
+          sources: ["E6 outputs"]
+          
+        - name: Definition Writer
+          type: nlp
+          
+        - name: Cross-reference Builder
+          type: graph
+          
+      external: []
+    
+    resources:
+      knowledge_bases:
+        - existing_glossaries
+        - etymological_databases
+    
+    guardrails:
+      post_conditions:
+        - condition: "every term has at least one definition"
+          error_code: "C5_UNDEFINED_TERM"
+          
+        - condition: "definitions have sources"
+          error_code: "C5_UNSOURCED_DEFINITION"
+          
+      forbidden:
+        - "circular definitions"
+        - "definitions without sources"
+    
+    quality_metrics:
+      - name: definition_clarity
+        target: ">= 0.9"
+        
+      - name: coverage
+        target: ">= 0.95"
+        
+      - name: cross_reference_accuracy
+        target: ">= 0.9"
+    
+    cost_profile:
+      compute: "MEDIUM"
+      tokens: "MEDIUM"
+      estimated_cost_per_call: "$0.02 - $0.10"
+    
+    autonomy_level: "L0-L1"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# C6: بناء الأنطولوجيا (Ontology Construction)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "C6"
+    name_ar: "بناء الأنطولوجيا"
+    name_en: "Ontology Construction"
+    category: "Construct"
+    version: "1.0.0"
+    
+    purpose: |
+      بناء أنطولوجيا (خريطة مفاهيمية هيكلية) لمجال معرفي
+      تحدد الكيانات والعلاقات والقيود
+    
+    inputs:
+      required:
+        - name: domain
+          type: string
+          description: "المجال المعرفي"
+          
+        - name: scope
+          type: object
+          schema:
+            breadth: enum[NARROW, MEDIUM, BROAD]
+            depth: enum[SHALLOW, MEDIUM, DEEP]
+            
+      optional:
+        - name: base_ontology
+          type: string
+          description: "أنطولوجيا أساسية للبناء عليها"
+          
+        - name: source_materials
+          type: array
+          description: "مواد مصدرية"
+          
+        - name: formalization_level
+          type: enum
+          values: [INFORMAL, SEMI_FORMAL, FORMAL_OWL]
+          default: "SEMI_FORMAL"
+          
+        - name: include_instances
+          type: boolean
+          default: false
+          description: "تضمين أمثلة/حالات"
+    
+    outputs:
+      primary:
+        name: ontology
+        type: Ontology
+        schema:
+          ontology_id: string
+          domain: string
+          version: string
+          namespaces:
+            type: object
+          classes:
+            type: array
+            items:
+              class_id: string
+              name: string
+              name_ar: string
+              description: string
+              parent_class: string
+              properties:
+                type: array
+                items:
+                  property_id: string
+                  name: string
+                  type: enum[DATA, OBJECT]
+                  range: string
+                  cardinality: string
+                  description: string
+              constraints:
+                type: array
+                items:
+                  constraint_type: string
+                  description: string
+          relations:
+            type: array
+            items:
+              relation_id: string
+              name: string
+              name_ar: string
+              domain: string
+              range: string
+              inverse: string
+              characteristics: array  # transitive, symmetric, etc.
+              description: string
+          axioms:
+            type: array
+            description: "القواعد والقيود"
+            items:
+              axiom_id: string
+              type: string
+              formal_expression: string
+              natural_language: string
+          instances:
+            type: array
+            items:
+              instance_id: string
+              class: string
+              properties: object
+          metadata:
+            total_classes: integer
+            total_relations: integer
+            total_axioms: integer
+            max_depth: integer
+            
+      secondary:
+        - name: ontology_visualization
+          type: object
+          format: "graph_viz"
+          
+        - name: owl_export
+          type: string
+          format: "OWL/XML"
+          
+        - name: competency_questions
+          type: array
+          description: "أسئلة تختبر الأنطولوجيا"
+    
+    tools:
+      internal:
+        - name: Class Extractor
+          type: nlp
+          
+        - name: Relation Discoverer
+          type: pattern_based
+          
+        - name: Axiom Validator
+          type: reasoning
+          
+        - name: OWL Serializer
+          type: formatter
+          
+      external: []
+    
+    resources:
+      knowledge_bases:
+        - upper_ontologies
+        - domain_ontologies
+    
+    guardrails:
+      post_conditions:
+        - condition: "no orphan classes (except root)"
+          error_code: "C6_ORPHAN_CLASS"
+          
+        - condition: "relations have valid domain/range"
+          error_code: "C6_INVALID_RELATION"
+          
+        - condition: "no logical contradictions in axioms"
+          error_code: "C6_INCONSISTENT_AXIOMS"
+          
+      forbidden:
+        - "circular class hierarchies"
+        - "undefined references"
+        - "contradictory axioms"
+    
+    quality_metrics:
+      - name: logical_consistency
+        target: "1.0"
+        
+      - name: coverage
+        target: ">= 0.85"
+        
+      - name: competency_question_answering
+        target: ">= 0.9"
+    
+    cost_profile:
+      compute: "HIGH"
+      tokens: "MEDIUM-HIGH"
+      estimated_cost_per_call: "$0.05 - $0.25"
+    
+    autonomy_level: "L1"
+    
+    example:
+      input:
+        domain: "علم الكلام"
+        scope:
+          breadth: "MEDIUM"
+          depth: "MEDIUM"
+        formalization_level: "SEMI_FORMAL"
+        
+      output:
+        ontology:
+          classes:
+            - class_id: "theologicalSchool"
+              name: "Theological School"
+              name_ar: "مدرسة كلامية"
+              parent_class: "School"
+              properties:
+                - property_id: "foundedBy"
+                  type: "OBJECT"
+                  range: "Person"
+                - property_id: "mainDoctrines"
+                  type: "OBJECT"
+                  range: "Doctrine"
+                  cardinality: "1..*"
+          relations:
+            - relation_id: "opposedTo"
+              name: "opposed to"
+              name_ar: "يعارض"
+              domain: "Doctrine"
+              range: "Doctrine"
+              characteristics: ["symmetric"]
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              نهاية ملف البناء
+# ═══════════════════════════════════════════════════════════════════════════════

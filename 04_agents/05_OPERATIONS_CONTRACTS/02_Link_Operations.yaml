@@ -1,0 +1,1203 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#                    الفئة الثانية: الربط (Link)
+#                    IQRA-12 Core Operations Layer
+# ═══════════════════════════════════════════════════════════════════════════════
+# 
+# الغرض: إنشاء علاقات بين الكيانات والمفاهيم
+# العمليات: L1-L5
+# 
+# المبدأ الحاكم:
+# "كل ربط = Suggest → Evidence → Approve"
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+category:
+  id: "LINK"
+  name_ar: "الربط"
+  name_en: "Link"
+  purpose: "إنشاء علاقات موثقة بين الكيانات والمفاهيم والنصوص"
+  golden_rule: "كل ربط = Suggest → Evidence → Approve (لا موافقة تلقائية)"
+  operations_count: 5
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# L1: حل الهوية (Entity Resolution)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+operations:
+
+  - id: "L1"
+    name_ar: "حل الهوية"
+    name_en: "Entity Resolution"
+    category: "Link"
+    version: "1.0.0"
+    
+    purpose: |
+      تحديد ما إذا كانت الإشارات المختلفة تعود لنفس الكيان
+      ودمجها تحت هوية قانونية واحدة
+    
+    critical_note: |
+      ⚠️ هذه العملية L1 (اقتراح فقط) - لا يُسمح بالدمج التلقائي أبداً
+      كل قرار دمج يتطلب موافقة بشرية صريحة
+    
+    inputs:
+      required:
+        - name: entity_mentions
+          type: array[EntityMention]
+          description: "الإشارات المرشحة للدمج"
+          schema:
+            EntityMention:
+              id: string
+              text: string
+              context: string
+              source:
+                passage_id: string
+                work_id: string
+                date_range: string
+              type: string
+              attributes: object
+              
+      optional:
+        - name: candidate_canonical
+          type: string
+          description: "الكيان القانوني المرشح للربط"
+          
+        - name: resolution_mode
+          type: enum
+          values: [merge, split, verify]
+          default: "verify"
+          description: |
+            merge: هل هذه الإشارات لنفس الكيان؟
+            split: هل هذا الكيان يجب تقسيمه؟
+            verify: التحقق من ربط موجود
+            
+        - name: evidence_depth
+          type: enum
+          values: [shallow, medium, deep]
+          default: "medium"
+          description: "عمق البحث عن الأدلة"
+          
+        - name: consider_temporal
+          type: boolean
+          default: true
+          description: "مراعاة التسلسل الزمني"
+          
+        - name: consider_geographic
+          type: boolean
+          default: true
+          description: "مراعاة السياق الجغرافي"
+    
+    outputs:
+      primary:
+        name: resolution_decision
+        type: ResolutionDecision
+        schema:
+          decision:
+            type: enum
+            values: [SAME, DIFFERENT, UNCERTAIN]
+          confidence:
+            type: float
+            range: [0.0, 1.0]
+          evidence:
+            supporting:
+              type: array
+              items:
+                reason: string
+                source: string
+                weight: float
+            contradicting:
+              type: array
+              items:
+                reason: string
+                source: string
+                weight: float
+          canonical_id:
+            type: string
+            nullable: true
+          suggested_canonical:
+            type: object
+            description: "اقتراح كيان قانوني جديد إن لم يوجد"
+            properties:
+              name: string
+              type: string
+              attributes: object
+          action_required:
+            type: enum
+            values: [NONE, HUMAN_REVIEW, MORE_EVIDENCE, EXPERT_CONSULTATION]
+          review_priority:
+            type: enum
+            values: [LOW, MEDIUM, HIGH, CRITICAL]
+          disambiguation_factors:
+            type: array
+            items:
+              factor: string
+              value_a: string
+              value_b: string
+              match: boolean
+              weight: float
+              
+      secondary:
+        - name: alternative_candidates
+          type: array
+          schema:
+            canonical_id: string
+            name: string
+            score: float
+            
+        - name: disambiguation_hints
+          type: array[string]
+          
+        - name: similar_cases
+          type: array
+          description: "حالات مشابهة تم حلها سابقاً"
+    
+    tools:
+      internal:
+        - name: Name Similarity Calculator
+          type: algorithm
+          methods: [levenshtein, jaro_winkler, soundex_arabic, phonetic]
+          
+        - name: Historical Context Matcher
+          type: knowledge_based
+          
+        - name: Biographical Data Comparator
+          type: database_lookup
+          
+        - name: Temporal Consistency Checker
+          type: rule_based
+          
+        - name: Geographic Plausibility Checker
+          type: knowledge_based
+          
+      external: []
+    
+    resources:
+      knowledge_bases:
+        - canonical_entities
+        - biographical_database
+        - name_variants
+        - nisba_gazetteer
+        - temporal_constraints
+    
+    guardrails:
+      pre_conditions:
+        - condition: "mentions have sufficient context for comparison"
+          error_code: "L1_INSUFFICIENT_CONTEXT"
+          
+        - condition: "at least 2 mentions or 1 mention + canonical candidate"
+          error_code: "L1_NOTHING_TO_RESOLVE"
+          
+      post_conditions:
+        - condition: "decision includes evidence from both supporting and contradicting"
+          error_code: "L1_UNBALANCED_EVIDENCE"
+          
+        - condition: "uncertain cases flagged for review"
+          error_code: "L1_UNFLAGGED_UNCERTAINTY"
+          
+        - condition: "confidence score is calibrated"
+          error_code: "L1_UNCALIBRATED_CONFIDENCE"
+          
+      forbidden:
+        - "AUTO-APPROVING merges - this is L1 SUGGEST ONLY"
+        - "merging without evidence"
+        - "ignoring contradicting evidence"
+        - "merging across incompatible entity types"
+        - "merging with confidence < 0.95 without human review flag"
+    
+    quality_metrics:
+      - name: resolution_accuracy
+        description: "دقة قرارات الحل (بعد المراجعة البشرية)"
+        target: ">= 0.95"
+        
+      - name: false_merge_rate
+        description: "معدل الدمج الخاطئ"
+        target: "< 0.01"
+        
+      - name: false_split_rate
+        description: "معدل الفصل الخاطئ"
+        target: "< 0.05"
+        
+      - name: evidence_completeness
+        description: "اكتمال الأدلة المقدمة"
+        target: ">= 0.9"
+    
+    cost_profile:
+      compute: "MEDIUM"
+      tokens: "LOW-MEDIUM"
+      estimated_cost_per_call: "$0.02 - $0.10"
+    
+    autonomy_level: "L1"
+    autonomy_description: |
+      اقتراح فقط - لا يُسمح بالموافقة التلقائية أبداً
+      كل قرار دمج يتطلب موافقة بشرية صريحة وتوثيق في decision_log
+    
+    human_review_triggers:
+      - "decision == SAME and confidence < 0.95"
+      - "contradicting evidence exists"
+      - "entity is high-profile (scholar, major work)"
+      - "merge would affect > 10 existing links"
+    
+    example:
+      input:
+        entity_mentions:
+          - id: "m_001"
+            text: "ابن رشد"
+            context: "قال ابن رشد في الكليات الطبية..."
+            source:
+              work_id: "kulliyat_tibb"
+              date_range: "520-595 AH"
+            type: "PERSON"
+            
+          - id: "m_002"
+            text: "الحفيد"
+            context: "وذكر الحفيد في تهافت التهافت رداً على الغزالي..."
+            source:
+              work_id: "tahafut_tahafut"
+              date_range: "520-595 AH"
+            type: "PERSON"
+            
+          - id: "m_003"
+            text: "Averroes"
+            context: "Averroes, the great commentator on Aristotle..."
+            source:
+              work_id: "latin_text_001"
+              date_range: "1200-1300 CE"
+            type: "PERSON"
+            
+        resolution_mode: "merge"
+        evidence_depth: "deep"
+        
+      output:
+        resolution_decision:
+          decision: "SAME"
+          confidence: 0.96
+          evidence:
+            supporting:
+              - reason: "الكليات وتهافت التهافت كلاهما منسوب لابن رشد الحفيد"
+                source: "work_attribution_db"
+                weight: 0.9
+              - reason: "Averroes هو التحريف اللاتيني لابن رشد"
+                source: "name_variants_db"
+                weight: 0.95
+              - reason: "الفترة الزمنية متوافقة (520-595 هـ)"
+                source: "temporal_check"
+                weight: 0.8
+              - reason: "لقب 'الحفيد' يُطلق على ابن رشد تمييزاً عن جده"
+                source: "biographical_db"
+                weight: 0.85
+            contradicting: []
+          canonical_id: "person_ibn_rushd_grandson"
+          action_required: "HUMAN_REVIEW"
+          review_priority: "MEDIUM"
+          disambiguation_factors:
+            - factor: "الفترة الزمنية"
+              value_a: "520-595 AH"
+              value_b: "520-595 AH"
+              match: true
+              weight: 0.3
+            - factor: "المؤلفات"
+              value_a: "الكليات"
+              value_b: "تهافت التهافت"
+              match: true
+              weight: 0.4
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# L2: الربط المفاهيمي (Concept Linking)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "L2"
+    name_ar: "الربط المفاهيمي"
+    name_en: "Concept Linking"
+    category: "Link"
+    version: "1.0.0"
+    
+    purpose: |
+      إنشاء روابط بين المفاهيم المتشابهة أو المتصلة
+      عبر النصوص والمدارس واللغات مع توثيق التحولات الدلالية
+    
+    inputs:
+      required:
+        - name: concept_a
+          type: Concept
+          schema:
+            term: string
+            domain: string
+            context: string
+            source:
+              passage_id: string
+              work_id: string
+              author_id: string
+              date: string
+            definition: string
+            
+        - name: concept_b
+          type: Concept
+          
+      optional:
+        - name: relation_hypothesis
+          type: string
+          description: "فرضية العلاقة المقترحة"
+          
+        - name: cross_domain
+          type: boolean
+          default: false
+          description: "ربط عبر مجالات مختلفة"
+          
+        - name: cross_language
+          type: boolean
+          default: false
+          description: "ربط عبر لغات مختلفة"
+          
+        - name: temporal_direction
+          type: enum
+          values: [a_to_b, b_to_a, bidirectional, unknown]
+          default: "unknown"
+          
+        - name: include_intermediaries
+          type: boolean
+          default: true
+          description: "البحث عن مفاهيم وسيطة"
+    
+    outputs:
+      primary:
+        name: concept_link
+        type: ConceptLink
+        schema:
+          id: string
+          relation_type:
+            type: enum
+            values: [
+              EQUIVALENT,     # متطابق المعنى
+              SIMILAR,        # متشابه
+              DERIVED,        # مشتق منه
+              OPPOSED,        # متناقض/متضاد
+              REFINED,        # تنقيح/تطوير
+              COMPONENT,      # جزء من
+              BROADER,        # أعم
+              NARROWER,       # أخص
+              TRANSLATED,     # ترجمة
+              BORROWED,       # استعارة
+              TRANSFORMED     # تحول
+            ]
+          strength:
+            type: float
+            range: [0.0, 1.0]
+          direction:
+            source_concept: string
+            target_concept: string
+            bidirectional: boolean
+          evidence:
+            type: array
+            items:
+              passage_id: string
+              quote: string
+              explanation: string
+              evidence_type: enum[EXPLICIT, IMPLICIT, SCHOLARLY_CONSENSUS]
+          transformation_notes:
+            type: string
+            description: "ماذا تغير في المفهوم عند الانتقال؟"
+          semantic_shift:
+            type: object
+            properties:
+              original_meaning: string
+              new_meaning: string
+              shift_type: enum[NARROWING, BROADENING, AMELIORATION, PEJORATION, METAPHOR]
+              shift_context: string
+          temporal_relation:
+            before: boolean
+            after: boolean
+            contemporary: boolean
+            date_gap: string
+          confidence:
+            type: float
+            
+      secondary:
+        - name: intermediate_concepts
+          type: array
+          description: "مفاهيم وسيطة في سلسلة التحول"
+          
+        - name: scholarly_debates
+          type: array
+          description: "خلافات علمية حول العلاقة"
+          
+        - name: alternative_links
+          type: array
+          description: "روابط بديلة محتملة"
+    
+    tools:
+      internal:
+        - name: Concept Comparator
+          type: ml_model
+          
+        - name: Semantic Similarity Engine
+          type: embedding_based
+          
+        - name: Cross-lingual Mapper
+          type: translation_alignment
+          
+        - name: Semantic Shift Detector
+          type: diachronic_analysis
+          
+      external: []
+    
+    resources:
+      knowledge_bases:
+        - concept_ontology
+        - cross_lingual_concept_map
+        - semantic_change_database
+        - translation_dictionaries
+    
+    guardrails:
+      pre_conditions:
+        - condition: "both concepts have clear definitions or usage contexts"
+          error_code: "L2_UNDEFINED_CONCEPT"
+          
+        - condition: "cross_language requires language tags"
+          error_code: "L2_MISSING_LANGUAGE"
+          
+      post_conditions:
+        - condition: "relation has textual evidence"
+          error_code: "L2_NO_EVIDENCE"
+          
+        - condition: "transformation notes explain any semantic shift"
+          error_code: "L2_UNEXPLAINED_SHIFT"
+          
+      forbidden:
+        - "assuming equivalence without evidence"
+        - "ignoring semantic drift across contexts"
+        - "claiming temporal direction without dating evidence"
+    
+    quality_metrics:
+      - name: link_precision
+        target: ">= 0.85"
+        
+      - name: evidence_quality
+        target: ">= 0.8"
+        
+      - name: transformation_clarity
+        target: ">= 0.9"
+    
+    cost_profile:
+      compute: "MEDIUM-HIGH"
+      tokens: "MEDIUM"
+      estimated_cost_per_call: "$0.03 - $0.15"
+    
+    autonomy_level: "L1"
+    autonomy_description: "يقترح الروابط، لا يوافق عليها نهائياً"
+    
+    example:
+      input:
+        concept_a:
+          term: "الجوهر"
+          domain: "kalam"
+          context: "الجوهر الفرد عند المتكلمين هو الجزء الذي لا يتجزأ"
+          source:
+            work_id: "maqalat_ashary"
+            author_id: "ashary"
+            date: "324 AH"
+            
+        concept_b:
+          term: "οὐσία"
+          domain: "greek_philosophy"
+          context: "ousia in Aristotle's Categories means that which exists in itself"
+          source:
+            work_id: "categories_aristotle"
+            date: "350 BCE"
+            
+        cross_language: true
+        include_intermediaries: true
+        
+      output:
+        concept_link:
+          relation_type: "DERIVED"
+          strength: 0.7
+          evidence:
+            - passage_id: "translation_study_001"
+              quote: "ترجم حنين بن إسحاق οὐσία بالجوهر..."
+              explanation: "الترجمة العربية للمصطلح اليوناني عبر السريانية"
+              evidence_type: "SCHOLARLY_CONSENSUS"
+          transformation_notes: |
+            المتكلمون أعادوا تعريف 'الجوهر' ليعني الجزء الذي لا يتجزأ (الذرة الكلامية)،
+            بينما عند أرسطو يعني 'ما يقوم بذاته ولا يُحمل على موضوع'.
+            حدث تحول جذري من معنى ميتافيزيقي-منطقي إلى معنى فيزيائي-ذري.
+          semantic_shift:
+            original_meaning: "ما يقوم بذاته ولا يُحمل على موضوع"
+            new_meaning: "الجزء الذي لا يتجزأ"
+            shift_type: "NARROWING"
+            shift_context: "انتقال من سياق منطقي-ميتافيزيقي إلى سياق فيزيائي-ذري في علم الكلام"
+          confidence: 0.85
+        intermediate_concepts:
+          - term: "ܐܘܣܝܐ"
+            language: "syriac"
+            note: "الترجمة السريانية الوسيطة"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# L3: الربط الاستشهادي (Citation Linking)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "L3"
+    name_ar: "الربط الاستشهادي"
+    name_en: "Citation Linking"
+    category: "Link"
+    version: "1.0.0"
+    
+    purpose: |
+      ربط الاستشهاد المستخرج بمصدره الأصلي
+      مع التوثيق الكامل (كتاب، طبعة، صفحة، سطر)
+    
+    inputs:
+      required:
+        - name: citation
+          type: ExtractedCitation
+          description: "الاستشهاد المستخرج من E5"
+          
+      optional:
+        - name: candidate_sources
+          type: array[Source]
+          description: "مصادر مرشحة للربط"
+          
+        - name: verification_level
+          type: enum
+          values: [basic, full, scholarly]
+          default: "full"
+          description: |
+            basic: مطابقة نصية فقط
+            full: مطابقة + تحقق من السند
+            scholarly: تحقيق علمي كامل
+            
+        - name: allow_variant_readings
+          type: boolean
+          default: true
+          description: "قبول القراءات والروايات المختلفة"
+    
+    outputs:
+      primary:
+        name: citation_link
+        type: CitationLink
+        schema:
+          id: string
+          source_work:
+            work_id: string
+            title: string
+            author_id: string
+            author_name: string
+          source_edition:
+            edition_id: string
+            editor: string
+            publisher: string
+            place: string
+            year: string
+            isbn: string
+          location:
+            volume: string
+            page_start: string
+            page_end: string
+            line: string
+            paragraph: string
+            section: string
+            chapter: string
+            hadith_number: string
+            ayah: string
+          verification:
+            status:
+              type: enum
+              values: [EXACT_MATCH, CLOSE_MATCH, PARAPHRASE, NOT_FOUND, DISPUTED, FABRICATED]
+            original_text: string
+            cited_text: string
+            differences:
+              type: array
+              items:
+                type: enum[ADDITION, DELETION, SUBSTITUTION, REORDERING]
+                original: string
+                cited: string
+            variation_notes: string
+            verification_method: string
+          alternative_sources:
+            type: array
+            description: "نفس النص في مصادر أخرى"
+            items:
+              source_id: string
+              priority: integer
+          transmission_info:
+            chain: array[string]
+            earliest_source: string
+            grading: string
+          confidence:
+            type: float
+            
+      secondary:
+        - name: related_citations
+          type: array
+          description: "استشهادات مرتبطة"
+          
+        - name: citation_network
+          type: object
+          description: "شبكة النقل والاستشهاد"
+    
+    tools:
+      internal:
+        - name: Full-text Matcher
+          type: search
+          
+        - name: Edition Comparator
+          type: diff
+          
+        - name: Transmission Tracer
+          type: graph_traversal
+          
+        - name: Variant Reading Handler
+          type: rule_based
+          
+      external:
+        - name: Shamela Search
+          purpose: "البحث في المصادر التراثية"
+          
+        - name: Waqfeya Search
+          purpose: "البحث في المخطوطات"
+    
+    resources:
+      knowledge_bases:
+        - works_registry
+        - editions_registry
+        - variant_readings_db
+      corpora:
+        - full_text_corpora
+    
+    guardrails:
+      pre_conditions:
+        - condition: "citation has extractable text"
+          error_code: "L3_EMPTY_CITATION"
+          
+      post_conditions:
+        - condition: "verification compares actual text"
+          error_code: "L3_NO_VERIFICATION"
+          
+        - condition: "variations are documented"
+          error_code: "L3_UNDOCUMENTED_VARIATION"
+          
+      forbidden:
+        - "assuming exact match without verification"
+        - "ignoring textual variations"
+        - "hiding fabrication evidence"
+    
+    quality_metrics:
+      - name: linking_accuracy
+        target: ">= 0.95"
+        
+      - name: verification_thoroughness
+        target: ">= 0.9"
+        
+      - name: edition_specificity
+        target: ">= 0.85"
+    
+    cost_profile:
+      compute: "MEDIUM"
+      tokens: "LOW"
+      external_api_calls: "variable"
+      estimated_cost_per_call: "$0.02 - $0.08"
+    
+    autonomy_level: "L0-L1"
+    autonomy_description: "L0 للتحقق الآلي، L1 لاقتراح التصحيحات"
+    
+    example:
+      input:
+        citation:
+          id: "c_001"
+          citation_text: "إنما الأعمال بالنيات"
+          type: "HADITH"
+          introduction_phrase: "في الصحيح"
+        verification_level: "scholarly"
+        
+      output:
+        citation_link:
+          source_work:
+            work_id: "bukhari_sahih"
+            title: "صحيح البخاري"
+            author_name: "محمد بن إسماعيل البخاري"
+          source_edition:
+            edition_id: "bukhari_dar_tawq"
+            editor: "محمد زهير الناصر"
+            publisher: "دار طوق النجاة"
+            year: "1422"
+          location:
+            volume: "1"
+            page_start: "6"
+            hadith_number: "1"
+            chapter: "كتاب بدء الوحي"
+          verification:
+            status: "EXACT_MATCH"
+            original_text: "إنما الأعمال بالنيات وإنما لكل امرئ ما نوى..."
+            differences: []
+          transmission_info:
+            chain: ["عمر بن الخطاب", "علقمة بن وقاص", "محمد بن إبراهيم", "يحيى بن سعيد"]
+            grading: "متفق عليه"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# L4: الربط التناصي (Intertextual Linking)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "L4"
+    name_ar: "الربط التناصي"
+    name_en: "Intertextual Linking"
+    category: "Link"
+    version: "1.0.0"
+    
+    purpose: |
+      اكتشاف وتوثيق العلاقات بين النصوص
+      (اقتباس، تضمين، إشارة، رد، شرح، اختصار، توسع)
+    
+    inputs:
+      required:
+        - name: passage_a
+          type: Passage
+          schema:
+            id: string
+            text: string
+            source:
+              work_id: string
+              author_id: string
+              date: string
+              
+        - name: passage_b
+          type: Passage
+          
+      optional:
+        - name: suspected_relation
+          type: string
+          description: "علاقة مشتبه بها"
+          
+        - name: temporal_order
+          type: enum
+          values: [a_before_b, b_before_a, unknown]
+          default: "unknown"
+          
+        - name: detection_sensitivity
+          type: enum
+          values: [strict, moderate, loose]
+          default: "moderate"
+          description: |
+            strict: تطابق عالي فقط
+            moderate: تشابه متوسط
+            loose: حتى الإشارات الخفيفة
+    
+    outputs:
+      primary:
+        name: intertextual_link
+        type: IntertextualLink
+        schema:
+          id: string
+          relation_type:
+            type: enum
+            values: [
+              QUOTATION,        # اقتباس حرفي أو شبه حرفي
+              PARAPHRASE,       # إعادة صياغة
+              ALLUSION,         # إشارة أو تلميح
+              COMMENTARY,       # شرح وتفسير
+              ABRIDGEMENT,      # اختصار
+              EXPANSION,        # توسع وإضافة
+              REFUTATION,       # رد ونقض
+              CONTINUATION,     # استكمال
+              TRANSLATION,      # ترجمة
+              ADAPTATION        # تكييف لسياق مختلف
+            ]
+          direction:
+            source:
+              passage_id: string
+              work_id: string
+              date: string
+            target:
+              passage_id: string
+              work_id: string
+              date: string
+          textual_overlap:
+            shared_phrases:
+              type: array
+              items:
+                phrase: string
+                source_offsets: object
+                target_offsets: object
+            overlap_percentage: float
+            longest_common_subsequence: string
+          transformation:
+            additions:
+              type: array
+              items:
+                text: string
+                position: string
+                purpose: string
+            deletions:
+              type: array
+              items:
+                text: string
+                position: string
+                reason: string
+            modifications:
+              type: array
+              items:
+                original: string
+                modified: string
+                type: enum[LEXICAL, SYNTACTIC, SEMANTIC]
+            reorderings:
+              type: array
+          evidence:
+            aligned_segments:
+              type: array
+              items:
+                source_span: object
+                target_span: object
+                alignment_score: float
+            structural_similarity: float
+            semantic_similarity: float
+          confidence:
+            type: float
+          scholarly_validation:
+            known_relation: boolean
+            sources: array[string]
+            
+      secondary:
+        - name: intermediary_texts
+          type: array
+          description: "نصوص وسيطة محتملة"
+          
+        - name: parallel_passages
+          type: array
+          description: "نصوص موازية أخرى"
+    
+    tools:
+      internal:
+        - name: Text Reuse Detector
+          type: algorithm
+          method: "minhash + locality sensitive hashing"
+          
+        - name: Sequence Aligner
+          type: algorithm
+          method: "Smith-Waterman for Arabic"
+          
+        - name: Transformation Analyzer
+          type: diff_based
+          
+        - name: Semantic Comparator
+          type: embedding_based
+          
+      external:
+        - name: passim
+          purpose: "text reuse detection at scale"
+    
+    resources:
+      knowledge_bases:
+        - known_intertextual_relations
+        - commentary_tradition_db
+    
+    guardrails:
+      pre_conditions:
+        - condition: "passages are long enough for meaningful comparison (>50 chars)"
+          error_code: "L4_PASSAGES_TOO_SHORT"
+          
+      post_conditions:
+        - condition: "aligned segments are accurate and verifiable"
+          error_code: "L4_INACCURATE_ALIGNMENT"
+          
+        - condition: "direction is justified by dating when claimed"
+          error_code: "L4_UNJUSTIFIED_DIRECTION"
+          
+      forbidden:
+        - "assuming direction without temporal evidence"
+        - "claiming quotation for paraphrase"
+        - "ignoring contradicting scholarly consensus"
+    
+    quality_metrics:
+      - name: alignment_accuracy
+        target: ">= 0.9"
+        
+      - name: relation_type_precision
+        target: ">= 0.85"
+        
+      - name: direction_accuracy
+        target: ">= 0.9"
+    
+    cost_profile:
+      compute: "MEDIUM-HIGH"
+      tokens: "LOW"
+      estimated_cost_per_call: "$0.02 - $0.10"
+    
+    autonomy_level: "L1"
+    autonomy_description: "يقترح العلاقات التناصية"
+    
+    example:
+      input:
+        passage_a:
+          id: "p_ghazali_001"
+          text: "ولما كانت أكثر الظنون لا تغني من الحق شيئاً..."
+          source:
+            work_id: "tahafut_falasifa"
+            author_id: "ghazali"
+            date: "488 AH"
+            
+        passage_b:
+          id: "p_rushd_001"
+          text: "وقوله إن أكثر الظنون لا تغني من الحق شيئاً..."
+          source:
+            work_id: "tahafut_tahafut"
+            author_id: "ibn_rushd"
+            date: "575 AH"
+            
+        temporal_order: "a_before_b"
+        
+      output:
+        intertextual_link:
+          relation_type: "REFUTATION"
+          direction:
+            source:
+              passage_id: "p_ghazali_001"
+              work_id: "tahafut_falasifa"
+            target:
+              passage_id: "p_rushd_001"
+              work_id: "tahafut_tahafut"
+          textual_overlap:
+            shared_phrases:
+              - phrase: "أكثر الظنون لا تغني من الحق شيئاً"
+            overlap_percentage: 0.75
+          transformation:
+            additions:
+              - text: "وقوله"
+                position: "beginning"
+                purpose: "إشارة للاقتباس من الخصم"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# L5: الربط الجينالوجي (Genealogical Linking)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "L5"
+    name_ar: "الربط الجينالوجي"
+    name_en: "Genealogical Linking"
+    category: "Link"
+    version: "1.0.0"
+    
+    purpose: |
+      تتبع نسب الأفكار والنصوص عبر سلاسل النقل والتأثير
+      من الأصول إلى الفروع وبناء شجرات النسب المعرفي
+    
+    inputs:
+      required:
+        - name: target
+          type: union[Idea, Text, Concept, Practice]
+          description: "ما نريد تتبع نسبه"
+          schema:
+            id: string
+            type: enum[IDEA, TEXT, CONCEPT, PRACTICE, INSTITUTION, METHODOLOGY]
+            name: string
+            description: string
+            first_known_occurrence:
+              source: string
+              date: string
+              context: string
+              
+      optional:
+        - name: search_direction
+          type: enum
+          values: [ancestors, descendants, both]
+          default: "both"
+          
+        - name: depth_limit
+          type: integer
+          default: 5
+          description: "عمق البحث في الشجرة"
+          
+        - name: include_lateral
+          type: boolean
+          default: true
+          description: "تضمين التأثيرات الجانبية والموازية"
+          
+        - name: cross_tradition
+          type: boolean
+          default: true
+          description: "تتبع عبر التقاليد والحضارات"
+          
+        - name: evidence_threshold
+          type: float
+          default: 0.6
+          description: "حد أدنى للثقة في الروابط"
+    
+    outputs:
+      primary:
+        name: genealogy
+        type: IdeaGenealogy
+        schema:
+          id: string
+          target:
+            id: string
+            name: string
+            type: string
+          root:
+            id: string
+            description: string
+            date_range: string
+            tradition: string
+          ancestors:
+            type: array
+            items:
+              node:
+                id: string
+                name: string
+                description: string
+                date: string
+                tradition: string
+              relation:
+                type: enum[DIRECT_SOURCE, INFLUENCE, PARALLEL, REACTION, SYNTHESIS]
+                strength: float
+              evidence:
+                type: array
+                items:
+                  source: string
+                  quote: string
+                  explanation: string
+              confidence: float
+              transformation_at_this_node: string
+          descendants:
+            type: array
+            items:
+              # same structure as ancestors
+          lateral_connections:
+            type: array
+            items:
+              node: object
+              relation_type: enum[CONTEMPORARY, PARALLEL_DEVELOPMENT, MUTUAL_INFLUENCE]
+              shared_source: string
+          transmission_chain:
+            type: array
+            description: "سلسلة الانتقال الرئيسية"
+            items:
+              node_id: string
+              role: string
+              date: string
+              transformation: string
+              
+      secondary:
+        - name: genealogy_graph
+          type: object
+          format: "networkx compatible"
+          
+        - name: key_transformations
+          type: array
+          description: "نقاط التحول الرئيسية في تاريخ الفكرة"
+          
+        - name: gaps
+          type: array
+          description: "حلقات مفقودة أو ضعيفة التوثيق"
+          
+        - name: alternative_genealogies
+          type: array
+          description: "تفسيرات بديلة للنسب"
+    
+    tools:
+      internal:
+        - name: Idea Tracer
+          type: graph_algorithm
+          
+        - name: Influence Network Builder
+          type: network_analysis
+          
+        - name: Temporal Orderer
+          type: chronology_engine
+          
+        - name: Cross-tradition Mapper
+          type: comparative_analysis
+          
+      external: []
+    
+    resources:
+      knowledge_bases:
+        - historical_timeline
+        - influence_patterns
+        - transmission_routes
+        - tradition_boundaries
+    
+    guardrails:
+      pre_conditions:
+        - condition: "target has identifiable first occurrence"
+          error_code: "L5_NO_ORIGIN"
+          
+      post_conditions:
+        - condition: "every link has evidence"
+          error_code: "L5_UNSUPPORTED_LINK"
+          
+        - condition: "temporal order is respected (no future causes)"
+          error_code: "L5_TEMPORAL_VIOLATION"
+          
+      forbidden:
+        - "circular genealogies"
+        - "links without evidence"
+        - "anachronistic influences"
+        - "claiming certainty for speculative links"
+    
+    quality_metrics:
+      - name: genealogy_coherence
+        target: ">= 0.9"
+        
+      - name: evidence_coverage
+        description: "نسبة الروابط الموثقة"
+        target: ">= 0.8"
+        
+      - name: temporal_consistency
+        target: "1.0"
+    
+    cost_profile:
+      compute: "HIGH"
+      tokens: "MEDIUM-HIGH"
+      estimated_cost_per_call: "$0.05 - $0.25"
+    
+    autonomy_level: "L1"
+    autonomy_description: "يقترح شجرة النسب، لا يعتمدها"
+    
+    example:
+      input:
+        target:
+          id: "concept_maqasid"
+          type: "CONCEPT"
+          name: "مقاصد الشريعة"
+          description: "نظرية المقاصد في أصول الفقه"
+          first_known_occurrence:
+            source: "الموافقات للشاطبي"
+            date: "790 AH"
+            context: "التأسيس المنهجي الكامل"
+        search_direction: "ancestors"
+        depth_limit: 7
+        cross_tradition: false
+        
+      output:
+        genealogy:
+          root:
+            id: "quran_wisdom_indicators"
+            description: "الإشارات القرآنية لحكم التشريع"
+            date_range: "1-11 AH"
+          ancestors:
+            - node:
+                id: "juwayni_maslaha"
+                name: "المصلحة عند الجويني"
+                date: "478 AH"
+              relation:
+                type: "DIRECT_SOURCE"
+                strength: 0.9
+              evidence:
+                - source: "البرهان للجويني"
+                  quote: "..."
+              transformation_at_this_node: "تقسيم المصالح إلى ضرورية وحاجية وتحسينية"
+              
+            - node:
+                id: "ghazali_maslaha"
+                name: "المصلحة عند الغزالي"
+                date: "505 AH"
+              relation:
+                type: "DIRECT_SOURCE"
+                strength: 0.95
+              transformation_at_this_node: "تنظيم الكليات الخمس"
+              
+          transmission_chain:
+            - {node_id: "quran", role: "أصل", date: "1-23 AH"}
+            - {node_id: "sahaba_ijtihad", role: "تطبيق", date: "11-100 AH"}
+            - {node_id: "juwayni", role: "تنظير", date: "478 AH"}
+            - {node_id: "ghazali", role: "تقنين", date: "505 AH"}
+            - {node_id: "shatibi", role: "تأسيس", date: "790 AH"}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              نهاية ملف الربط
+# ═══════════════════════════════════════════════════════════════════════════════

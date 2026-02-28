@@ -1,0 +1,124 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://iqra.ai/schemas/data/theory_card.schema.json",
+  "title": "Theory Card Schema",
+  "description": "بطاقة النظرية - IQRA v1.3",
+  "type": "object",
+  "required": ["theory_id", "title_ar", "hypothesis", "evidence_ids", "created_by"],
+  "properties": {
+    "theory_id": {
+      "type": "string",
+      "pattern": "^THEO-[A-Z0-9]{8}$"
+    },
+    "title_ar": {"type": "string"},
+    "title_en": {"type": "string"},
+    "abstract_ar": {"type": "string", "maxLength": 1000},
+    "abstract_en": {"type": "string", "maxLength": 1000},
+    "hypothesis": {
+      "type": "object",
+      "required": ["statement_ar", "type"],
+      "properties": {
+        "statement_ar": {"type": "string"},
+        "statement_en": {"type": "string"},
+        "type": {
+          "type": "string",
+          "enum": ["descriptive", "explanatory", "predictive", "normative"]
+        },
+        "scope": {"type": "string"},
+        "falsifiable": {"type": "boolean"}
+      }
+    },
+    "evidence_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string"}
+    },
+    "concept_ids": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "supporting_arguments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "argument_id": {"type": "string"},
+          "argument_ar": {"type": "string"},
+          "argument_type": {
+            "type": "string",
+            "enum": ["deductive", "inductive", "analogical", "textual", "historical"]
+          },
+          "evidence_ids": {"type": "array", "items": {"type": "string"}},
+          "strength": {"type": "number", "minimum": 0, "maximum": 1}
+        }
+      }
+    },
+    "counter_arguments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "argument_id": {"type": "string"},
+          "argument_ar": {"type": "string"},
+          "source_scholar_id": {"type": "string"},
+          "rebuttal_ar": {"type": "string"},
+          "addressed": {"type": "boolean"}
+        }
+      }
+    },
+    "methodology": {
+      "type": "object",
+      "properties": {
+        "approach": {
+          "type": "string",
+          "enum": ["textual_analysis", "historical_critical", "comparative", "phenomenological", "hermeneutic"]
+        },
+        "limitations": {"type": "array", "items": {"type": "string"}},
+        "assumptions": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "implications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "domain": {"type": "string"},
+          "implication_ar": {"type": "string"},
+          "significance": {"type": "string", "enum": ["minor", "moderate", "major"]}
+        }
+      }
+    },
+    "related_theories": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "theory_id": {"type": "string"},
+          "relation": {"type": "string", "enum": ["supports", "contradicts", "extends", "specializes", "generalizes"]}
+        }
+      }
+    },
+    "confidence_score": {"type": "number", "minimum": 0, "maximum": 1},
+    "peer_reviews": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "reviewer_id": {"type": "string"},
+          "review_date": {"type": "string", "format": "date"},
+          "decision": {"type": "string", "enum": ["approve", "revise", "reject"]},
+          "comments": {"type": "string"}
+        }
+      }
+    },
+    "created_by": {"type": "string"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"},
+    "version": {"type": "integer", "default": 1},
+    "status": {
+      "type": "string",
+      "enum": ["draft", "review", "approved", "published", "archived"],
+      "default": "draft"
+    }
+  }
+}

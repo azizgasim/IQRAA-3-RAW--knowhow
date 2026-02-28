@@ -1,0 +1,1260 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#                    الفئة الرابعة: التحليل (Analyze)
+#                    IQRA-12 Core Operations Layer
+# ═══════════════════════════════════════════════════════════════════════════════
+# 
+# الغرض: فهم البنى والعلاقات والتناقضات والسياقات
+# العمليات: A1-A6
+# 
+# المبدأ الحاكم:
+# "كل تحليل = بنية + أدلة + حدود + بدائل"
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+category:
+  id: "ANALYZE"
+  name_ar: "التحليل"
+  name_en: "Analyze"
+  purpose: "فهم البنى والعلاقات والتناقضات وكشف الأنماط الكامنة"
+  golden_rule: "كل تحليل = بنية + أدلة + حدود + بدائل"
+  operations_count: 6
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# A1: تحليل الحجة (Argument Analysis)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+operations:
+
+  - id: "A1"
+    name_ar: "تحليل الحجة"
+    name_en: "Argument Analysis"
+    category: "Analyze"
+    version: "1.0.0"
+    
+    purpose: |
+      تفكيك الحجج والاستدلالات إلى مكوناتها الأساسية
+      وتقييم قوتها ومواطن ضعفها وفق نموذج تولمين وغيره
+    
+    inputs:
+      required:
+        - name: text
+          type: string
+          description: "النص المحتوي على الحجة"
+          
+      optional:
+        - name: argument_model
+          type: enum
+          values: [TOULMIN, CLASSICAL, ISLAMIC_MANTIQ, CUSTOM]
+          default: "TOULMIN"
+          description: |
+            TOULMIN: الادعاء-البيانات-الضمان-الدعم-المشروطية-الدحض
+            CLASSICAL: مقدمات-نتيجة
+            ISLAMIC_MANTIQ: القياس الأرسطي المعدل
+            
+        - name: identify_fallacies
+          type: boolean
+          default: true
+          
+        - name: evaluate_strength
+          type: boolean
+          default: true
+          
+        - name: domain_context
+          type: string
+          description: "السياق المجالي (فقه، كلام، فلسفة...)"
+    
+    outputs:
+      primary:
+        name: argument_structure
+        type: ArgumentStructure
+        schema:
+          argument_id: string
+          text_span:
+            start: integer
+            end: integer
+            text: string
+          model_used: string
+          components:
+            # نموذج تولمين
+            claim:
+              text: string
+              offsets: object
+              type: enum[DESCRIPTIVE, EVALUATIVE, PRESCRIPTIVE, INTERPRETIVE]
+              scope: string
+              certainty: enum[DEFINITE, PROBABLE, POSSIBLE, QUALIFIED]
+            data:
+              type: array
+              items:
+                text: string
+                offsets: object
+                data_type: enum[FACT, TESTIMONY, STATISTIC, EXAMPLE, ANALOGY]
+                source: string
+            warrant:
+              text: string
+              offsets: object
+              warrant_type: enum[PRINCIPLE, RULE, DEFINITION, AUTHORITY, PRECEDENT]
+              implicit: boolean
+            backing:
+              type: array
+              items:
+                text: string
+                backing_type: string
+                source: string
+            qualifier:
+              text: string
+              strength: enum[CERTAINLY, PROBABLY, PRESUMABLY, POSSIBLY]
+            rebuttal:
+              type: array
+              items:
+                text: string
+                condition: string
+                acknowledged: boolean
+          argument_type: enum[
+            DEDUCTIVE,
+            INDUCTIVE,
+            ABDUCTIVE,
+            ANALOGICAL,
+            QIYAS_FIQHI,      # القياس الفقهي
+            QIYAS_MANTIQ,     # القياس المنطقي
+            ISTIDLAL_NAQLI,   # الاستدلال النقلي
+            ISTIDLAL_AQLI     # الاستدلال العقلي
+          ]
+          strength_evaluation:
+            overall_strength: float
+            data_quality: float
+            warrant_validity: float
+            logical_coherence: float
+            scope_appropriateness: float
+          fallacies:
+            type: array
+            items:
+              fallacy_type: string
+              fallacy_name_ar: string
+              fallacy_name_en: string
+              location: object
+              explanation: string
+              severity: enum[MINOR, MODERATE, CRITICAL]
+          counter_arguments:
+            type: array
+            description: "حجج مضادة محتملة أو موجودة"
+            items:
+              argument_summary: string
+              source: string
+              strength: float
+              
+      secondary:
+        - name: argument_diagram
+          type: object
+          format: "argument_map"
+          
+        - name: premise_chain
+          type: array
+          description: "سلسلة المقدمات"
+          
+        - name: implicit_assumptions
+          type: array
+    
+    tools:
+      internal:
+        - name: Argument Parser
+          type: nlp
+          
+        - name: Fallacy Detector
+          type: ml_model
+          
+        - name: Logical Validator
+          type: rule_based
+          
+      external: []
+    
+    resources:
+      knowledge_bases:
+        - fallacy_taxonomy
+        - argument_patterns
+        - domain_specific_warrants
+    
+    guardrails:
+      pre_conditions:
+        - condition: "text contains identifiable argument"
+          error_code: "A1_NO_ARGUMENT"
+          
+      post_conditions:
+        - condition: "claim is explicitly identified"
+          error_code: "A1_NO_CLAIM"
+          
+        - condition: "components have textual evidence"
+          error_code: "A1_UNSUPPORTED_COMPONENT"
+          
+      forbidden:
+        - "inventing unstated premises without flagging as implicit"
+        - "claiming fallacy without explanation"
+        - "evaluating strength without criteria"
+    
+    quality_metrics:
+      - name: component_identification
+        target: ">= 0.9"
+        
+      - name: fallacy_precision
+        target: ">= 0.85"
+        
+      - name: strength_calibration
+        target: ">= 0.8"
+    
+    cost_profile:
+      compute: "MEDIUM"
+      tokens: "MEDIUM"
+      estimated_cost_per_call: "$0.02 - $0.10"
+    
+    autonomy_level: "L0"
+    
+    example:
+      input:
+        text: |
+          الصلاة واجبة لأن الله أمر بها في قوله تعالى "وأقيموا الصلاة"،
+          والأمر يقتضي الوجوب ما لم تصرفه قرينة، ولا قرينة هنا.
+        argument_model: "ISLAMIC_MANTIQ"
+        domain_context: "usul_fiqh"
+        
+      output:
+        argument_structure:
+          argument_type: "ISTIDLAL_NAQLI"
+          components:
+            claim:
+              text: "الصلاة واجبة"
+              type: "PRESCRIPTIVE"
+              certainty: "DEFINITE"
+            data:
+              - text: "قوله تعالى: وأقيموا الصلاة"
+                data_type: "TESTIMONY"
+                source: "القرآن"
+            warrant:
+              text: "الأمر يقتضي الوجوب ما لم تصرفه قرينة"
+              warrant_type: "PRINCIPLE"
+              implicit: false
+            backing:
+              - text: "قاعدة أصولية مجمع عليها"
+            qualifier:
+              strength: "CERTAINLY"
+            rebuttal:
+              - text: "لا قرينة صارفة هنا"
+                acknowledged: true
+          strength_evaluation:
+            overall_strength: 0.95
+            data_quality: 1.0  # آية قرآنية
+            warrant_validity: 0.9  # قاعدة أصولية معتمدة
+          fallacies: []
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# A2: تحليل السياق (Context Analysis)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "A2"
+    name_ar: "تحليل السياق"
+    name_en: "Context Analysis"
+    category: "Analyze"
+    version: "1.0.0"
+    
+    purpose: |
+      فهم السياق المتعدد الأبعاد للنص أو الحدث أو الفكرة
+      (سياسي، اقتصادي، فكري، اجتماعي، جغرافي)
+    
+    inputs:
+      required:
+        - name: target
+          type: object
+          schema:
+            type: enum[TEXT, EVENT, PERSON, IDEA, INSTITUTION]
+            id: string
+            name: string
+            date: string
+            location: string
+            
+      optional:
+        - name: context_dimensions
+          type: array[string]
+          default: ["all"]
+          values: [
+            POLITICAL,      # السياق السياسي
+            ECONOMIC,       # السياق الاقتصادي
+            SOCIAL,         # السياق الاجتماعي
+            INTELLECTUAL,   # السياق الفكري
+            RELIGIOUS,      # السياق الديني
+            GEOGRAPHIC,     # السياق الجغرافي
+            LINGUISTIC,     # السياق اللغوي
+            MATERIAL        # السياق المادي (تقنيات، موارد)
+          ]
+          
+        - name: temporal_scope
+          type: object
+          schema:
+            before: string  # كم سنة قبل
+            after: string   # كم سنة بعد
+            
+        - name: geographic_scope
+          type: string
+          description: "النطاق الجغرافي للسياق"
+          
+        - name: depth_level
+          type: enum
+          values: [OVERVIEW, DETAILED, COMPREHENSIVE]
+          default: "DETAILED"
+    
+    outputs:
+      primary:
+        name: contextual_analysis
+        type: ContextualAnalysis
+        schema:
+          target: object
+          temporal_frame:
+            date: string
+            period_name: string
+            preceding_events: array
+            contemporary_events: array
+            following_events: array
+          dimensions:
+            political:
+              ruling_power: string
+              political_system: string
+              key_figures: array
+              major_conflicts: array
+              policies_relevant: array
+              power_dynamics: string
+              impact_on_target: string
+              evidence: array
+            economic:
+              economic_system: string
+              major_industries: array
+              trade_routes: array
+              economic_conditions: string
+              patronage_system: string
+              impact_on_target: string
+              evidence: array
+            social:
+              social_structure: string
+              major_groups: array
+              social_mobility: string
+              demographics: object
+              cultural_practices: array
+              impact_on_target: string
+              evidence: array
+            intellectual:
+              dominant_schools: array
+              key_debates: array
+              knowledge_institutions: array
+              foreign_influences: array
+              intellectual_climate: string
+              impact_on_target: string
+              evidence: array
+            religious:
+              religious_landscape: string
+              sectarian_dynamics: string
+              religious_institutions: array
+              religious_debates: array
+              impact_on_target: string
+              evidence: array
+            geographic:
+              location_significance: string
+              urban_rural: string
+              climate_environment: string
+              connectivity: string
+              impact_on_target: string
+            linguistic:
+              languages_in_use: array
+              literary_culture: string
+              translation_activity: string
+              impact_on_target: string
+            material:
+              available_technologies: array
+              material_resources: array
+              infrastructure: string
+              impact_on_target: string
+          synthesis:
+            how_context_shaped_target: string
+            unique_contextual_factors: array
+            contextual_constraints: array
+            contextual_opportunities: array
+          comparative_contexts:
+            type: array
+            description: "مقارنة مع سياقات مشابهة"
+            
+      secondary:
+        - name: context_timeline
+          type: array
+          
+        - name: context_map
+          type: object
+          format: "geojson"
+          
+        - name: source_bibliography
+          type: array
+    
+    tools:
+      internal:
+        - name: Historical Context Engine
+          type: knowledge_based
+          
+        - name: Multi-dimensional Analyzer
+          type: aggregator
+          
+      external: []
+    
+    resources:
+      knowledge_bases:
+        - historical_periods_db
+        - political_entities_db
+        - economic_history_db
+        - intellectual_movements_db
+    
+    guardrails:
+      post_conditions:
+        - condition: "each dimension has evidence sources"
+          error_code: "A2_UNSOURCED_CONTEXT"
+          
+        - condition: "impact on target is explicit"
+          error_code: "A2_NO_IMPACT_ANALYSIS"
+          
+      forbidden:
+        - "anachronistic contextual claims"
+        - "projecting modern conditions onto historical contexts"
+        - "ignoring regional variations"
+    
+    quality_metrics:
+      - name: dimension_coverage
+        target: ">= 0.85"
+        
+      - name: evidence_density
+        target: ">= 0.8"
+        
+      - name: synthesis_quality
+        target: ">= 0.85"
+    
+    cost_profile:
+      compute: "HIGH"
+      tokens: "MEDIUM-HIGH"
+      estimated_cost_per_call: "$0.05 - $0.20"
+    
+    autonomy_level: "L0-L1"
+    
+    example:
+      input:
+        target:
+          type: "TEXT"
+          name: "إحياء علوم الدين"
+          date: "489-495 AH"
+          location: "نيسابور/طوس"
+        context_dimensions: ["POLITICAL", "INTELLECTUAL", "RELIGIOUS"]
+        depth_level: "DETAILED"
+        
+      output:
+        contextual_analysis:
+          dimensions:
+            political:
+              ruling_power: "السلاجقة"
+              key_figures: ["نظام الملك", "ملكشاه"]
+              major_conflicts: ["الصراع السني-الإسماعيلي", "فتنة الباطنية"]
+              impact_on_target: "كتب الغزالي الإحياء في سياق الرد على الباطنية وإحياء التدين السني"
+            intellectual:
+              dominant_schools: ["الأشعرية", "الشافعية", "التصوف"]
+              key_debates: ["العلاقة بين الفلسفة والدين", "التصوف والشريعة"]
+              impact_on_target: "الإحياء محاولة للجمع بين علوم الظاهر والباطن"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# A3: تحليل المقارنة (Comparative Analysis)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "A3"
+    name_ar: "تحليل المقارنة"
+    name_en: "Comparative Analysis"
+    category: "Analyze"
+    version: "1.0.0"
+    
+    purpose: |
+      المقارنة المنهجية بين كيانين أو أكثر (أفكار، مدارس، نصوص، ممارسات)
+      لكشف أوجه الشبه والاختلاف والعلاقات
+    
+    inputs:
+      required:
+        - name: items
+          type: array
+          min_items: 2
+          max_items: 10
+          schema:
+            id: string
+            type: string
+            name: string
+            description: string
+            source: object
+            
+      optional:
+        - name: comparison_dimensions
+          type: array[string]
+          default: ["auto_detect"]
+          description: "أبعاد المقارنة"
+          
+        - name: comparison_type
+          type: enum
+          values: [
+            SYNCHRONIC,      # مقارنة في نفس الزمن
+            DIACHRONIC,      # مقارنة عبر الزمن
+            CROSS_CULTURAL,  # مقارنة عبر الثقافات
+            INTRA_TRADITION  # مقارنة داخل التقليد الواحد
+          ]
+          default: "auto_detect"
+          
+        - name: focus
+          type: enum
+          values: [SIMILARITIES, DIFFERENCES, BOTH, RELATIONSHIPS]
+          default: "BOTH"
+          
+        - name: include_explanations
+          type: boolean
+          default: true
+          description: "تفسير أسباب الاختلاف والتشابه"
+    
+    outputs:
+      primary:
+        name: comparative_analysis
+        type: ComparativeAnalysis
+        schema:
+          items_compared:
+            type: array
+            items:
+              id: string
+              name: string
+              summary: string
+          comparison_type: string
+          dimensions:
+            type: array
+            items:
+              dimension_name: string
+              dimension_description: string
+              comparison_table:
+                type: array
+                items:
+                  item_id: string
+                  value: string
+                  evidence: string
+                  confidence: float
+              similarity_score: float
+              difference_significance: enum[TRIVIAL, MINOR, MODERATE, MAJOR, FUNDAMENTAL]
+          similarities:
+            type: array
+            items:
+              aspect: string
+              description: string
+              items_sharing: array[string]
+              explanation: string
+              significance: string
+              evidence: array
+          differences:
+            type: array
+            items:
+              aspect: string
+              description: string
+              item_positions:
+                type: array
+                items:
+                  item_id: string
+                  position: string
+              explanation: string
+              historical_reasons: string
+              philosophical_reasons: string
+              significance: string
+              evidence: array
+          relationships:
+            type: array
+            items:
+              type: enum[INFLUENCE, REACTION, PARALLEL, SYNTHESIS, OPPOSITION]
+              from_item: string
+              to_item: string
+              description: string
+              evidence: string
+          overall_assessment:
+            fundamental_commonality: string
+            fundamental_divergence: string
+            typology_suggestion: string
+            scholarly_consensus: string
+            
+      secondary:
+        - name: comparison_matrix
+          type: object
+          format: "table"
+          
+        - name: venn_diagram_data
+          type: object
+          
+        - name: similarity_heatmap
+          type: object
+    
+    tools:
+      internal:
+        - name: Dimension Extractor
+          type: nlp
+          
+        - name: Similarity Calculator
+          type: statistical
+          
+        - name: Relationship Inferrer
+          type: reasoning
+          
+      external: []
+    
+    resources:
+      knowledge_bases:
+        - comparison_frameworks
+        - scholarly_comparisons
+    
+    guardrails:
+      pre_conditions:
+        - condition: "items are comparable (same category/type)"
+          error_code: "A3_INCOMPARABLE_ITEMS"
+          
+      post_conditions:
+        - condition: "comparison is balanced (not biased toward one item)"
+          error_code: "A3_BIASED_COMPARISON"
+          
+        - condition: "differences have explanations"
+          error_code: "A3_UNEXPLAINED_DIFFERENCE"
+          
+      forbidden:
+        - "value judgments disguised as neutral comparison"
+        - "cherry-picking dimensions"
+        - "ignoring context when comparing"
+    
+    quality_metrics:
+      - name: dimension_relevance
+        target: ">= 0.9"
+        
+      - name: comparison_balance
+        target: ">= 0.85"
+        
+      - name: explanation_quality
+        target: ">= 0.8"
+    
+    cost_profile:
+      compute: "MEDIUM-HIGH"
+      tokens: "MEDIUM"
+      estimated_cost_per_call: "$0.03 - $0.15"
+    
+    autonomy_level: "L0"
+    
+    example:
+      input:
+        items:
+          - id: "ashary"
+            type: "SCHOOL"
+            name: "الأشاعرة"
+          - id: "mutazila"
+            type: "SCHOOL"
+            name: "المعتزلة"
+        comparison_dimensions: ["صفات الله", "القدر", "الإيمان", "التأويل"]
+        comparison_type: "INTRA_TRADITION"
+        
+      output:
+        comparative_analysis:
+          dimensions:
+            - dimension_name: "صفات الله"
+              comparison_table:
+                - item_id: "mutazila"
+                  value: "نفي الصفات الزائدة على الذات"
+                - item_id: "ashary"
+                  value: "إثبات صفات قائمة بالذات لا هي هو ولا هي غيره"
+              difference_significance: "FUNDAMENTAL"
+          differences:
+            - aspect: "الصفات الإلهية"
+              item_positions:
+                - {item_id: "mutazila", position: "الصفات عين الذات"}
+                - {item_id: "ashary", position: "الصفات زائدة على الذات"}
+              explanation: "المعتزلة خافوا من التشبيه، والأشاعرة خافوا من التعطيل"
+              philosophical_reasons: "اختلاف في فهم التوحيد"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# A4: تحليل التناقض (Contradiction Analysis)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "A4"
+    name_ar: "تحليل التناقض"
+    name_en: "Contradiction Analysis"
+    category: "Analyze"
+    version: "1.0.0"
+    
+    purpose: |
+      اكتشاف وتحليل التناقضات الظاهرة أو الحقيقية في النصوص أو بين المواقف
+      مع اقتراح طرق التوفيق أو تفسير التناقض
+    
+    inputs:
+      required:
+        - name: corpus
+          type: union[array[Passage], array[Claim], object]
+          description: "مجموعة النصوص أو الادعاءات"
+          
+      optional:
+        - name: contradiction_types
+          type: array[string]
+          default: ["all"]
+          values: [
+            LOGICAL,           # تناقض منطقي صريح
+            SEMANTIC,          # تناقض في المعنى
+            PRAGMATIC,         # تناقض في الاستخدام/السياق
+            TEMPORAL,          # تناقض زمني (نسخ، تطور)
+            PERSPECTIVAL,      # اختلاف وجهات النظر
+            APPARENT           # تناقض ظاهري
+          ]
+          
+        - name: resolution_strategies
+          type: array[string]
+          default: ["all"]
+          values: [
+            NASKH,             # النسخ
+            TAKHSIS,           # التخصيص
+            TAQYID,            # التقييد
+            TAAWIL,            # التأويل
+            JAMAA,             # الجمع
+            TARJIH,            # الترجيح
+            TAWAQQUF           # التوقف
+          ]
+          
+        - name: source_type
+          type: string
+          description: "نوع المصدر (قرآن، حديث، نص عالم...)"
+          
+        - name: authority_hierarchy
+          type: array[string]
+          description: "ترتيب المصادر من حيث الحجية"
+    
+    outputs:
+      primary:
+        name: contradiction_analysis
+        type: ContradictionAnalysis
+        schema:
+          corpus_summary: object
+          contradictions_found:
+            type: array
+            items:
+              id: string
+              type: string
+              severity: enum[MINOR, MODERATE, MAJOR, FUNDAMENTAL]
+              statements:
+                type: array
+                items:
+                  id: string
+                  text: string
+                  source: object
+                  interpretation: string
+              nature_of_contradiction:
+                description: string
+                logical_form: string  # P ∧ ¬P
+                scope: string
+              analysis:
+                is_real: boolean
+                if_apparent:
+                  reason: string
+                  resolution_method: string
+                  resolution_explanation: string
+                if_real:
+                  type: enum[EVOLUTION, ERROR, CONTEXT_DEPENDENT, GENUINE_DISAGREEMENT]
+                  explanation: string
+              resolution_attempts:
+                type: array
+                items:
+                  strategy: string
+                  strategy_ar: string
+                  application: string
+                  success: boolean
+                  scholarly_support: array
+                  criticism: array
+              scholarly_opinions:
+                type: array
+                items:
+                  scholar: string
+                  position: string
+                  reasoning: string
+              recommendation:
+                best_resolution: string
+                confidence: float
+                caveats: array
+          consistency_assessment:
+            overall_consistency: float
+            problematic_areas: array
+            internally_consistent_clusters: array
+          unresolved:
+            type: array
+            description: "تناقضات لم تُحل"
+            
+      secondary:
+        - name: contradiction_map
+          type: object
+          
+        - name: resolution_statistics
+          type: object
+    
+    tools:
+      internal:
+        - name: Logical Contradiction Detector
+          type: formal_logic
+          
+        - name: Semantic Contradiction Detector
+          type: nlp
+          
+        - name: Resolution Strategy Matcher
+          type: knowledge_based
+          
+      external: []
+    
+    resources:
+      knowledge_bases:
+        - naskh_database
+        - takhsis_patterns
+        - scholarly_jamaa_solutions
+    
+    guardrails:
+      post_conditions:
+        - condition: "contradictions have textual evidence"
+          error_code: "A4_PHANTOM_CONTRADICTION"
+          
+        - condition: "resolution attempts are documented"
+          error_code: "A4_NO_RESOLUTION_ATTEMPT"
+          
+      forbidden:
+        - "claiming resolution without evidence"
+        - "ignoring traditional resolution attempts"
+        - "presenting speculative resolution as certain"
+    
+    quality_metrics:
+      - name: detection_accuracy
+        target: ">= 0.9"
+        
+      - name: resolution_validity
+        target: ">= 0.85"
+    
+    cost_profile:
+      compute: "MEDIUM-HIGH"
+      tokens: "MEDIUM"
+      estimated_cost_per_call: "$0.03 - $0.15"
+    
+    autonomy_level: "L1"
+    autonomy_description: "يقترح التحليل والتوفيق"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# A5: تحليل الفجوات (Gap Analysis)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "A5"
+    name_ar: "تحليل الفجوات"
+    name_en: "Gap Analysis"
+    category: "Analyze"
+    version: "1.0.0"
+    
+    purpose: |
+      اكتشاف الفجوات المعرفية والبحثية في مجال أو كوربس
+      ما لم يُدرس، ما لم يُربط، ما لم يُستثمر
+    
+    critical_note: |
+      هذه العملية هي أساس "وكيل الثروة المهملة"
+      تكشف الحقول والجداول والعلاقات غير المستثمرة
+    
+    inputs:
+      required:
+        - name: scope
+          type: object
+          schema:
+            type: enum[CORPUS, FIELD, TOPIC, DATABASE_TABLES]
+            identifier: string
+            boundaries: object
+            
+      optional:
+        - name: gap_types
+          type: array[string]
+          default: ["all"]
+          values: [
+            UNSTUDIED_TOPICS,       # مواضيع لم تُدرس
+            UNLINKED_ENTITIES,      # كيانات غير مربوطة
+            MISSING_CONNECTIONS,    # علاقات مفقودة
+            UNDEREXPLORED_SOURCES,  # مصادر لم تُستثمر
+            TEMPORAL_GAPS,          # فجوات زمنية
+            GEOGRAPHIC_GAPS,        # فجوات جغرافية
+            METHODOLOGICAL_GAPS,    # فجوات منهجية
+            UNUSED_FIELDS           # حقول قاعدة البيانات غير المستخدمة
+          ]
+          
+        - name: baseline_comparison
+          type: string
+          description: "مقارنة بمعيار (أدبيات، فهرس، خطة بحثية)"
+          
+        - name: significance_threshold
+          type: float
+          default: 0.5
+          description: "حد أهمية الفجوة"
+    
+    outputs:
+      primary:
+        name: gap_analysis
+        type: GapAnalysis
+        schema:
+          scope: object
+          analysis_date: string
+          gaps:
+            type: array
+            items:
+              id: string
+              type: string
+              title: string
+              description: string
+              evidence:
+                what_exists: string
+                what_is_missing: string
+                how_discovered: string
+              location:
+                corpus_section: string
+                database_tables: array
+                field_area: string
+              significance:
+                score: float
+                reasoning: string
+                potential_impact: string
+              difficulty:
+                score: float
+                barriers: array
+                requirements: array
+              related_gaps: array[string]
+              exploitation_suggestions:
+                type: array
+                items:
+                  suggestion: string
+                  approach: string
+                  resources_needed: array
+                  priority: enum[LOW, MEDIUM, HIGH, CRITICAL]
+              existing_partial_work:
+                type: array
+                description: "عمل موجود يسد جزءاً من الفجوة"
+          database_insights:
+            underused_tables:
+              type: array
+              items:
+                table_name: string
+                usage_rate: float
+                potential_queries: array
+            unlinked_fields:
+              type: array
+              items:
+                field_a: string
+                field_b: string
+                potential_relation: string
+            sparse_regions:
+              type: array
+              items:
+                dimension: string
+                sparse_values: array
+                coverage_rate: float
+          prioritized_opportunities:
+            type: array
+            items:
+              gap_id: string
+              priority_score: float
+              quick_wins: array
+              long_term: array
+          statistics:
+            total_gaps: integer
+            by_type: object
+            by_significance: object
+            
+      secondary:
+        - name: gap_heatmap
+          type: object
+          description: "خريطة حرارية للفجوات"
+          
+        - name: coverage_report
+          type: object
+          
+        - name: trend_analysis
+          type: object
+          description: "هل الفجوات تتقلص أم تتسع؟"
+    
+    tools:
+      internal:
+        - name: Coverage Analyzer
+          type: statistical
+          
+        - name: Database Schema Inspector
+          type: database
+          
+        - name: Literature Gap Detector
+          type: text_mining
+          
+        - name: Relationship Density Analyzer
+          type: graph_analysis
+          
+      external: []
+    
+    resources:
+      knowledge_bases:
+        - field_bibliographies
+        - research_agendas
+      databases:
+        - iqra12_schema
+    
+    guardrails:
+      post_conditions:
+        - condition: "gaps have evidence of absence"
+          error_code: "A5_UNVERIFIED_GAP"
+          
+        - condition: "significance scoring is consistent"
+          error_code: "A5_INCONSISTENT_SCORING"
+          
+      forbidden:
+        - "claiming gap without search evidence"
+        - "ignoring existing work"
+    
+    quality_metrics:
+      - name: gap_validity
+        target: ">= 0.9"
+        
+      - name: actionability
+        target: ">= 0.8"
+    
+    cost_profile:
+      compute: "MEDIUM-HIGH"
+      tokens: "LOW-MEDIUM"
+      estimated_cost_per_call: "$0.03 - $0.15"
+    
+    autonomy_level: "L0"
+    
+    example:
+      input:
+        scope:
+          type: "DATABASE_TABLES"
+          identifier: "iqra12_kalam"
+        gap_types: ["UNUSED_FIELDS", "UNLINKED_ENTITIES", "UNSTUDIED_TOPICS"]
+        
+      output:
+        gap_analysis:
+          gaps:
+            - id: "gap_001"
+              type: "UNUSED_FIELDS"
+              title: "حقول السياق الاجتماعي غير مستثمرة"
+              description: "جداول العلماء تحتوي حقول عن الوضع الاجتماعي والاقتصادي لم تُستخدم في أي تحليل"
+              evidence:
+                what_exists: "حقول: social_class, economic_status, patronage"
+                what_is_missing: "لا استعلامات تربط هذه الحقول بالإنتاج الفكري"
+              significance:
+                score: 0.85
+                potential_impact: "فهم سوسيولوجيا المعرفة الكلامية"
+              exploitation_suggestions:
+                - suggestion: "دراسة العلاقة بين الرعاية السلطانية والمواقف الكلامية"
+                  priority: "HIGH"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# A6: تحليل الموقف (Position Analysis)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "A6"
+    name_ar: "تحليل الموقف"
+    name_en: "Position Analysis"
+    category: "Analyze"
+    version: "1.0.0"
+    
+    purpose: |
+      تحديد موقف عالم أو مدرسة من مسألة معينة
+      مع الأدلة والتفاصيل والتطور والمقارنة
+    
+    inputs:
+      required:
+        - name: entity
+          type: object
+          schema:
+            type: enum[PERSON, SCHOOL, MOVEMENT, TEXT]
+            id: string
+            name: string
+            
+        - name: issue
+          type: object
+          schema:
+            name: string
+            domain: string
+            question_formulation: string
+            
+      optional:
+        - name: include_evolution
+          type: boolean
+          default: true
+          description: "تتبع تطور الموقف"
+          
+        - name: include_nuances
+          type: boolean
+          default: true
+          description: "تضمين التفاصيل والتنويعات"
+          
+        - name: compare_with
+          type: array[string]
+          description: "مقارنة مع مواقف أخرى"
+          
+        - name: source_priority
+          type: array[string]
+          description: "ترتيب المصادر (كتب المسائل، الفتاوى...)"
+    
+    outputs:
+      primary:
+        name: position_analysis
+        type: PositionAnalysis
+        schema:
+          entity: object
+          issue: object
+          position:
+            summary: string
+            detailed_formulation: string
+            position_type: enum[AFFIRMATION, NEGATION, QUALIFICATION, SUSPENSION, MIXED]
+            certainty_level: enum[DEFINITE, PREFERRED, POSSIBLE, TENTATIVE]
+            scope_and_conditions: string
+          evidence:
+            primary_sources:
+              type: array
+              items:
+                source_id: string
+                source_title: string
+                passage: string
+                offsets: object
+                interpretation: string
+                weight: float
+            secondary_attestations:
+              type: array
+              items:
+                attestor: string
+                attribution: string
+                reliability: float
+          argumentation:
+            main_arguments: array
+            supporting_evidence: array
+            methodology_used: string
+          nuances:
+            type: array
+            items:
+              condition: string
+              modified_position: string
+              source: string
+          evolution:
+            type: array
+            description: "تطور الموقف عبر الزمن"
+            items:
+              period: string
+              position: string
+              source: string
+              change_reason: string
+          internal_tensions:
+            type: array
+            description: "توترات داخلية في الموقف"
+          context:
+            intellectual_context: string
+            polemical_context: string
+            historical_triggers: array
+          reception:
+            followers: array
+            critics: array
+            later_developments: array
+          comparison:
+            type: array
+            items:
+              other_entity: string
+              their_position: string
+              relationship: enum[IDENTICAL, SIMILAR, DIFFERENT, OPPOSED]
+              key_differences: array
+              
+      secondary:
+        - name: position_spectrum
+          type: object
+          description: "موقع الموقف على طيف الآراء"
+          
+        - name: citation_map
+          type: object
+    
+    tools:
+      internal:
+        - name: Position Extractor
+          type: nlp
+          
+        - name: Evolution Tracker
+          type: temporal_analysis
+          
+        - name: Nuance Detector
+          type: fine_grained_nlp
+          
+      external: []
+    
+    resources:
+      knowledge_bases:
+        - positions_database
+        - masail_database
+        - fatawa_database
+    
+    guardrails:
+      pre_conditions:
+        - condition: "entity has documented positions"
+          error_code: "A6_NO_DOCUMENTED_POSITION"
+          
+      post_conditions:
+        - condition: "position has primary source evidence"
+          error_code: "A6_NO_PRIMARY_EVIDENCE"
+          
+        - condition: "nuances are sourced"
+          error_code: "A6_UNSOURCED_NUANCE"
+          
+      forbidden:
+        - "attributing position without evidence"
+        - "oversimplifying complex positions"
+        - "ignoring evolution and nuance"
+        - "presenting minority interpretation as main position"
+    
+    quality_metrics:
+      - name: position_accuracy
+        target: ">= 0.95"
+        
+      - name: evidence_quality
+        target: ">= 0.9"
+        
+      - name: nuance_coverage
+        target: ">= 0.85"
+    
+    cost_profile:
+      compute: "MEDIUM"
+      tokens: "MEDIUM"
+      estimated_cost_per_call: "$0.02 - $0.12"
+    
+    autonomy_level: "L0-L1"
+    
+    example:
+      input:
+        entity:
+          type: "PERSON"
+          id: "ghazali"
+          name: "الغزالي"
+        issue:
+          name: "حكم الفلسفة"
+          domain: "kalam"
+          question_formulation: "ما موقف الغزالي من الفلسفة والفلاسفة؟"
+        include_evolution: true
+        include_nuances: true
+        
+      output:
+        position_analysis:
+          position:
+            summary: "موقف مركب: نقد كلي للفلاسفة في ثلاث مسائل، وقبول جزئي لمنهجهم المنطقي"
+            position_type: "MIXED"
+          evidence:
+            primary_sources:
+              - source_title: "تهافت الفلاسفة"
+                passage: "التكفير في ثلاث: قدم العالم، نفي العلم بالجزئيات، نفي المعاد الجسماني"
+              - source_title: "المنقذ من الضلال"
+                passage: "فعلم أن رد القول قبل فهمه جهل..."
+          nuances:
+            - condition: "في المنطق والرياضيات"
+              modified_position: "لا حرج فيها، بل قد تفيد"
+            - condition: "في الإلهيات"
+              modified_position: "غلطوا في معظمها"
+          evolution:
+            - period: "قبل الأزمة الروحية"
+              position: "أستاذ أصول الدين، محايد نسبياً"
+            - period: "بعد المنقذ"
+              position: "نقد فلسفي عميق مع استيعاب"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              نهاية ملف التحليل
+# ═══════════════════════════════════════════════════════════════════════════════

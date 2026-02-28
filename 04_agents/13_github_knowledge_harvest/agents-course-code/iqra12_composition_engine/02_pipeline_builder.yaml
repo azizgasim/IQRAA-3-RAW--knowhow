@@ -1,0 +1,836 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#                         Pipeline Builder (باني الـ Pipeline)
+#                    IQRA-12 Dynamic Composition Engine
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# الغرض: تحويل السؤال المحلل إلى خطة تنفيذ من العمليات الذرية
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+component:
+  name: "Pipeline Builder"
+  name_ar: "باني الـ Pipeline"
+  version: "1.0.0"
+  
+  purpose: |
+    بناء خطة تنفيذ (Execution Plan) من العمليات الذرية
+    بناءً على السؤال المحلل، مع مراعاة التبعيات والتحسين
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              المدخلات والمخرجات
+# ═══════════════════════════════════════════════════════════════════════════════
+
+interface:
+  
+  input:
+    name: "ParsedQuestion"
+    source: "Question Parser"
+    
+  output:
+    name: "ExecutionPlan"
+    schema:
+      plan_id:
+        type: string
+        format: "plan_{uuid}"
+        
+      parsed_question_id:
+        type: string
+        
+      strategy:
+        type: enum[RECIPE_BASED, DYNAMIC, HYBRID]
+        description: "استراتيجية البناء المستخدمة"
+        
+      recipe_id:
+        type: string
+        nullable: true
+        description: "معرف الوصفة إن استُخدمت"
+        
+      phases:
+        type: array[ExecutionPhase]
+        description: "مراحل التنفيذ"
+        
+      operations:
+        type: array[PlannedOperation]
+        description: "جميع العمليات المخططة"
+        
+      dependency_graph:
+        type: DependencyGraph
+        description: "رسم التبعيات بين العمليات"
+        
+      parallelization:
+        type: ParallelizationPlan
+        description: "خطة التوازي"
+        
+      checkpoints:
+        type: array[Checkpoint]
+        description: "نقاط الحفظ والتحقق"
+        
+      gates:
+        type: array[QualityGate]
+        description: "بوابات الجودة الإلزامية"
+        
+      cost_estimate:
+        type: CostEstimate
+        
+      fallback_options:
+        type: array[FallbackPlan]
+        description: "خطط بديلة عند الفشل"
+        
+      metadata:
+        type: object
+        properties:
+          built_at: timestamp
+          builder_version: string
+          optimization_level: string
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              المكونات الفرعية
+# ═══════════════════════════════════════════════════════════════════════════════
+
+subcomponents:
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # 1. Recipe Matcher (مطابق الوصفات)
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  recipe_matcher:
+    name: "Recipe Matcher"
+    name_ar: "مطابق الوصفات"
+    
+    purpose: "البحث عن وصفة جاهزة تناسب السؤال"
+    
+    matching_algorithm:
+      steps:
+        1: "Match question type"
+        2: "Check entity compatibility"
+        3: "Verify scope alignment"
+        4: "Score output compatibility"
+        5: "Consider complexity match"
+        
+      scoring:
+        type_match: 0.3
+        entity_coverage: 0.2
+        scope_fit: 0.2
+        output_match: 0.2
+        complexity_fit: 0.1
+        
+      thresholds:
+        use_recipe: ">= 0.8"
+        adapt_recipe: "0.6 - 0.8"
+        build_dynamic: "< 0.6"
+        
+    output:
+      matched_recipe: Recipe | null
+      match_score: float
+      adaptations_needed: array[Adaptation]
+      recommendation: enum[USE_AS_IS, ADAPT, BUILD_DYNAMIC]
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # 2. Operation Selector (منتقي العمليات)
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  operation_selector:
+    name: "Operation Selector"
+    name_ar: "منتقي العمليات"
+    
+    purpose: "اختيار العمليات المناسبة بناءً على نوع السؤال ومتطلباته"
+    
+    selection_rules:
+      
+      # قواعد حسب نوع السؤال
+      by_question_type:
+        
+        TRACING:
+          core_operations:
+            - E1  # بحث نصي
+            - E2  # بحث دلالي
+            - E3  # استخراج كيانات
+            - T1  # تتبع معجمي (إذا كان هناك انتقال لغوي)
+            - T2  # تتبع مفاهيمي
+            - T3  # تتبع جينالوجي
+          optional_operations:
+            - L2  # ربط مفاهيمي
+            - L5  # ربط جينالوجي
+            - S1  # تركيب سردي
+            - S4  # جدول زمني
+          verification:
+            - V1
+            - V2
+            
+        COMPARATIVE:
+          core_operations:
+            - E1
+            - E2
+            - E3
+            - E6  # استخراج مصطلحات
+            - A3  # تحليل مقارنة
+            - A6  # تحليل موقف
+          optional_operations:
+            - S5  # تركيب مقارني
+          verification:
+            - V1
+            - V2
+            
+        INFLUENCE:
+          core_operations:
+            - E1
+            - E2
+            - E3
+            - E4  # استخراج علاقات
+            - L4  # ربط تناصي
+            - L5  # ربط جينالوجي
+            - A1  # تحليل حجة
+            - C1  # بناء حزمة أدلة
+            - C2  # بناء ادعاء
+          optional_operations:
+            - C3  # بناء دليل مضاد
+            - T2
+            - T3
+          verification:
+            - V1
+            - V2
+            - V4
+            
+        POSITION:
+          core_operations:
+            - E1
+            - E2
+            - E5  # استخراج استشهادات
+            - A6  # تحليل موقف
+            - C1
+          optional_operations:
+            - A1
+            - A4  # تحليل تناقض
+          verification:
+            - V1
+            
+        DEFINITION:
+          core_operations:
+            - E1
+            - E6
+            - T1  # إذا كان هناك أصل لغوي
+          optional_operations:
+            - C5  # بناء قاموس
+          verification:
+            - V1
+            
+        NETWORK:
+          core_operations:
+            - E1
+            - E3
+            - E4
+            - L1  # حل الهوية
+            - T3
+          optional_operations:
+            - S3  # تركيب خريطة معرفية
+          verification:
+            - V1
+            
+        TIMELINE:
+          core_operations:
+            - E1
+            - E3
+            - T2
+            - T5  # تتبع مؤسسي (إذا لزم)
+          optional_operations:
+            - S4  # تركيب جدول زمني
+          verification:
+            - V1
+            - V2
+            
+        GAP_DISCOVERY:
+          core_operations:
+            - E1
+            - E2
+            - A5  # تحليل فجوات - الأساسي
+          optional_operations: []
+          verification:
+            - V1
+            
+        SYNTHESIS:
+          core_operations:
+            - E1
+            - E2
+            - E3
+            - E5
+            - E6
+            - C1
+            - C2
+            - C3  # إلزامي للتركيب
+            - C4  # بناء مخطط
+            - S1  # أو S2
+            - W1
+            - W2
+            - W3  # ملخص
+            - W5  # مقدمة وخاتمة
+          verification:
+            - V1
+            - V2
+            - V4
+            
+      # قواعد حسب السياق
+      contextual_rules:
+        
+        cross_linguistic:
+          condition: "temporal_scope spans multiple languages"
+          add_operations:
+            - T1  # تتبع معجمي
+            - L2  # ربط مفاهيمي
+            
+        long_temporal_span:
+          condition: "temporal_span > 300 years"
+          add_operations:
+            - S4  # جدول زمني
+            - T2  # تتبع مفاهيمي
+            
+        multiple_schools:
+          condition: "entities include multiple schools"
+          add_operations:
+            - A3  # تحليل مقارنة
+            - A6  # تحليل موقف
+            
+        high_complexity:
+          condition: "complexity_level >= HIGH"
+          add_operations:
+            - C3  # بناء دليل مضاد
+            - A4  # تحليل تناقض
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # 3. Dependency Resolver (حالّ التبعيات)
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  dependency_resolver:
+    name: "Dependency Resolver"
+    name_ar: "حالّ التبعيات"
+    
+    purpose: "تحديد ترتيب العمليات بناءً على التبعيات"
+    
+    dependency_types:
+      
+      DATA_DEPENDENCY:
+        description: "عملية تحتاج مخرجات عملية أخرى"
+        example: "L1 يحتاج مخرجات E3"
+        strength: "HARD"
+        
+      LOGICAL_DEPENDENCY:
+        description: "تبعية منطقية وليست بيانات"
+        example: "C2 يجب أن يأتي بعد C1"
+        strength: "HARD"
+        
+      QUALITY_DEPENDENCY:
+        description: "تحسين الجودة لكن ليس إلزامي"
+        example: "E2 يحسن نتائج E1"
+        strength: "SOFT"
+        
+      GATE_DEPENDENCY:
+        description: "بوابة جودة يجب اجتيازها"
+        example: "V1 قبل النشر"
+        strength: "HARD"
+        
+    base_dependencies:
+      # التبعيات الأساسية بين العمليات
+      
+      # Extract dependencies
+      E3:
+        depends_on: [E1, E2]
+        type: DATA_DEPENDENCY
+      E4:
+        depends_on: [E3]
+        type: DATA_DEPENDENCY
+      E5:
+        depends_on: [E1]
+        type: DATA_DEPENDENCY
+      E6:
+        depends_on: [E1, E2]
+        type: DATA_DEPENDENCY
+        
+      # Link dependencies
+      L1:
+        depends_on: [E3]
+        type: DATA_DEPENDENCY
+      L2:
+        depends_on: [E6]
+        type: DATA_DEPENDENCY
+      L3:
+        depends_on: [E5]
+        type: DATA_DEPENDENCY
+      L4:
+        depends_on: [E1, E3]
+        type: DATA_DEPENDENCY
+      L5:
+        depends_on: [E3, E4]
+        type: DATA_DEPENDENCY
+        
+      # Trace dependencies
+      T1:
+        depends_on: [E6]
+        type: DATA_DEPENDENCY
+      T2:
+        depends_on: [E3, L2]
+        type: DATA_DEPENDENCY
+      T3:
+        depends_on: [E3, E4, L1]
+        type: DATA_DEPENDENCY
+      T4:
+        depends_on: [E3]
+        type: DATA_DEPENDENCY
+      T5:
+        depends_on: [E3]
+        type: DATA_DEPENDENCY
+        
+      # Analyze dependencies
+      A1:
+        depends_on: [E1, E5]
+        type: DATA_DEPENDENCY
+      A2:
+        depends_on: [E1, E3]
+        type: DATA_DEPENDENCY
+      A3:
+        depends_on: [E3, E6]
+        type: DATA_DEPENDENCY
+      A4:
+        depends_on: [E1]
+        type: DATA_DEPENDENCY
+      A5:
+        depends_on: [E1, E2]
+        type: DATA_DEPENDENCY
+      A6:
+        depends_on: [E1, E5, E3]
+        type: DATA_DEPENDENCY
+        
+      # Construct dependencies
+      C1:
+        depends_on: [E1, E2, E3, E4, E5]
+        type: DATA_DEPENDENCY
+      C2:
+        depends_on: [C1]
+        type: LOGICAL_DEPENDENCY
+      C3:
+        depends_on: [C2]
+        type: LOGICAL_DEPENDENCY
+      C4:
+        depends_on: [C2]
+        type: LOGICAL_DEPENDENCY
+      C5:
+        depends_on: [E6]
+        type: DATA_DEPENDENCY
+      C6:
+        depends_on: [E3, E6, L2]
+        type: DATA_DEPENDENCY
+        
+      # Synthesize dependencies
+      S1:
+        depends_on: [C1, C2]
+        type: DATA_DEPENDENCY
+      S2:
+        depends_on: [C1, C2, C4]
+        type: DATA_DEPENDENCY
+      S3:
+        depends_on: [E3, E4, L1]
+        type: DATA_DEPENDENCY
+      S4:
+        depends_on: [E3, T2]
+        type: DATA_DEPENDENCY
+      S5:
+        depends_on: [A3, A6]
+        type: DATA_DEPENDENCY
+        
+      # Write dependencies
+      W1:
+        depends_on: [C1, C2]
+        type: DATA_DEPENDENCY
+      W2:
+        depends_on: [W1, C4]
+        type: DATA_DEPENDENCY
+      W3:
+        depends_on: [S1, S2]
+        type: DATA_DEPENDENCY
+      W4:
+        depends_on: [E1]
+        type: DATA_DEPENDENCY
+      W5:
+        depends_on: [W2]
+        type: LOGICAL_DEPENDENCY
+        
+      # Verify dependencies (gates)
+      V1:
+        depends_on: [W1, W2]
+        type: GATE_DEPENDENCY
+      V2:
+        depends_on: [C2, S1, S2]
+        type: GATE_DEPENDENCY
+      V3:
+        depends_on: [C4, W2]
+        type: GATE_DEPENDENCY
+      V4:
+        depends_on: [C1, C2]
+        type: GATE_DEPENDENCY
+      V5:
+        depends_on: [S1, S2]
+        type: GATE_DEPENDENCY
+      V6:
+        depends_on: [C6]
+        type: GATE_DEPENDENCY
+        
+    resolution_algorithm:
+      method: "topological_sort"
+      handle_cycles: "error"
+      
+      output:
+        ordered_operations: array[string]
+        dependency_graph:
+          nodes: array[OperationNode]
+          edges: array[DependencyEdge]
+        parallel_groups: array[array[string]]
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # 4. Pipeline Optimizer (محسّن الـ Pipeline)
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  pipeline_optimizer:
+    name: "Pipeline Optimizer"
+    name_ar: "محسّن الـ Pipeline"
+    
+    purpose: "تحسين خطة التنفيذ من حيث الكفاءة والتكلفة"
+    
+    optimization_strategies:
+      
+      parallelization:
+        description: "تحديد العمليات التي يمكن تنفيذها بالتوازي"
+        method: |
+          1. تحديد العمليات بدون تبعيات متبادلة
+          2. تجميعها في مجموعات متوازية
+          3. موازنة الحمل بين المجموعات
+          
+      deduplication:
+        description: "تجنب تكرار العمليات المتشابهة"
+        method: |
+          1. اكتشاف عمليات بنفس المعاملات
+          2. إعادة استخدام النتائج
+          3. تخزين مؤقت للنتائج المشتركة
+          
+      early_filtering:
+        description: "تصفية مبكرة لتقليل البيانات"
+        method: |
+          1. تطبيق الفلاتر في أقرب مرحلة ممكنة
+          2. تقليم النتائج غير المطلوبة مبكراً
+          
+      lazy_loading:
+        description: "تأخير تحميل البيانات حتى الحاجة"
+        method: |
+          1. عدم تحميل كل النتائج مقدماً
+          2. تحميل تدريجي حسب الحاجة
+          
+      checkpoint_placement:
+        description: "وضع نقاط حفظ استراتيجية"
+        method: |
+          1. بعد العمليات المكلفة
+          2. قبل العمليات الخطرة
+          3. عند نقاط التفرع
+          
+    cost_model:
+      factors:
+        compute_cost:
+          weight: 0.3
+          unit: "compute_units"
+        token_cost:
+          weight: 0.3
+          unit: "tokens"
+        time_cost:
+          weight: 0.2
+          unit: "seconds"
+        api_cost:
+          weight: 0.2
+          unit: "dollars"
+          
+    output:
+      optimized_plan: ExecutionPlan
+      optimization_report:
+        original_cost: float
+        optimized_cost: float
+        savings_percentage: float
+        optimizations_applied: array[string]
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # 5. Cost Estimator (مقدّر التكلفة)
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  cost_estimator:
+    name: "Cost Estimator"
+    name_ar: "مقدّر التكلفة"
+    
+    purpose: "تقدير تكلفة تنفيذ الـ Pipeline"
+    
+    cost_per_operation:
+      # تكاليف تقديرية لكل عملية
+      
+      E1: {compute: "LOW", tokens: 0, time: "5s", cost: "$0.01"}
+      E2: {compute: "MEDIUM", tokens: 500, time: "10s", cost: "$0.02"}
+      E3: {compute: "MEDIUM", tokens: 1000, time: "15s", cost: "$0.03"}
+      E4: {compute: "MEDIUM-HIGH", tokens: 1500, time: "20s", cost: "$0.04"}
+      E5: {compute: "LOW-MEDIUM", tokens: 500, time: "10s", cost: "$0.02"}
+      E6: {compute: "MEDIUM", tokens: 1000, time: "15s", cost: "$0.03"}
+      
+      L1: {compute: "MEDIUM", tokens: 1000, time: "15s", cost: "$0.03"}
+      L2: {compute: "MEDIUM", tokens: 1500, time: "20s", cost: "$0.04"}
+      L3: {compute: "LOW-MEDIUM", tokens: 500, time: "10s", cost: "$0.02"}
+      L4: {compute: "MEDIUM-HIGH", tokens: 2000, time: "25s", cost: "$0.05"}
+      L5: {compute: "MEDIUM", tokens: 1500, time: "20s", cost: "$0.04"}
+      
+      T1: {compute: "LOW", tokens: 500, time: "10s", cost: "$0.02"}
+      T2: {compute: "MEDIUM", tokens: 2000, time: "30s", cost: "$0.05"}
+      T3: {compute: "MEDIUM", tokens: 1500, time: "20s", cost: "$0.04"}
+      T4: {compute: "LOW-MEDIUM", tokens: 1000, time: "15s", cost: "$0.03"}
+      T5: {compute: "MEDIUM", tokens: 1500, time: "20s", cost: "$0.04"}
+      
+      A1: {compute: "LOW-MEDIUM", tokens: 1500, time: "20s", cost: "$0.04"}
+      A2: {compute: "MEDIUM", tokens: 2000, time: "25s", cost: "$0.05"}
+      A3: {compute: "LOW-MEDIUM", tokens: 1500, time: "20s", cost: "$0.04"}
+      A4: {compute: "MEDIUM", tokens: 2000, time: "25s", cost: "$0.05"}
+      A5: {compute: "LOW-MEDIUM", tokens: 1000, time: "15s", cost: "$0.03"}
+      A6: {compute: "MEDIUM", tokens: 2000, time: "25s", cost: "$0.05"}
+      
+      C1: {compute: "MEDIUM-HIGH", tokens: 2000, time: "30s", cost: "$0.06"}
+      C2: {compute: "LOW-MEDIUM", tokens: 1500, time: "20s", cost: "$0.04"}
+      C3: {compute: "MEDIUM-HIGH", tokens: 2000, time: "30s", cost: "$0.06"}
+      C4: {compute: "LOW", tokens: 1000, time: "15s", cost: "$0.03"}
+      C5: {compute: "MEDIUM", tokens: 1500, time: "20s", cost: "$0.04"}
+      C6: {compute: "HIGH", tokens: 3000, time: "45s", cost: "$0.08"}
+      
+      S1: {compute: "MEDIUM-HIGH", tokens: 5000, time: "60s", cost: "$0.12"}
+      S2: {compute: "HIGH", tokens: 8000, time: "90s", cost: "$0.20"}
+      S3: {compute: "MEDIUM", tokens: 1000, time: "20s", cost: "$0.04"}
+      S4: {compute: "LOW-MEDIUM", tokens: 500, time: "15s", cost: "$0.02"}
+      S5: {compute: "LOW-MEDIUM", tokens: 1000, time: "20s", cost: "$0.04"}
+      
+      W1: {compute: "LOW-MEDIUM", tokens: 2000, time: "30s", cost: "$0.05"}
+      W2: {compute: "MEDIUM", tokens: 4000, time: "60s", cost: "$0.10"}
+      W3: {compute: "LOW-MEDIUM", tokens: 1500, time: "25s", cost: "$0.04"}
+      W4: {compute: "MEDIUM", tokens: 3000, time: "45s", cost: "$0.08"}
+      W5: {compute: "LOW-MEDIUM", tokens: 2000, time: "30s", cost: "$0.05"}
+      
+      V1: {compute: "MEDIUM", tokens: 500, time: "20s", cost: "$0.03"}
+      V2: {compute: "MEDIUM-HIGH", tokens: 1000, time: "30s", cost: "$0.05"}
+      V3: {compute: "LOW-MEDIUM", tokens: 500, time: "15s", cost: "$0.02"}
+      V4: {compute: "MEDIUM", tokens: 500, time: "20s", cost: "$0.03"}
+      V5: {compute: "LOW", tokens: 500, time: "15s", cost: "$0.02"}
+      V6: {compute: "MEDIUM-HIGH", tokens: 1000, time: "30s", cost: "$0.05"}
+      
+    output_schema:
+      CostEstimate:
+        total_compute: string
+        total_tokens: integer
+        total_time: string
+        total_cost: float
+        breakdown:
+          by_operation: object
+          by_phase: object
+        confidence: float
+        range:
+          min: float
+          max: float
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              خوارزمية البناء
+# ═══════════════════════════════════════════════════════════════════════════════
+
+building_algorithm:
+  
+  steps:
+    
+    1_recipe_check:
+      name: "فحص الوصفات"
+      actions:
+        - match_question_to_recipes
+        - if_match >= 0.8: use_recipe
+        - elif_match >= 0.6: adapt_recipe
+        - else: build_dynamic
+        
+    2_operation_selection:
+      name: "اختيار العمليات"
+      actions:
+        - get_core_operations_for_type
+        - evaluate_contextual_rules
+        - add_optional_operations_if_needed
+        - ensure_verification_operations
+        
+    3_dependency_resolution:
+      name: "حل التبعيات"
+      actions:
+        - build_dependency_graph
+        - topological_sort
+        - identify_parallel_groups
+        
+    4_phase_grouping:
+      name: "تجميع المراحل"
+      actions:
+        - group_operations_by_stage
+        - assign_phase_numbers
+        - set_phase_dependencies
+        
+    5_optimization:
+      name: "التحسين"
+      actions:
+        - identify_parallelization_opportunities
+        - place_checkpoints
+        - remove_redundancies
+        
+    6_cost_estimation:
+      name: "تقدير التكلفة"
+      actions:
+        - sum_operation_costs
+        - apply_parallelization_savings
+        - calculate_confidence_range
+        
+    7_fallback_planning:
+      name: "خطط الطوارئ"
+      actions:
+        - identify_risk_points
+        - create_fallback_paths
+        - set_retry_policies
+        
+    8_assembly:
+      name: "التجميع"
+      actions:
+        - assemble_execution_plan
+        - add_metadata
+        - validate_plan
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              Schemas
+# ═══════════════════════════════════════════════════════════════════════════════
+
+schemas:
+  
+  ExecutionPhase:
+    phase_number: integer
+    name: string
+    description: string
+    depends_on: array[integer]  # أرقام المراحل السابقة
+    operations: array[PlannedOperation]
+    estimated_duration: string
+    
+  PlannedOperation:
+    step_id: string
+    operation_id: string  # e.g., "E1", "L2"
+    operation_name: string
+    params: object
+    inputs_from: array[string]  # step_ids
+    outputs_to: array[string]  # step_ids
+    is_parallel: boolean
+    parallel_group: integer
+    checkpoint_after: boolean
+    retry_policy:
+      max_retries: integer
+      backoff: string
+    estimated_cost: object
+    
+  DependencyGraph:
+    nodes:
+      type: array
+      items:
+        id: string
+        operation: string
+        phase: integer
+    edges:
+      type: array
+      items:
+        from: string
+        to: string
+        type: DependencyType
+        
+  ParallelizationPlan:
+    groups:
+      type: array
+      items:
+        group_id: integer
+        operations: array[string]
+        phase: integer
+    max_parallelism: integer
+    
+  Checkpoint:
+    id: string
+    after_step: string
+    save_state: boolean
+    verify_before_continue: boolean
+    rollback_to: string
+    
+  QualityGate:
+    id: string
+    operation: string  # V1, V2, etc.
+    required: boolean
+    on_failure: enum[BLOCK, WARN, RETRY]
+    
+  FallbackPlan:
+    trigger: string
+    condition: string
+    action: enum[RETRY, SKIP, ALTERNATIVE, ABORT]
+    alternative_steps: array[PlannedOperation]
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              مثال كامل
+# ═══════════════════════════════════════════════════════════════════════════════
+
+example:
+  
+  input_parsed_question:
+    question_type: "TRACING"
+    entities:
+      - {text: "أرسطو", type: "PERSON", role: "source"}
+      - {text: "علم الكلام", type: "DOMAIN", role: "destination"}
+    concepts:
+      - {term_arabic: "الجوهر", role: "traced"}
+    complexity_assessment:
+      level: "HIGH"
+      
+  output_execution_plan:
+    plan_id: "plan_abc123"
+    strategy: "DYNAMIC"
+    
+    phases:
+      - phase_number: 1
+        name: "الاستخراج الأولي"
+        operations:
+          - step_id: "s1"
+            operation_id: "E1"
+            params: {query: "جوهر أرسطو οὐσία"}
+          - step_id: "s2"
+            operation_id: "E2"
+            params: {concept: "substance"}
+            is_parallel: true
+            parallel_group: 1
+            
+      - phase_number: 2
+        name: "استخراج الكيانات"
+        depends_on: [1]
+        operations:
+          - step_id: "s3"
+            operation_id: "E3"
+            inputs_from: ["s1", "s2"]
+          - step_id: "s4"
+            operation_id: "E6"
+            inputs_from: ["s1", "s2"]
+            is_parallel: true
+            parallel_group: 2
+            
+      # ... المزيد من المراحل
+      
+    dependency_graph:
+      nodes:
+        - {id: "s1", operation: "E1", phase: 1}
+        - {id: "s2", operation: "E2", phase: 1}
+        - {id: "s3", operation: "E3", phase: 2}
+      edges:
+        - {from: "s1", to: "s3", type: "DATA_DEPENDENCY"}
+        - {from: "s2", to: "s3", type: "DATA_DEPENDENCY"}
+        
+    cost_estimate:
+      total_tokens: 25000
+      total_time: "5-8 minutes"
+      total_cost: "$0.60"
+      
+    gates:
+      - {id: "g1", operation: "V1", required: true}
+      - {id: "g2", operation: "V2", required: true}
+
+# ═══════════════════════════════════════════════════════════════════════════════

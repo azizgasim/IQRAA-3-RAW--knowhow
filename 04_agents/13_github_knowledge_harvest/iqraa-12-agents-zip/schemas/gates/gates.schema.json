@@ -1,0 +1,239 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://iqra.ai/schemas/gates/gates.schema.json",
+  "title": "IQRA Quality Gates Schema",
+  "description": "البوابات الست لضمان الجودة - v1.3",
+  "definitions": {
+    "GateResult": {
+      "type": "object",
+      "required": ["gate_id", "passed", "timestamp"],
+      "properties": {
+        "gate_id": {"type": "string", "pattern": "^G-[0-5]$"},
+        "passed": {"type": "boolean"},
+        "score": {"type": "number", "minimum": 0, "maximum": 1},
+        "checks": {"type": "array", "items": {"$ref": "#/definitions/CheckResult"}},
+        "timestamp": {"type": "string", "format": "date-time"},
+        "duration_ms": {"type": "integer"},
+        "reviewer_agent": {"type": "string"}
+      }
+    },
+    "CheckResult": {
+      "type": "object",
+      "required": ["check_id", "passed"],
+      "properties": {
+        "check_id": {"type": "string"},
+        "check_name": {"type": "string"},
+        "passed": {"type": "boolean"},
+        "score": {"type": "number"},
+        "message": {"type": "string"},
+        "severity": {"type": "string", "enum": ["error", "warning", "info"]}
+      }
+    }
+  },
+  "gates": {
+    "G-0": {
+      "gate_id": "G-0",
+      "name_ar": "بوابة الإدخال",
+      "name_en": "Input Gate",
+      "description": "Validates linguistic preprocessing quality",
+      "position": "after_linguist",
+      "required_checks": [
+        {
+          "check_id": "G0-C1",
+          "name": "morphological_completeness",
+          "description": "All tokens have morphological analysis",
+          "threshold": 0.95
+        },
+        {
+          "check_id": "G0-C2",
+          "name": "diacritization_accuracy",
+          "description": "Diacritization confidence above threshold",
+          "threshold": 0.90
+        },
+        {
+          "check_id": "G0-C3",
+          "name": "ner_coverage",
+          "description": "Named entities properly identified",
+          "threshold": 0.85
+        },
+        {
+          "check_id": "G0-C4",
+          "name": "language_detection",
+          "description": "Arabic text properly detected",
+          "threshold": 1.0
+        }
+      ],
+      "blocking": true
+    },
+    "G-1": {
+      "gate_id": "G-1",
+      "name_ar": "بوابة الأدلة",
+      "name_en": "Evidence Gate",
+      "description": "Validates evidence quality and citations",
+      "position": "after_evidencer",
+      "required_checks": [
+        {
+          "check_id": "G1-C1",
+          "name": "frbr_chain_complete",
+          "description": "Work→Expression→Manifestation→Item chain valid",
+          "threshold": 1.0
+        },
+        {
+          "check_id": "G1-C2",
+          "name": "quote_accuracy",
+          "description": "Quotes match original source",
+          "threshold": 0.98
+        },
+        {
+          "check_id": "G1-C3",
+          "name": "page_reference_valid",
+          "description": "Page/volume references are accurate",
+          "threshold": 1.0
+        },
+        {
+          "check_id": "G1-C4",
+          "name": "source_authority",
+          "description": "Source is authoritative and reliable",
+          "threshold": 0.80
+        }
+      ],
+      "blocking": true
+    },
+    "G-2": {
+      "gate_id": "G-2",
+      "name_ar": "بوابة المفاهيم",
+      "name_en": "Concept Gate",
+      "description": "Validates concept card quality",
+      "position": "after_analyst",
+      "required_checks": [
+        {
+          "check_id": "G2-C1",
+          "name": "definition_sourced",
+          "description": "All definitions have evidence",
+          "threshold": 1.0
+        },
+        {
+          "check_id": "G2-C2",
+          "name": "semantic_consistency",
+          "description": "No contradictory definitions",
+          "threshold": 0.90
+        },
+        {
+          "check_id": "G2-C3",
+          "name": "term_normalized",
+          "description": "Arabic term properly normalized",
+          "threshold": 1.0
+        },
+        {
+          "check_id": "G2-C4",
+          "name": "relations_valid",
+          "description": "Related concepts exist and are valid",
+          "threshold": 0.95
+        }
+      ],
+      "blocking": false
+    },
+    "G-3": {
+      "gate_id": "G-3",
+      "name_ar": "بوابة الأنساب",
+      "name_en": "Genealogy Gate",
+      "description": "Validates historical lineage quality",
+      "position": "after_genealogist",
+      "required_checks": [
+        {
+          "check_id": "G3-C1",
+          "name": "temporal_consistency",
+          "description": "Chronological order is valid",
+          "threshold": 1.0
+        },
+        {
+          "check_id": "G3-C2",
+          "name": "influence_evidenced",
+          "description": "Influence claims have textual evidence",
+          "threshold": 0.85
+        },
+        {
+          "check_id": "G3-C3",
+          "name": "no_circular_links",
+          "description": "No circular dependencies in lineage",
+          "threshold": 1.0
+        }
+      ],
+      "blocking": false
+    },
+    "G-4": {
+      "gate_id": "G-4",
+      "name_ar": "بوابة النظريات",
+      "name_en": "Theory Gate",
+      "description": "Validates theory card quality",
+      "position": "after_theorist",
+      "required_checks": [
+        {
+          "check_id": "G4-C1",
+          "name": "hypothesis_clear",
+          "description": "Hypothesis is clearly stated and testable",
+          "threshold": 0.90
+        },
+        {
+          "check_id": "G4-C2",
+          "name": "evidence_sufficient",
+          "description": "Minimum 3 supporting evidence units",
+          "threshold": 1.0
+        },
+        {
+          "check_id": "G4-C3",
+          "name": "counterarguments_addressed",
+          "description": "Major counterarguments acknowledged",
+          "threshold": 0.80
+        },
+        {
+          "check_id": "G4-C4",
+          "name": "methodology_valid",
+          "description": "Methodology is appropriate and stated",
+          "threshold": 0.85
+        }
+      ],
+      "blocking": true
+    },
+    "G-5": {
+      "gate_id": "G-5",
+      "name_ar": "بوابة التصدير",
+      "name_en": "Export Gate",
+      "description": "Final quality check before output",
+      "position": "before_response",
+      "required_checks": [
+        {
+          "check_id": "G5-C1",
+          "name": "no_hallucination",
+          "description": "All claims are evidence-backed",
+          "threshold": 1.0
+        },
+        {
+          "check_id": "G5-C2",
+          "name": "bias_check",
+          "description": "No detected methodological bias",
+          "threshold": 0.90
+        },
+        {
+          "check_id": "G5-C3",
+          "name": "completeness",
+          "description": "Response addresses the query fully",
+          "threshold": 0.85
+        },
+        {
+          "check_id": "G5-C4",
+          "name": "citation_format",
+          "description": "Citations properly formatted",
+          "threshold": 1.0
+        },
+        {
+          "check_id": "G5-C5",
+          "name": "arabic_quality",
+          "description": "Arabic text is grammatically correct",
+          "threshold": 0.95
+        }
+      ],
+      "blocking": true
+    }
+  }
+}

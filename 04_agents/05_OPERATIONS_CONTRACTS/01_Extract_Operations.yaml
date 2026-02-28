@@ -1,0 +1,1386 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#                    الفئة الأولى: الاستخراج (Extract)
+#                    IQRA-12 Core Operations Layer
+# ═══════════════════════════════════════════════════════════════════════════════
+# 
+# الغرض: انتشال المعلومات الخام من الكوربسات
+# العمليات: E1-E6
+# 
+# المبدأ الحاكم:
+# "كل مخرج يحمل offset (الموقع الدقيق في النص الأصلي)"
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+category:
+  id: "EXTRACT"
+  name_ar: "الاستخراج"
+  name_en: "Extract"
+  purpose: "انتشال المعلومات الخام من الكوربسات مع الحفاظ على الموقع والسياق"
+  golden_rule: "كل مخرج يحمل offset (الموقع الدقيق في النص الأصلي)"
+  operations_count: 6
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# E1: البحث النصي (Text Search)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+operations:
+
+  - id: "E1"
+    name_ar: "البحث النصي"
+    name_en: "Text Search"
+    category: "Extract"
+    version: "1.0.0"
+    
+    purpose: |
+      العثور على المقاطع النصية التي تحتوي على كلمات أو عبارات محددة
+      مع تحديد موقعها الدقيق في النص الأصلي
+    
+    inputs:
+      required:
+        - name: query
+          type: string
+          description: "الكلمة أو العبارة المبحوث عنها"
+          validation:
+            min_length: 2
+            max_length: 500
+            
+        - name: corpus_ids
+          type: array[string]
+          description: "معرفات الكوربسات المستهدفة"
+          validation:
+            min_items: 1
+            max_items: 50
+            
+      optional:
+        - name: filters
+          type: object
+          description: "فلاتر: تاريخ، مؤلف، نوع، مذهب..."
+          schema:
+            date_range:
+              start: string  # "100 AH" or "700 CE"
+              end: string
+            authors: array[string]
+            work_types: array[enum[book, article, manuscript, fatwa]]
+            schools: array[string]
+            regions: array[string]
+            
+        - name: limit
+          type: integer
+          default: 100
+          validation:
+            min: 1
+            max: 1000
+            
+        - name: offset
+          type: integer
+          default: 0
+          description: "للـ pagination"
+          
+        - name: search_mode
+          type: enum
+          values: [exact, fuzzy, root, phrase]
+          default: "exact"
+          description: |
+            exact: مطابقة تامة
+            fuzzy: تقريبية (تتحمل أخطاء إملائية)
+            root: جذرية (كل مشتقات الجذر)
+            phrase: عبارة كاملة بالترتيب
+            
+        - name: context_window
+          type: integer
+          default: 100
+          description: "عدد الأحرف قبل وبعد النتيجة للسياق"
+          
+        - name: highlight
+          type: boolean
+          default: true
+          description: "تمييز الكلمات المطابقة"
+      
+    outputs:
+      primary:
+        name: search_results
+        type: array[SearchResult]
+        schema:
+          SearchResult:
+            passage_id:
+              type: string
+              description: "معرف فريد للمقطع"
+            text:
+              type: string
+              description: "نص المقطع"
+            offsets:
+              type: object
+              properties:
+                start: integer
+                end: integer
+                char_start: integer
+                char_end: integer
+            source:
+              type: object
+              properties:
+                work_id: string
+                work_title: string
+                author_id: string
+                author_name: string
+                edition_id: string
+                volume: string
+                page: string
+                line: string
+            relevance_score:
+              type: float
+              range: [0.0, 1.0]
+            highlight_positions:
+              type: array
+              items:
+                start: integer
+                end: integer
+            context:
+              type: object
+              properties:
+                before: string
+                after: string
+                
+      secondary:
+        - name: total_count
+          type: integer
+          description: "إجمالي النتائج (قبل limit)"
+          
+        - name: corpus_distribution
+          type: object
+          description: "توزيع النتائج على الكوربسات"
+          schema:
+            corpus_id: integer  # عدد النتائج
+            
+        - name: query_expansion
+          type: array[string]
+          description: "مصطلحات مقترحة لتوسيع البحث"
+          
+        - name: search_metadata
+          type: object
+          properties:
+            execution_time_ms: integer
+            bytes_scanned: integer
+            query_normalized: string
+    
+    tools:
+      internal:
+        - name: BigQuery Full-Text Search
+          type: database
+          description: "محرك البحث الأساسي"
+          
+        - name: Arabic Morphological Analyzer
+          type: nlp
+          description: "تحليل صرفي للغة العربية"
+          
+        - name: Root Extractor
+          type: nlp
+          description: "استخراج الجذور الثلاثية والرباعية"
+          
+        - name: Query Normalizer
+          type: preprocessing
+          description: "تطبيع الاستعلام (همزات، تشكيل...)"
+          
+      external: []
+    
+    resources:
+      knowledge_bases:
+        - morphology_lexicon
+        - stopwords_list
+        - search_synonyms
+      corpora:
+        - dynamic_based_on_corpus_ids
+    
+    guardrails:
+      pre_conditions:
+        - condition: "corpus_ids must exist and be accessible"
+          error_code: "E1_CORPUS_NOT_FOUND"
+          
+        - condition: "query length >= 2 characters after normalization"
+          error_code: "E1_QUERY_TOO_SHORT"
+          
+        - condition: "user has read permission on specified corpora"
+          error_code: "E1_ACCESS_DENIED"
+          
+      post_conditions:
+        - condition: "every result has valid offsets within document bounds"
+          error_code: "E1_INVALID_OFFSET"
+          
+        - condition: "every result links to existing source in registry"
+          error_code: "E1_ORPHAN_RESULT"
+          
+        - condition: "highlight_positions are within text bounds"
+          error_code: "E1_INVALID_HIGHLIGHT"
+          
+      forbidden:
+        - "returning passages without source attribution"
+        - "modifying original text content"
+        - "returning results from inaccessible corpora"
+        - "caching results without cache policy"
+    
+    quality_metrics:
+      - name: precision_at_10
+        description: "دقة أول 10 نتائج"
+        target: ">= 0.8"
+        
+      - name: recall_estimate
+        description: "تقدير الاستذكار"
+        target: ">= 0.7"
+        
+      - name: offset_accuracy
+        description: "دقة تحديد المواقع"
+        target: "1.0"
+        
+      - name: response_time_p95
+        description: "زمن الاستجابة (النسبة المئوية 95)"
+        target: "< 2000ms"
+        
+      - name: bytes_efficiency
+        description: "كفاءة المسح (نتائج / bytes)"
+        target: "optimize"
+    
+    cost_profile:
+      compute: "LOW"
+      tokens: 0
+      description: "لا يستخدم LLM"
+      bigquery:
+        bytes_scanned: "variable by corpus size"
+        slot_time: "LOW"
+      estimated_cost_per_call: "$0.001 - $0.01"
+    
+    autonomy_level: "L0"
+    autonomy_description: "قراءة فقط - لا يعدل أي بيانات"
+    
+    error_handling:
+      retry_policy:
+        max_retries: 3
+        backoff: "exponential"
+      fallback:
+        - "try simplified query"
+        - "reduce corpus scope"
+        - "return partial results with warning"
+    
+    example:
+      input:
+        query: "خلق القرآن"
+        corpus_ids: ["kalam_corpus", "aqida_corpus"]
+        filters:
+          date_range:
+            start: "200 AH"
+            end: "400 AH"
+        limit: 50
+        search_mode: "phrase"
+        
+      output:
+        search_results:
+          - passage_id: "kalam_001_p234_s12"
+            text: "وقالت المعتزلة إن القرآن مخلوق محدث، وخالفهم أهل السنة..."
+            offsets:
+              start: 1205
+              end: 1342
+              char_start: 1205
+              char_end: 1342
+            source:
+              work_id: "maqalat_ashary"
+              work_title: "مقالات الإسلاميين"
+              author_id: "author_ashary"
+              author_name: "أبو الحسن الأشعري"
+              edition_id: "ed_ritter_1950"
+              volume: "1"
+              page: "234"
+              line: "12"
+            relevance_score: 0.94
+            highlight_positions:
+              - {start: 23, end: 33}
+            context:
+              before: "في مسألة الصفات "
+              after: " وهذا أصل من أصولهم"
+        total_count: 847
+        corpus_distribution:
+          kalam_corpus: 623
+          aqida_corpus: 224
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# E2: البحث الدلالي (Semantic Search)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "E2"
+    name_ar: "البحث الدلالي"
+    name_en: "Semantic Search"
+    category: "Extract"
+    version: "1.0.0"
+    
+    purpose: |
+      العثور على المقاطع المشابهة في المعنى حتى لو اختلفت الألفاظ
+      باستخدام التمثيلات المتجهية (embeddings)
+    
+    inputs:
+      required:
+        - name: query
+          type: string
+          description: "السؤال أو المفهوم المبحوث عنه"
+          validation:
+            min_length: 5
+            max_length: 1000
+            
+        - name: corpus_ids
+          type: array[string]
+          description: "معرفات الكوربسات المفهرسة دلالياً"
+          
+      optional:
+        - name: similarity_threshold
+          type: float
+          default: 0.7
+          validation:
+            min: 0.0
+            max: 1.0
+            
+        - name: limit
+          type: integer
+          default: 50
+          
+        - name: exclude_exact_matches
+          type: boolean
+          default: false
+          description: "استبعاد التطابق اللفظي للتركيز على الدلالي"
+          
+        - name: embedding_model
+          type: string
+          default: "arabic-semantic-v2"
+          description: "نموذج التضمين المستخدم"
+          
+        - name: rerank
+          type: boolean
+          default: true
+          description: "إعادة ترتيب النتائج بنموذج أدق"
+          
+        - name: diversity_factor
+          type: float
+          default: 0.0
+          description: "عامل التنويع (0 = بدون، 1 = أقصى تنويع)"
+    
+    outputs:
+      primary:
+        name: semantic_results
+        type: array[SemanticResult]
+        schema:
+          SemanticResult:
+            passage_id: string
+            text: string
+            offsets:
+              start: integer
+              end: integer
+            source:
+              work_id: string
+              edition_id: string
+              page: string
+              line: string
+            similarity_score: float
+            matched_concepts:
+              type: array[string]
+              description: "المفاهيم المشتركة المكتشفة"
+            embedding_distance: float
+            rerank_score: float
+            
+      secondary:
+        - name: concept_clusters
+          type: array
+          schema:
+            concept: string
+            centroid_passage_id: string
+            passages: array[string]
+            
+        - name: suggested_queries
+          type: array[string]
+          description: "استعلامات مقترحة بناءً على المعنى"
+          
+        - name: semantic_neighbors
+          type: array
+          description: "مفاهيم قريبة دلالياً"
+    
+    tools:
+      internal:
+        - name: Vertex AI Vector Search
+          type: vector_database
+          
+        - name: Arabic Embedding Model
+          type: ml_model
+          model_id: "arabic-semantic-v2"
+          
+        - name: Concept Extractor
+          type: nlp
+          
+        - name: Cross-encoder Reranker
+          type: ml_model
+          
+      external: []
+    
+    resources:
+      knowledge_bases:
+        - concept_ontology
+        - embedding_index
+      corpora:
+        - "[must have embeddings indexed]"
+    
+    guardrails:
+      pre_conditions:
+        - condition: "corpus must have embeddings indexed"
+          error_code: "E2_NO_EMBEDDINGS"
+          
+        - condition: "query must be meaningful (not just stopwords)"
+          error_code: "E2_EMPTY_QUERY"
+          
+      post_conditions:
+        - condition: "similarity_score reflects actual vector distance"
+          error_code: "E2_SCORE_MISMATCH"
+          
+        - condition: "matched_concepts are extractable from result text"
+          error_code: "E2_PHANTOM_CONCEPTS"
+          
+      forbidden:
+        - "claiming semantic match without vector evidence"
+        - "returning results below threshold without flagging"
+        - "hallucinating concepts not in text"
+    
+    quality_metrics:
+      - name: semantic_precision
+        target: ">= 0.75"
+        
+      - name: concept_alignment_score
+        target: ">= 0.7"
+        
+      - name: diversity_of_results
+        description: "تنوع المصادر والسياقات"
+        target: ">= 0.5"
+        
+      - name: rerank_improvement
+        description: "تحسن الترتيب بعد إعادة الترتيب"
+    
+    cost_profile:
+      compute: "MEDIUM"
+      tokens: "LOW (embedding only)"
+      vector_queries: "variable"
+      estimated_cost_per_call: "$0.01 - $0.05"
+    
+    autonomy_level: "L0"
+    autonomy_description: "قراءة فقط"
+    
+    example:
+      input:
+        query: "العلاقة بين الصفات الإلهية والذات"
+        corpus_ids: ["kalam_corpus"]
+        similarity_threshold: 0.75
+        limit: 30
+        rerank: true
+        
+      output:
+        semantic_results:
+          - passage_id: "kalam_042_p89_s5"
+            text: "واختلفوا في الصفات هل هي زائدة على الذات أم عينها..."
+            similarity_score: 0.89
+            matched_concepts: ["الصفات", "الذات", "الزيادة", "العينية"]
+            rerank_score: 0.92
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# E3: استخراج الكيانات (Entity Extraction)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "E3"
+    name_ar: "استخراج الكيانات"
+    name_en: "Entity Extraction"
+    category: "Extract"
+    version: "1.0.0"
+    
+    purpose: |
+      التعرف على الكيانات المذكورة في النص وتصنيفها
+      (أشخاص، أماكن، كتب، مذاهب، مصطلحات، تواريخ...)
+    
+    inputs:
+      required:
+        - name: passages
+          type: array[Passage]
+          description: "المقاطع المراد استخراج الكيانات منها"
+          schema:
+            Passage:
+              id: string
+              text: string
+              source: object
+              
+      optional:
+        - name: entity_types
+          type: array[string]
+          default: ["all"]
+          values: [PERSON, PLACE, WORK, SCHOOL, TERM, DATE, EVENT, INSTITUTION, CONCEPT, RULING, all]
+          
+        - name: confidence_threshold
+          type: float
+          default: 0.8
+          
+        - name: link_to_canonical
+          type: boolean
+          default: true
+          description: "ربط بالكيان القانوني إن وُجد"
+          
+        - name: extract_attributes
+          type: boolean
+          default: false
+          description: "استخراج صفات الكيانات (لقب، نسبة، كنية...)"
+          
+        - name: resolve_coreferences
+          type: boolean
+          default: true
+          description: "ربط الضمائر والإشارات بمرجعها"
+    
+    outputs:
+      primary:
+        name: extracted_entities
+        type: array[ExtractedEntity]
+        schema:
+          ExtractedEntity:
+            id:
+              type: string
+              description: "معرف فريد للإشارة"
+            mention:
+              type: string
+              description: "النص كما ورد"
+            normalized_mention:
+              type: string
+              description: "النص بعد التطبيع"
+            type:
+              type: enum
+              values: [PERSON, PLACE, WORK, SCHOOL, TERM, DATE, EVENT, INSTITUTION, CONCEPT, RULING]
+            subtype:
+              type: string
+              description: "تصنيف فرعي (مثلاً: PERSON/SCHOLAR, PLACE/CITY)"
+            offsets:
+              passage_id: string
+              start: integer
+              end: integer
+            confidence:
+              type: float
+              range: [0.0, 1.0]
+            canonical_id:
+              type: string
+              nullable: true
+              description: "معرف الكيان القانوني"
+            canonical_name:
+              type: string
+              nullable: true
+            canonical_confidence:
+              type: float
+              description: "ثقة الربط بالقانوني"
+            attributes:
+              type: object
+              description: "صفات مستخرجة"
+              properties:
+                titles: array[string]
+                nisba: string
+                kunya: string
+                dates: object
+            context_snippet:
+              type: string
+              description: "سياق مختصر"
+            coreference_chain:
+              type: array[string]
+              description: "إشارات أخرى لنفس الكيان في النص"
+              
+      secondary:
+        - name: entity_frequency
+          type: object
+          description: "تكرار كل كيان"
+          
+        - name: co_occurrence_matrix
+          type: object
+          description: "مصفوفة التواجد المشترك"
+          
+        - name: unresolved_mentions
+          type: array
+          description: "إشارات تحتاج مراجعة بشرية"
+          schema:
+            mention: string
+            reason: string
+            candidates: array
+            
+        - name: new_entities
+          type: array
+          description: "كيانات جديدة غير موجودة في السجل"
+    
+    tools:
+      internal:
+        - name: Arabic NER Model
+          type: ml_model
+          model_id: "iqra-ner-v3"
+          
+        - name: Entity Linker
+          type: ml_model
+          
+        - name: Historical Name Resolver
+          type: rule_based
+          
+        - name: Coreference Resolver
+          type: ml_model
+          
+        - name: Attribute Extractor
+          type: pattern_based
+          
+      external: []
+    
+    resources:
+      knowledge_bases:
+        - canonical_entities_registry
+        - name_variants_table
+        - historical_persons_db
+        - places_gazetteer
+        - works_catalog
+    
+    guardrails:
+      pre_conditions:
+        - condition: "passages have valid structure with offsets capability"
+          error_code: "E3_INVALID_PASSAGE"
+          
+      post_conditions:
+        - condition: "every entity has offsets within passage bounds"
+          error_code: "E3_OFFSET_OVERFLOW"
+          
+        - condition: "confidence reflects actual model output"
+          error_code: "E3_FAKE_CONFIDENCE"
+          
+        - condition: "canonical linking is Suggest (L1), not Approve"
+          error_code: "E3_UNAUTHORIZED_APPROVAL"
+          
+      forbidden:
+        - "auto-approving canonical links"
+        - "inventing entities not in text"
+        - "returning entities below threshold without flagging"
+        - "modifying passage text"
+    
+    quality_metrics:
+      - name: entity_precision
+        target: ">= 0.9"
+        
+      - name: entity_recall
+        target: ">= 0.85"
+        
+      - name: linking_accuracy
+        target: ">= 0.8"
+        
+      - name: type_accuracy
+        target: ">= 0.95"
+        
+      - name: coreference_accuracy
+        target: ">= 0.8"
+    
+    cost_profile:
+      compute: "MEDIUM"
+      tokens: "MEDIUM (LLM for disambiguation)"
+      estimated_cost_per_call: "$0.02 - $0.10"
+    
+    autonomy_level: "L1"
+    autonomy_description: "يقترح الربط، لا يوافق عليه"
+    
+    example:
+      input:
+        passages:
+          - id: "p_001"
+            text: "قال أبو الحسن الأشعري في كتاب مقالات الإسلاميين رداً على المعتزلة في البصرة..."
+        entity_types: ["PERSON", "WORK", "SCHOOL", "PLACE"]
+        link_to_canonical: true
+        
+      output:
+        extracted_entities:
+          - id: "e_001"
+            mention: "أبو الحسن الأشعري"
+            type: "PERSON"
+            subtype: "SCHOLAR"
+            offsets:
+              passage_id: "p_001"
+              start: 4
+              end: 22
+            confidence: 0.97
+            canonical_id: "person_ashary_001"
+            canonical_name: "الأشعري، أبو الحسن علي بن إسماعيل (ت 324 هـ)"
+            canonical_confidence: 0.95
+            attributes:
+              kunya: "أبو الحسن"
+              nisba: "الأشعري"
+              
+          - id: "e_002"
+            mention: "مقالات الإسلاميين"
+            type: "WORK"
+            offsets:
+              passage_id: "p_001"
+              start: 31
+              end: 49
+            confidence: 0.95
+            canonical_id: "work_maqalat_001"
+            
+          - id: "e_003"
+            mention: "المعتزلة"
+            type: "SCHOOL"
+            offsets:
+              passage_id: "p_001"
+              start: 58
+              end: 66
+            confidence: 0.98
+            canonical_id: "school_mutazila"
+            
+          - id: "e_004"
+            mention: "البصرة"
+            type: "PLACE"
+            subtype: "CITY"
+            offsets:
+              passage_id: "p_001"
+              start: 70
+              end: 76
+            confidence: 0.99
+            canonical_id: "place_basra"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# E4: استخراج العلاقات (Relation Extraction)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "E4"
+    name_ar: "استخراج العلاقات"
+    name_en: "Relation Extraction"
+    category: "Extract"
+    version: "1.0.0"
+    
+    purpose: |
+      اكتشاف العلاقات المذكورة في النص بين الكيانات
+      (تأثر، نقد، شرح، اختصر، تتلمذ، عاصر...)
+    
+    inputs:
+      required:
+        - name: passages
+          type: array[Passage]
+          
+        - name: entities
+          type: array[ExtractedEntity]
+          description: "الكيانات المستخرجة مسبقاً (من E3)"
+          
+      optional:
+        - name: relation_types
+          type: array[string]
+          default: ["all"]
+          values: [
+            STUDENT_OF, TEACHER_OF,           # علاقات تعليمية
+            INFLUENCED_BY, INFLUENCED,        # علاقات تأثير
+            REFUTED, REFUTED_BY,              # علاقات نقد
+            COMMENTED_ON, ABRIDGED,           # علاقات نصية
+            CONTEMPORARY_OF, SUCCESSOR_OF,    # علاقات زمنية
+            BELONGED_TO, FOUNDED,             # علاقات مؤسسية
+            BORN_IN, DIED_IN, LIVED_IN,       # علاقات مكانية
+            AUTHORED, ATTRIBUTED_TO           # علاقات تأليف
+          ]
+          
+        - name: confidence_threshold
+          type: float
+          default: 0.75
+          
+        - name: include_implicit
+          type: boolean
+          default: false
+          description: "تضمين العلاقات الضمنية (مع وسم)"
+    
+    outputs:
+      primary:
+        name: extracted_relations
+        type: array[ExtractedRelation]
+        schema:
+          ExtractedRelation:
+            id: string
+            subject:
+              entity_id: string
+              mention: string
+              type: string
+            predicate:
+              type: string
+              label_ar: string
+              label_en: string
+              is_implicit: boolean
+            object:
+              entity_id: string
+              mention: string
+              type: string
+            evidence:
+              passage_id: string
+              offsets:
+                start: integer
+                end: integer
+              text_snippet: string
+              trigger_words: array[string]
+            confidence: float
+            direction:
+              type: enum
+              values: [FORWARD, REVERSE, BIDIRECTIONAL]
+            temporality:
+              start_date: string
+              end_date: string
+              ongoing: boolean
+            source_certainty:
+              type: enum
+              values: [EXPLICIT, INFERRED, DISPUTED]
+              
+      secondary:
+        - name: relation_graph_snippet
+          type: object
+          description: "جزء من رسم العلاقات"
+          
+        - name: ambiguous_relations
+          type: array
+          description: "علاقات تحتاج مراجعة"
+          
+        - name: relation_statistics
+          type: object
+    
+    tools:
+      internal:
+        - name: Arabic Relation Extractor
+          type: ml_model
+          
+        - name: Dependency Parser
+          type: nlp
+          
+        - name: Relation Classifier
+          type: ml_model
+          
+        - name: Trigger Word Detector
+          type: pattern_based
+          
+      external: []
+    
+    resources:
+      knowledge_bases:
+        - relation_ontology
+        - relation_patterns
+        - trigger_word_lexicon
+    
+    guardrails:
+      pre_conditions:
+        - condition: "entities must have valid offsets"
+          error_code: "E4_INVALID_ENTITIES"
+          
+      post_conditions:
+        - condition: "every relation has textual evidence with offsets"
+          error_code: "E4_NO_EVIDENCE"
+          
+        - condition: "subject and object are from provided entities"
+          error_code: "E4_PHANTOM_ENTITY"
+          
+      forbidden:
+        - "inferring implicit relations without flagging as implicit"
+        - "creating relations without evidence span"
+        - "inventing trigger words"
+    
+    quality_metrics:
+      - name: relation_precision
+        target: ">= 0.85"
+        
+      - name: relation_recall
+        target: ">= 0.75"
+        
+      - name: evidence_quality
+        target: ">= 0.9"
+        
+      - name: direction_accuracy
+        target: ">= 0.95"
+    
+    cost_profile:
+      compute: "MEDIUM-HIGH"
+      tokens: "MEDIUM"
+      estimated_cost_per_call: "$0.03 - $0.15"
+    
+    autonomy_level: "L1"
+    autonomy_description: "يقترح العلاقات"
+    
+    example:
+      input:
+        passages:
+          - id: "p_042"
+            text: "ورد ابن رشد على الغزالي في تهافت التهافت فنقض حججه واحدة واحدة"
+        entities:
+          - {id: "e1", mention: "ابن رشد", type: "PERSON"}
+          - {id: "e2", mention: "الغزالي", type: "PERSON"}
+          - {id: "e3", mention: "تهافت التهافت", type: "WORK"}
+          
+      output:
+        extracted_relations:
+          - id: "r_001"
+            subject:
+              entity_id: "e1"
+              mention: "ابن رشد"
+            predicate:
+              type: "REFUTED"
+              label_ar: "رد على"
+              label_en: "refuted"
+              is_implicit: false
+            object:
+              entity_id: "e2"
+              mention: "الغزالي"
+            evidence:
+              passage_id: "p_042"
+              offsets: {start: 0, end: 65}
+              text_snippet: "ورد ابن رشد على الغزالي في تهافت التهافت فنقض حججه"
+              trigger_words: ["رد على", "نقض"]
+            confidence: 0.92
+            direction: "FORWARD"
+            
+          - id: "r_002"
+            subject:
+              entity_id: "e1"
+              mention: "ابن رشد"
+            predicate:
+              type: "AUTHORED"
+              label_ar: "ألف"
+              label_en: "authored"
+            object:
+              entity_id: "e3"
+              mention: "تهافت التهافت"
+            evidence:
+              passage_id: "p_042"
+              text_snippet: "ابن رشد... في تهافت التهافت"
+            confidence: 0.88
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# E5: استخراج الاستشهادات (Citation Extraction)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "E5"
+    name_ar: "استخراج الاستشهادات"
+    name_en: "Citation Extraction"
+    category: "Extract"
+    version: "1.0.0"
+    
+    purpose: |
+      التعرف على الاستشهادات والإحالات في النص
+      (آيات، أحاديث، أقوال، إحالات لكتب...)
+    
+    inputs:
+      required:
+        - name: passages
+          type: array[Passage]
+          
+      optional:
+        - name: citation_types
+          type: array[enum]
+          default: ["all"]
+          values: [
+            QURAN,          # آيات قرآنية
+            HADITH,         # أحاديث نبوية
+            ATHAR,          # آثار صحابة وتابعين
+            QUOTE,          # أقوال علماء
+            BOOK_REF,       # إحالة لكتاب
+            VERSE_POETRY,   # أبيات شعرية
+            PROVERB,        # أمثال
+            CONSENSUS       # إجماع
+          ]
+          
+        - name: resolve_sources
+          type: boolean
+          default: true
+          
+        - name: verify_text
+          type: boolean
+          default: true
+          description: "التحقق من مطابقة النص للمصدر"
+          
+        - name: include_grading
+          type: boolean
+          default: true
+          description: "تضمين درجة الحديث إن وجدت"
+    
+    outputs:
+      primary:
+        name: extracted_citations
+        type: array[ExtractedCitation]
+        schema:
+          ExtractedCitation:
+            id: string
+            citation_text: string
+            type: enum
+            offsets:
+              passage_id: string
+              start: integer
+              end: integer
+            introduction_phrase:
+              type: string
+              description: "قال تعالى، روى البخاري..."
+            signal_words:
+              type: array[string]
+              description: "الكلمات الدالة على الاستشهاد"
+            resolved_source:
+              canonical_id: string
+              reference: string
+              confidence: float
+              source_text: string
+              source_location:
+                work: string
+                volume: string
+                page: string
+                number: string
+            verification:
+              status: enum[EXACT_MATCH, CLOSE_MATCH, PARAPHRASE, NOT_FOUND, PARTIAL]
+              differences: array[string]
+              notes: string
+            grading:
+              grade: string
+              grader: string
+              source: string
+            context:
+              role: enum[EVIDENCE, SUPPORT, COUNTER, ILLUSTRATION]
+              
+      secondary:
+        - name: citation_frequency
+          type: object
+          
+        - name: unresolved_citations
+          type: array
+          
+        - name: potential_fabrications
+          type: array
+          description: "استشهادات مشكوك فيها"
+    
+    tools:
+      internal:
+        - name: Quran Matcher
+          type: search
+          database: quran_full_index
+          
+        - name: Hadith Matcher
+          type: search
+          database: hadith_collections
+          
+        - name: Poetry Matcher
+          type: search
+          
+        - name: Citation Pattern Recognizer
+          type: pattern_based
+          
+        - name: Text Comparator
+          type: diff
+          
+      external:
+        - name: Shamela API
+          purpose: "hadith verification and grading"
+          
+        - name: Quran API
+          purpose: "verse verification"
+    
+    resources:
+      knowledge_bases:
+        - quran_index
+        - hadith_index_with_gradings
+        - classical_poetry_index
+        - famous_quotes_index
+    
+    guardrails:
+      pre_conditions:
+        - condition: "passages are in Arabic or have Arabic citations"
+          error_code: "E5_NON_ARABIC"
+          
+      post_conditions:
+        - condition: "Quran citations verified against standard mushaf"
+          error_code: "E5_QURAN_UNVERIFIED"
+          
+        - condition: "hadith citations include source book when detectable"
+          error_code: "E5_HADITH_NO_SOURCE"
+          
+      forbidden:
+        - "marking hadith as sahih without authoritative source"
+        - "ignoring fabrication indicators"
+        - "auto-grading hadith without scholarly reference"
+    
+    quality_metrics:
+      - name: citation_detection_recall
+        target: ">= 0.95"
+        
+      - name: source_resolution_accuracy
+        target: ">= 0.9"
+        
+      - name: quran_ayah_accuracy
+        target: "1.0"
+        
+      - name: grading_accuracy
+        target: ">= 0.95"
+    
+    cost_profile:
+      compute: "LOW-MEDIUM"
+      tokens: "LOW"
+      external_api_calls: "variable"
+      estimated_cost_per_call: "$0.01 - $0.05"
+    
+    autonomy_level: "L1"
+    autonomy_description: "يقترح التوثيق، خاصة للأحاديث"
+    
+    example:
+      input:
+        passages:
+          - id: "p_001"
+            text: "قال تعالى: {الله لا إله إلا هو الحي القيوم} وفي الصحيحين عن أبي هريرة رضي الله عنه أن النبي صلى الله عليه وسلم قال: إنما الأعمال بالنيات"
+        citation_types: ["QURAN", "HADITH"]
+        verify_text: true
+        include_grading: true
+        
+      output:
+        extracted_citations:
+          - id: "c_001"
+            citation_text: "الله لا إله إلا هو الحي القيوم"
+            type: "QURAN"
+            offsets:
+              passage_id: "p_001"
+              start: 12
+              end: 43
+            introduction_phrase: "قال تعالى"
+            resolved_source:
+              canonical_id: "quran_2_255"
+              reference: "البقرة: 255"
+              confidence: 1.0
+              source_text: "اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ"
+            verification:
+              status: "EXACT_MATCH"
+              
+          - id: "c_002"
+            citation_text: "إنما الأعمال بالنيات"
+            type: "HADITH"
+            offsets:
+              passage_id: "p_001"
+              start: 120
+              end: 141
+            introduction_phrase: "في الصحيحين عن أبي هريرة"
+            resolved_source:
+              canonical_id: "bukhari_1"
+              reference: "صحيح البخاري، كتاب بدء الوحي، حديث رقم 1"
+              source_location:
+                work: "صحيح البخاري"
+                volume: "1"
+                page: "6"
+                number: "1"
+            verification:
+              status: "EXACT_MATCH"
+            grading:
+              grade: "متفق عليه"
+              source: "البخاري ومسلم"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# E6: استخراج المصطلحات (Term Extraction)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "E6"
+    name_ar: "استخراج المصطلحات"
+    name_en: "Term Extraction"
+    category: "Extract"
+    version: "1.0.0"
+    
+    purpose: |
+      اكتشاف المصطلحات التخصصية في النص مع سياقات استخدامها
+      وتعريفاتها الضمنية أو الصريحة
+    
+    inputs:
+      required:
+        - name: passages
+          type: array[Passage]
+          
+        - name: domain
+          type: string
+          description: "المجال: fiqh, kalam, falsafa, tasawwuf, usul, hadith, tafsir, nahw, balagha"
+          
+      optional:
+        - name: include_definitions
+          type: boolean
+          default: true
+          
+        - name: include_usage_context
+          type: boolean
+          default: true
+          
+        - name: term_candidates
+          type: array[string]
+          description: "مصطلحات محددة للبحث عنها"
+          
+        - name: extract_variants
+          type: boolean
+          default: true
+          description: "استخراج صيغ المصطلح المختلفة"
+          
+        - name: cross_domain
+          type: boolean
+          default: false
+          description: "البحث عن استخدام المصطلح في مجالات أخرى"
+    
+    outputs:
+      primary:
+        name: extracted_terms
+        type: array[ExtractedTerm]
+        schema:
+          ExtractedTerm:
+            id: string
+            term: string
+            normalized_term: string
+            domain: string
+            term_type:
+              type: enum
+              values: [TECHNICAL, SEMI_TECHNICAL, BORROWED, COINED]
+            occurrences:
+              type: array
+              items:
+                passage_id: string
+                offsets:
+                  start: integer
+                  end: integer
+                context_snippet: string
+            definitions_found:
+              type: array
+              items:
+                text: string
+                passage_id: string
+                offsets:
+                  start: integer
+                  end: integer
+                type: enum[EXPLICIT, IMPLICIT, CONTEXTUAL]
+                definition_markers: array[string]
+            usage_contexts:
+              type: array
+              items:
+                snippet: string
+                semantic_role: string
+                collocations: array[string]
+            variant_forms:
+              type: array[string]
+              description: "صيغ أخرى للمصطلح"
+            related_terms:
+              type: array
+              items:
+                term: string
+                relation: enum[SYNONYM, ANTONYM, HYPERNYM, HYPONYM, RELATED]
+            etymology:
+              type: object
+              properties:
+                origin: string
+                original_meaning: string
+                semantic_shift: string
+            cross_domain_usage:
+              type: array
+              items:
+                domain: string
+                meaning: string
+                example: string
+                
+      secondary:
+        - name: term_frequency_distribution
+          type: object
+          
+        - name: domain_vocabulary_coverage
+          type: float
+          description: "نسبة تغطية مفردات المجال"
+          
+        - name: new_terms_discovered
+          type: array
+          description: "مصطلحات غير موجودة في القاموس"
+          
+        - name: definition_patterns
+          type: array
+          description: "أنماط التعريف المكتشفة"
+    
+    tools:
+      internal:
+        - name: Domain Term Classifier
+          type: ml_model
+          
+        - name: Definition Pattern Matcher
+          type: pattern_based
+          patterns:
+            - "هو/هي ... الذي/التي"
+            - "يُعرَّف بأنه"
+            - "والمراد به"
+            - "أي"
+            - "يعني"
+          
+        - name: Morphological Analyzer
+          type: nlp
+          
+        - name: Collocation Extractor
+          type: statistical
+          
+      external: []
+    
+    resources:
+      knowledge_bases:
+        - domain_glossaries
+        - term_ontologies
+        - definition_patterns
+        - etymology_database
+    
+    guardrails:
+      pre_conditions:
+        - condition: "domain is recognized in system"
+          error_code: "E6_UNKNOWN_DOMAIN"
+          
+      post_conditions:
+        - condition: "terms are domain-relevant (not general vocabulary)"
+          error_code: "E6_NON_TECHNICAL"
+          
+        - condition: "definitions are extracted verbatim with offsets"
+          error_code: "E6_MODIFIED_DEFINITION"
+          
+      forbidden:
+        - "generating synthetic definitions"
+        - "confusing common words with technical terms"
+        - "attributing definitions without textual evidence"
+    
+    quality_metrics:
+      - name: term_precision
+        target: ">= 0.9"
+        
+      - name: definition_extraction_accuracy
+        target: ">= 0.85"
+        
+      - name: domain_relevance_score
+        target: ">= 0.9"
+        
+      - name: variant_coverage
+        target: ">= 0.8"
+    
+    cost_profile:
+      compute: "MEDIUM"
+      tokens: "MEDIUM"
+      estimated_cost_per_call: "$0.02 - $0.08"
+    
+    autonomy_level: "L0"
+    autonomy_description: "قراءة فقط"
+    
+    example:
+      input:
+        passages:
+          - id: "p_001"
+            text: "الجوهر الفرد هو الجزء الذي لا يتجزأ، وهو أصل عند المتكلمين في إثبات حدوث العالم. والجوهر عند الفلاسفة ما يقوم بذاته."
+        domain: "kalam"
+        include_definitions: true
+        cross_domain: true
+        
+      output:
+        extracted_terms:
+          - id: "t_001"
+            term: "الجوهر الفرد"
+            domain: "kalam"
+            term_type: "TECHNICAL"
+            occurrences:
+              - passage_id: "p_001"
+                offsets: {start: 0, end: 11}
+            definitions_found:
+              - text: "الجزء الذي لا يتجزأ"
+                passage_id: "p_001"
+                offsets: {start: 15, end: 34}
+                type: "EXPLICIT"
+                definition_markers: ["هو"]
+            related_terms:
+              - {term: "الجوهر", relation: "HYPERNYM"}
+              - {term: "العرض", relation: "ANTONYM"}
+              - {term: "الجسم", relation: "RELATED"}
+              - {term: "الذرة", relation: "SYNONYM"}
+            cross_domain_usage:
+              - domain: "falsafa"
+                meaning: "ما يقوم بذاته"
+                example: "والجوهر عند الفلاسفة ما يقوم بذاته"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              نهاية ملف الاستخراج
+# ═══════════════════════════════════════════════════════════════════════════════

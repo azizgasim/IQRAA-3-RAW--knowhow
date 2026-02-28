@@ -1,0 +1,503 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#                    IQRA-12 Knowledge Layer
+#                        طبقة المعرفة
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# "تحويل البيانات إلى معانٍ ومفاهيم قابلة للاستنتاج والتتبع"
+#
+# الدرس الحاكم (Douglas Engelbart):
+# "القيمة في هندسة التمثيل لا في تجميع المحتوى"
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+metadata:
+  layer: "Knowledge Layer"
+  layer_ar: "طبقة المعرفة"
+  version: "1.0.0"
+  purpose: "تحويل البيانات الخام إلى بنية معرفية عميقة قابلة للاستنتاج"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              المعمارية الشاملة
+# ═══════════════════════════════════════════════════════════════════════════════
+
+architecture:
+  overview: |
+    ┌─────────────────────────────────────────────────────────────────────────┐
+    │                         طبقة المعرفة                                    │
+    │              "من البيانات الخام إلى الفهم العميق"                       │
+    └─────────────────────────────────────────────────────────────────────────┘
+                                        │
+          ┌─────────────────────────────┼─────────────────────────────┐
+          │                             │                             │
+          ▼                             ▼                             ▼
+    ┌───────────────┐         ┌───────────────┐         ┌───────────────┐
+    │   الكوربسات   │         │   الكيانات    │         │  الأنطولوجيا  │
+    │   Corpora     │         │   Entities    │         │   Ontology    │
+    └───────────────┘         └───────────────┘         └───────────────┘
+          │                             │                             │
+          ▼                             ▼                             ▼
+    ┌───────────────┐         ┌───────────────┐         ┌───────────────┐
+    │   النصوص     │         │   العلاقات    │         │   المفاهيم    │
+    │    Texts      │         │  Relations    │         │   Concepts    │
+    └───────────────┘         └───────────────┘         └───────────────┘
+          │                             │                             │
+          └─────────────────────────────┼─────────────────────────────┘
+                                        │
+                                        ▼
+                          ┌───────────────────────┐
+                          │    رسم المعرفة       │
+                          │   Knowledge Graph     │
+                          └───────────────────────┘
+
+  components:
+    - name: "Corpora Registry"
+      file: "01_corpora_registry.yaml"
+      purpose: "سجل المصادر والكوربسات"
+      
+    - name: "Entity Schema"
+      file: "02_entity_schema.yaml"
+      purpose: "هيكل الكيانات والمعرّفات"
+      
+    - name: "Relations Schema"
+      file: "03_relations_schema.yaml"
+      purpose: "أنواع العلاقات والروابط"
+      
+    - name: "Ontology Framework"
+      file: "04_ontology_framework.yaml"
+      purpose: "الإطار المفاهيمي والأنطولوجي"
+      
+    - name: "Text Atomization"
+      file: "05_text_atomization.yaml"
+      purpose: "تقطيع النصوص إلى وحدات"
+      
+    - name: "Acculturation Networks"
+      file: "06_acculturation_networks.yaml"
+      purpose: "شبكات التثاقف والانتقال الحضاري"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              المبادئ الحاكمة
+# ═══════════════════════════════════════════════════════════════════════════════
+
+governing_principles:
+
+  # من Tim Berners-Lee (Web Architecture & Linked Data)
+  principle_1:
+    name: "ID-First Architecture"
+    name_ar: "المعرّف أولاً"
+    source: "Tim Berners-Lee"
+    field: "Web Architecture & Linked Data"
+    rule: |
+      لا تُخزَّن أي وحدة معرفة دون معرّف ثابت قابل للحل.
+      "المعرّف قبل الرابط، والرابط قبل الاستنتاج"
+    implementation:
+      - "كل كيان له URI فريد"
+      - "المعرّفات مستقلة عن مكان التخزين"
+      - "قابلية الحل (Resolution) داخل المنصة"
+
+  # من Luc Moreau (Data Provenance)
+  principle_2:
+    name: "Provenance as Data Layer"
+    name_ar: "الأصل كطبقة بيانات"
+    source: "Luc Moreau"
+    field: "Data Provenance & Provenance Models"
+    rule: |
+      الأصل (Provenance) طبقة بيانات لا مجرد سجل نصي.
+      كل قرار دمج/فصل/تحويل يُوثَّق كنشاط.
+    implementation:
+      - "جداول provenance منفصلة"
+      - "تسلسل العمليات مُسجَّل"
+      - "قابلية إعادة التشغيل"
+
+  # من Victoria Stodden (Reproducible Science)
+  principle_3:
+    name: "Reproducibility by Design"
+    name_ar: "قابلية إعادة الإنتاج"
+    source: "Victoria Stodden"
+    field: "Reproducible Computational Science"
+    rule: |
+      حزمة إعادة الإنتاج جزء من المخرجات لا خيار.
+      النتائج قابلة لإعادة التشغيل من إجراءاتها وبياناتها.
+    implementation:
+      - "كل تحليل له run_id + recipe"
+      - "المدخلات والمخرجات موثقة"
+      - "الإصدارات محفوظة"
+
+  # من Norman Paskin (DOI & Persistent Identifiers)
+  principle_4:
+    name: "Persistent Identification"
+    name_ar: "المعرّف الدائم"
+    source: "Norman Paskin"
+    field: "Persistent Identifiers & DOI Ecosystem"
+    rule: |
+      المعرّف الدائم شرط للتوثيق المرجعي القابل للتحقق.
+    implementation:
+      - "معرّفات مستقرة عبر الزمن"
+      - "لا تتغير بتغير التخزين"
+      - "قابلة للربط بمعرّفات عالمية (VIAF, Wikidata)"
+
+  # من Sarah Bowen Savant (KITAB Project)
+  principle_5:
+    name: "Text as Living Entity"
+    name_ar: "النص ككائن حي"
+    source: "Sarah Bowen Savant"
+    field: "Digital Philology & Textual Genealogy"
+    rule: |
+      الكتاب التراثي ليس ملفاً ثابتاً، بل كائن حي يتغير مع كل ناسخ.
+      التعامل مع "إصدارات" لا "كتاب واحد".
+    implementation:
+      - "جدول Works منفصل عن Editions"
+      - "تتبع النسخ والتحولات"
+      - "مقارنة تفاضلية بين النسخ"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              مناطق البيانات
+# ═══════════════════════════════════════════════════════════════════════════════
+
+data_zones:
+  
+  description: |
+    تُقسم بيانات إقرأ-12 إلى أربع مناطق ثابتة.
+    كل منطقة لها قواعد كتابة/قراءة ومؤشرات جودة.
+    
+    الدرس (John P. A. Ioannidis): 
+    "مزج الاستكشاف بالاعتماد ينتج يقيناً زائفاً"
+    
+  zones:
+    
+    raw_zone:
+      name: "Raw Zone"
+      name_ar: "منطقة الخام"
+      purpose: "ما تم اقتناؤه كما هو"
+      contents:
+        - "نصوص OCR الأصلية"
+        - "ملفات TEI-XML"
+        - "صور المخطوطات"
+        - "ميتاداتا الاقتناء"
+      rules:
+        - "لا تعديل على المحتوى الأصلي"
+        - "كل ملف له إصدار وتاريخ"
+        - "حقوق الاستخدام موثقة"
+      tables:
+        - "raw_documents"
+        - "raw_metadata"
+        - "acquisition_log"
+        
+    curated_zone:
+      name: "Curated Zone"
+      name_ar: "منطقة المُنقّى"
+      purpose: "تنظيف وتوحيد وتقطيع"
+      contents:
+        - "نصوص منظفة"
+        - "ترميزات موحدة"
+        - "وحدات نصية قياسية"
+      rules:
+        - "كل تعديل موثق"
+        - "قواعد التنظيف موحدة"
+        - "التقطيع حسب معيار ثابت"
+      tables:
+        - "curated_texts"
+        - "text_passages"
+        - "normalization_log"
+        
+    semantic_zone:
+      name: "Semantic/Graph Zone"
+      name_ar: "منطقة الدلالة"
+      purpose: "كيانات وعلاقات ومفاهيم"
+      contents:
+        - "كيانات مُعرَّفة"
+        - "علاقات مُبرهنة"
+        - "أحداث مُرتبة"
+        - "قواميس مفاهيم"
+      rules:
+        - "كل كيان له canonical_id"
+        - "كل علاقة لها evidence"
+        - "درجات ثقة موثقة"
+      tables:
+        - "entities"
+        - "relations"
+        - "events"
+        - "concepts"
+        
+    evidence_zone:
+      name: "Evidence/Claims Zone"
+      name_ar: "منطقة الأدلة والادعاءات"
+      purpose: "منتجات بحثية قابلة للتدقيق"
+      contents:
+        - "ادعاءات مُسنَدة"
+        - "شواهد مُوثَّقة"
+        - "استشهادات مُحققة"
+        - "سلاسل أصل"
+      rules:
+        - "لا claim بلا evidence"
+        - "لا evidence بلا offsets"
+        - "لا نشر بلا provenance"
+      tables:
+        - "claims"
+        - "evidence_bundles"
+        - "citations"
+        - "provenance_chains"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              المعرّفات الخمسة
+# ═══════════════════════════════════════════════════════════════════════════════
+
+identifier_levels:
+  
+  description: |
+    خمسة مستويات معرّفات لازمة للتشغيل.
+    بدونها لا يمكن الربط ولا التتبع ولا إعادة الإنتاج.
+    
+  levels:
+    
+    content_identifiers:
+      level: 1
+      name_ar: "معرّفات المحتوى"
+      ids:
+        - source_id: "المصدر الأصلي"
+        - work_id: "العمل التجريدي"
+        - edition_id: "الطبعة/النسخة"
+        - doc_id: "الوثيقة المحددة"
+      format: "iqraa:content:{type}:{hash}"
+      
+    text_unit_identifiers:
+      level: 2
+      name_ar: "معرّفات الوحدات النصية"
+      ids:
+        - section_id: "القسم/الباب/الفصل"
+        - passage_id: "المقطع الدلالي"
+        - sentence_id: "الجملة"
+      format: "iqraa:text:{doc_id}:{unit_type}:{sequence}"
+      includes:
+        - char_start
+        - char_end
+        - page_ref
+        - source_version
+        
+    entity_identifiers:
+      level: 3
+      name_ar: "معرّفات الكيانات"
+      ids:
+        - person_id: "شخص"
+        - concept_id: "مفهوم"
+        - place_id: "مكان"
+        - institution_id: "مؤسسة"
+        - work_id: "عمل/كتاب"
+        - event_id: "حدث"
+      format: "iqraa:entity:{type}:{canonical_form}:{disambiguation}"
+      links_to:
+        - "VIAF"
+        - "Wikidata"
+        - "OpenITI URIs"
+        
+    research_product_identifiers:
+      level: 4
+      name_ar: "معرّفات المنتجات البحثية"
+      ids:
+        - claim_id: "ادعاء"
+        - evidence_id: "دليل"
+        - citation_id: "استشهاد"
+        - theory_id: "نظرية"
+      format: "iqraa:research:{type}:{project_id}:{sequence}"
+      
+    operation_identifiers:
+      level: 5
+      name_ar: "معرّفات التشغيل"
+      ids:
+        - project_id: "مشروع بحثي"
+        - run_id: "تشغيل محدد"
+        - agent_id: "وكيل منفذ"
+        - recipe_id: "وصفة/قالب"
+      format: "iqraa:ops:{type}:{timestamp}:{hash}"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              الآباء المؤسسون
+# ═══════════════════════════════════════════════════════════════════════════════
+
+founding_fathers:
+  
+  description: |
+    الدروس المستخلصة من الرواد في الرقميات الإنسانية والإسلامية.
+    كل درس منسوب لصاحبه مع تخصصه الدقيق.
+    
+  pioneers:
+    
+    # ═══════════════════════════════════════════════════════════════════════
+    # Sarah Bowen Savant - مهندسة الجينوم النصي
+    # ═══════════════════════════════════════════════════════════════════════
+    
+    sarah_bowen_savant:
+      name: "Sarah Bowen Savant"
+      name_ar: "سارة بوين سافانت"
+      title: "مهندسة الجينوم النصي"
+      field: "Digital Philology & Textual Genealogy"
+      project: "KITAB Project"
+      
+      key_lessons:
+        - lesson: "الكتاب ككائن حي"
+          description: |
+            الكتاب التراثي ينمو ويتغير عبر النسخ.
+            الوكيل يتعامل مع "إصدارات" لا "كتاب واحد".
+          implementation: "جدول bibliographic_records مع versions"
+          
+        - lesson: "الجينوم النصي (Textual DNA)"
+          description: |
+            تتبع الجملة كجين ينتقل من كتاب لآخر.
+            من الطبري إلى ابن كثير.
+          implementation: "خوارزميات Sequence Alignment + Passim"
+          
+        - lesson: "إعادة بناء المفقود"
+          description: |
+            كثرة النقل من كتاب مفقود تمكّن من إعادة بنائه.
+            المغازي لابن إسحاق من خلال الطبري.
+          implementation: "وكيل Lost Book Reconstructor"
+          
+        - lesson: "الأسانيد كشبكات"
+          description: |
+            السند ليس قائمة خطية بل شبكة معقدة.
+            تحليله كرسم بياني يكشف المدار.
+          implementation: "Graph DB للأسانيد + Centrality Analysis"
+          
+        - lesson: "التصور البصري للتناص"
+          description: |
+            مخططات Sankey لإظهار تدفق النصوص عبر القرون.
+          implementation: "D3.js + Looker visualizations"
+          
+    # ═══════════════════════════════════════════════════════════════════════
+    # Maxim Romanov - مؤرخ البيانات الإسلامية
+    # ═══════════════════════════════════════════════════════════════════════
+    
+    maxim_romanov:
+      name: "Maxim Romanov"
+      name_ar: "مكسيم رومانوف"
+      title: "مؤرخ البيانات الإسلامية"
+      field: "Computational History & Data History"
+      project: "OpenITI & al-Thurayya"
+      
+      key_lessons:
+        - lesson: "التاريخ كبيانات"
+          description: |
+            تحويل سير أعلام النبلاء من نص سردي
+            إلى جدول بيانات (الاسم، الوفاة، الشيوخ).
+          implementation: "Structured Data extraction pipelines"
+          
+        - lesson: "الجغرافيا التاريخية (al-Thurayya)"
+          description: |
+            ربط الأماكن المذكورة بإحداثيات GPS.
+            عرض تفاعلي على الخريطة.
+          implementation: "GeoJSON + Historical places DB"
+          
+        - lesson: "المعايير الموحدة (URI)"
+          description: |
+            رقم هوية موحد لكل عالم وكتاب.
+            مثل: 0728IbnTaymiyya
+          implementation: "OpenITI URI system"
+          
+        - lesson: "التنظيف أولاً"
+          description: |
+            80% من الجهد في تنظيف النصوص.
+            البيانات التراثية فوضوية بطبيعتها.
+          implementation: "خطوط ETL صارمة"
+          
+        - lesson: "تحليل الشبكات الاجتماعية"
+          description: |
+            شبكة علاقات العلماء (من التقى بمن؟).
+            كشف العناقيد العلمية والمدارس.
+          implementation: "Community Detection algorithms"
+          
+    # ═══════════════════════════════════════════════════════════════════════
+    # Nicola Guarino - مهندس الأنطولوجيا
+    # ═══════════════════════════════════════════════════════════════════════
+    
+    nicola_guarino:
+      name: "Nicola Guarino"
+      name_ar: "نيكولا غوارينو"
+      title: "مهندس الأنطولوجيا الشكلية"
+      field: "Formal Ontology (DOLCE)"
+      
+      key_lessons:
+        - lesson: "التمييز بين الجواهر والأحداث"
+          description: |
+            الجواهر (Endurants): توجد بكليتها في كل لحظة (العلماء، الكتب).
+            الأحداث (Perdurants): تمتد في الزمن (المعارك، الرحلات).
+          implementation: "فصل جداول entities عن events"
+          
+        - lesson: "الصفات الصلبة والأدوار"
+          description: |
+            إنسان = صفة صلبة.
+            خليفة = دور في فترة زمنية.
+          implementation: "Role Pattern في الأنطولوجيا"
+          
+    # ═══════════════════════════════════════════════════════════════════════
+    # Thomas Gruber - مبتكر الأنطولوجيا
+    # ═══════════════════════════════════════════════════════════════════════
+    
+    thomas_gruber:
+      name: "Thomas Gruber"
+      name_ar: "توماس غروبر"
+      title: "مبتكر الأنطولوجيا"
+      field: "Knowledge Sharing & Ontology"
+      
+      key_lessons:
+        - lesson: "الحد الأدنى من الالتزام"
+          description: |
+            الأنطولوجيا للمشاركة لا لفرض حقيقة واحدة.
+            تعريف المفاهيم بأقل قدر من القيود.
+          implementation: "Core ontology + Domain extensions per madhab"
+          
+    # ═══════════════════════════════════════════════════════════════════════
+    # Ian Gregory - الجغرافيا التاريخية
+    # ═══════════════════════════════════════════════════════════════════════
+    
+    ian_gregory:
+      name: "Ian Gregory"
+      name_ar: "إيان غريغوري"
+      title: "رائد الجغرافيا التاريخية الرقمية"
+      field: "Historical GIS & Spatial Humanities"
+      
+      key_lessons:
+        - lesson: "الأماكن الضبابية"
+          description: |
+            الأماكن مساحات ضبابية (Fuzzy Polygons) تتغير عبر الزمن.
+            ليست إحداثيات GPS ثابتة.
+          implementation: "Temporal-spatial polygons"
+          
+        - lesson: "النصوص كخرائط"
+          description: |
+            استخراج المعلومات المكانية من النصوص.
+            تحويل الوصف السردي إلى إحداثيات.
+          implementation: "Geoparsing + Historical gazetteer"
+          
+    # ═══════════════════════════════════════════════════════════════════════
+    # Ruth Ahnert - شبكات المراسلات التاريخية
+    # ═══════════════════════════════════════════════════════════════════════
+    
+    ruth_ahnert:
+      name: "Ruth Ahnert"
+      name_ar: "روث آهنيرت"
+      title: "محللة الشبكات التاريخية"
+      field: "Historical Network Analysis"
+      
+      key_lessons:
+        - lesson: "المركزية البينية (Betweenness Centrality)"
+          description: |
+            كشف العلماء الذين لعبوا دور الجسور بين المذاهب.
+            غالباً مهملون في السرديات التقليدية.
+          implementation: "Network centrality metrics"
+          
+        - lesson: "المجتمعات العلمية"
+          description: |
+            كشف العناقيد والمدارس غير الرسمية.
+          implementation: "Community detection algorithms"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              إحصائيات
+# ═══════════════════════════════════════════════════════════════════════════════
+
+statistics:
+  components: 6
+  data_zones: 4
+  identifier_levels: 5
+  founding_fathers: 6
+  key_lessons: "20+"
+  
+# ═══════════════════════════════════════════════════════════════════════════════

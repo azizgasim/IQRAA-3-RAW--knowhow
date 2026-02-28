@@ -1,0 +1,232 @@
+{
+  "agents": [
+    {
+      "agent_id": "AGT-01-LINGUIST",
+      "arabic_name": "اللغوي",
+      "layer": "Pre-processing (Layer 0)",
+      "autonomy_level": "L2_ADVISOR",
+      "llm_model": "gemini-1.5-pro",
+      "temperature": 0.1,
+      "timeout_seconds": 60,
+      "responsibilities": [
+        "Morphological Analysis (التحليل الصرفي)",
+        "Syntactic Parsing (التحليل النحوي)",
+        "Semantic Disambiguation (رفع الإبهام الدلالي)",
+        "Diacritization (التشكيل)",
+        "Named Entity Recognition (الكيانات المسماة)",
+        "Historical manuscript processing"
+      ],
+      "external_tools": [
+        {"name": "CAMeL Tools", "source": "NYU Abu Dhabi", "license": "MIT"},
+        {"name": "Farasa", "source": "QCRI", "license": "GPL-3.0"},
+        {"name": "AraBERT", "source": "Hugging Face", "license": "Apache 2.0"},
+        {"name": "Qalsadi", "source": "Taha Zerrouki", "license": "GPL"}
+      ],
+      "outputs": ["MorphologicalResult", "NamedEntity", "DiacritizedText"],
+      "gates_after": ["G-0"]
+    },
+    {
+      "agent_id": "AGT-02-ORCHESTRATOR",
+      "arabic_name": "المنسق",
+      "layer": "Governance (Layer 1)",
+      "autonomy_level": "L3_DECIDER",
+      "llm_model": "gemini-1.5-pro",
+      "temperature": 0.3,
+      "timeout_seconds": 30,
+      "responsibilities": [
+        "Query classification and routing",
+        "Task decomposition and planning",
+        "Agent coordination",
+        "State management",
+        "Gate enforcement",
+        "Memory lifecycle management"
+      ],
+      "inputs": ["UserQuery", "Context"],
+      "outputs": ["ExecutionPlan", "TaskAssignment"],
+      "gates_after": ["G-0"]
+    },
+    {
+      "agent_id": "AGT-03-GUARDIAN",
+      "arabic_name": "الحارس",
+      "layer": "Governance (Layer 1)",
+      "autonomy_level": "L2_ADVISOR",
+      "llm_model": "gemini-1.5-flash",
+      "temperature": 0.2,
+      "timeout_seconds": 30,
+      "responsibilities": [
+        "Quality monitoring",
+        "Cost tracking",
+        "Bias detection",
+        "Audit logging",
+        "Export validation",
+        "Confidence calibration"
+      ],
+      "inputs": ["AnyAgentOutput", "RunMetrics"],
+      "outputs": ["QualityReport", "AuditLog", "ExportArtifact"],
+      "gates_after": ["G-5"]
+    },
+    {
+      "agent_id": "AGT-04-ARCHIVIST",
+      "arabic_name": "الخازن",
+      "layer": "Understanding & Analysis (Layer 2)",
+      "autonomy_level": "L1_EXECUTOR",
+      "llm_model": null,
+      "temperature": 0,
+      "timeout_seconds": 30,
+      "responsibilities": [
+        "BigQuery SSOT management",
+        "ops_logs operations",
+        "kb_store operations",
+        "Memory Bank integration",
+        "Data validation"
+      ],
+      "inputs": ["DataRequest", "WriteRequest"],
+      "outputs": ["QueryResult", "WriteConfirmation"],
+      "tables": ["ops_logs.*", "kb_store.*"]
+    },
+    {
+      "agent_id": "AGT-05-EVIDENCER",
+      "arabic_name": "المحقق",
+      "layer": "Understanding & Analysis (Layer 2)",
+      "autonomy_level": "L2_ADVISOR",
+      "llm_model": "gemini-1.5-pro",
+      "temperature": 0.2,
+      "timeout_seconds": 60,
+      "responsibilities": [
+        "Evidence collection",
+        "Citation verification",
+        "FRBR linking",
+        "Source documentation",
+        "Evidence grading"
+      ],
+      "inputs": ["Claim", "SearchCriteria"],
+      "outputs": ["EvidenceUnit", "CitationRecord"],
+      "gates_after": ["G-1"],
+      "playbooks": ["PB-01"]
+    },
+    {
+      "agent_id": "AGT-06-ANALYST",
+      "arabic_name": "المُحلِّل",
+      "layer": "Understanding & Analysis (Layer 2)",
+      "autonomy_level": "L3_DECIDER",
+      "llm_model": "gemini-1.5-pro",
+      "temperature": 0.4,
+      "timeout_seconds": 90,
+      "responsibilities": [
+        "Epistemological analysis",
+        "Argumentation mapping",
+        "Thought model construction",
+        "Logical validation",
+        "Assumption extraction"
+      ],
+      "inputs": ["Text", "EvidenceUnits"],
+      "outputs": ["ConceptCard", "ThoughtModel", "ArgumentMap"],
+      "gates_after": ["G-2"],
+      "playbooks": ["PB-02", "PB-04", "PB-05"]
+    },
+    {
+      "agent_id": "AGT-07-GENEALOGIST",
+      "arabic_name": "الجينيالوجي",
+      "layer": "Exploration & Linking (Layer 3)",
+      "autonomy_level": "L3_DECIDER",
+      "llm_model": "gemini-1.5-pro",
+      "temperature": 0.5,
+      "timeout_seconds": 120,
+      "responsibilities": [
+        "Concept history tracing",
+        "Transfer detection",
+        "Lineage construction",
+        "Hidden context discovery",
+        "Semantic drift analysis"
+      ],
+      "inputs": ["Concept", "TimeRange"],
+      "outputs": ["LineageLink", "ContextUnit", "TransferRecord"],
+      "gates_after": ["G-3"],
+      "playbooks": ["PB-03", "PB-09"]
+    },
+    {
+      "agent_id": "AGT-08-SCOUT",
+      "arabic_name": "الرصّاد",
+      "layer": "Exploration & Linking (Layer 3)",
+      "autonomy_level": "L4_INITIATOR",
+      "llm_model": "gemini-1.5-pro",
+      "temperature": 0.7,
+      "timeout_seconds": 180,
+      "context_window": "2M tokens",
+      "responsibilities": [
+        "Spark detection",
+        "Pattern recognition",
+        "Gap identification",
+        "Cross-linking",
+        "Anomaly detection"
+      ],
+      "inputs": ["KnowledgeBase", "ExplorationDirective"],
+      "outputs": ["SparkCard", "PatternReport", "GapAnalysis"],
+      "playbooks": ["PB-08"]
+    },
+    {
+      "agent_id": "AGT-09-THEORIST",
+      "arabic_name": "المُنظِّر",
+      "layer": "Building & Evaluation (Layer 4)",
+      "autonomy_level": "L4_INITIATOR",
+      "llm_model": "gemini-1.5-pro",
+      "temperature": 0.6,
+      "timeout_seconds": 180,
+      "responsibilities": [
+        "Theory formation",
+        "System building",
+        "Philosophical synthesis",
+        "Model construction",
+        "Hypothesis generation"
+      ],
+      "inputs": ["ConceptCards", "EvidenceUnits", "SparkCards"],
+      "outputs": ["TheoryCard", "SystemModel"],
+      "gates_after": ["G-4"],
+      "playbooks": ["PB-07"]
+    },
+    {
+      "agent_id": "AGT-10-PURIFIER",
+      "arabic_name": "المُطهِّر",
+      "layer": "Building & Evaluation (Layer 4)",
+      "autonomy_level": "L3_DECIDER",
+      "llm_model": "gemini-1.5-pro",
+      "temperature": 0.3,
+      "timeout_seconds": 120,
+      "responsibilities": [
+        "Method purification",
+        "Grounding verification",
+        "Tool validation",
+        "Payload checking",
+        "External method adoption"
+      ],
+      "inputs": ["Method", "Theory", "ExternalTool"],
+      "outputs": ["PurificationReport", "GroundingCertificate"],
+      "gates_after": ["G-3"],
+      "playbooks": ["PB-06"]
+    },
+    {
+      "agent_id": "AGT-11-IMPROVER",
+      "arabic_name": "المُحسِّن",
+      "layer": "Meta-Governance (Layer 5)",
+      "autonomy_level": "L3_DECIDER",
+      "llm_model": "gemini-1.5-pro",
+      "temperature": 0.3,
+      "timeout_seconds": 120,
+      "responsibilities": [
+        "Error registry analysis",
+        "Pattern detection",
+        "Self-improvement proposals",
+        "Playbook updates",
+        "Feedback loop management"
+      ],
+      "triggers": [
+        {"type": "scheduled", "interval": "24 hours"},
+        {"type": "threshold", "condition": "10+ errors of same type"},
+        {"type": "manual", "source": "admin request"}
+      ],
+      "inputs": ["ErrorRegistry", "PerformanceMetrics"],
+      "outputs": ["ImprovementProposal", "PatternAlert", "PlaybookUpdate"],
+      "playbooks": ["PB-12"]
+    }
+  ]
+}

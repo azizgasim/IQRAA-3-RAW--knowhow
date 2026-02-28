@@ -1,0 +1,553 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#                    IQRA-12 Corpora Registry
+#                        سجل الكوربسات والمصادر
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# "المعرفة تبدأ بمعرفة مصادر المعرفة"
+#
+# الدروس الحاكمة:
+# - Brewster Kahle: حفظ كل أصل بتنسيق WARC + إصلاح الروابط الميتة
+# - Anurag Acharya: البحث عن النسخ الخضراء قبل الشراء
+# - Jason Priem: الربط بالمعرّفات العالمية (DOI, ORCID)
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+metadata:
+  component: "Corpora Registry"
+  component_ar: "سجل الكوربسات"
+  version: "1.0.0"
+  purpose: "توثيق وتصنيف جميع مصادر البيانات المعرفية"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              الطبقات الثلاث للمصادر
+# ═══════════════════════════════════════════════════════════════════════════════
+
+source_tiers:
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # الطبقة الأولى: المصادر المفتوحة
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  tier_1_open:
+    name: "Open Access Sources"
+    name_ar: "المصادر المفتوحة"
+    priority: "HIGH"
+    cost: "FREE"
+    
+    categories:
+      
+      # ─────────────────────────────────────────────────────────────────────
+      # المكتبات الرقمية العامة
+      # ─────────────────────────────────────────────────────────────────────
+      
+      public_digital_libraries:
+        
+        shamela:
+          name: "Al-Maktaba al-Shamela"
+          name_ar: "المكتبة الشاملة"
+          url: "https://shamela.ws"
+          content: "10,000+ كتاب تراثي"
+          format: "bok, epub, pdf"
+          quality: "متفاوتة"
+          license: "مجاني مع قيود"
+          notes: |
+            - أكبر مكتبة تراث عربي رقمي
+            - جودة النصوص متفاوتة
+            - بعض النصوص غير محققة
+          lessons:
+            - source: "فريق الشاملة"
+              lesson: "التعامل مع تفاوت الجودة يتطلب طبقة تصنيف"
+              
+        waqfeya:
+          name: "Al-Maktaba al-Waqfiyya"
+          name_ar: "المكتبة الوقفية"
+          url: "https://waqfeya.net"
+          content: "5,000+ كتاب"
+          format: "pdf"
+          quality: "جيدة"
+          license: "وقف"
+          
+        archive_org:
+          name: "Internet Archive"
+          url: "https://archive.org"
+          content: "ملايين الوثائق"
+          format: "pdf, djvu, warc"
+          quality: "متفاوتة جداً"
+          license: "متعدد"
+          lessons:
+            - source: "Brewster Kahle"
+              field: "Digital Preservation"
+              lesson: |
+                حفظ كل أصل بتنسيق WARC للحفاظ على السياق الرقمي.
+                تطبيق بروتوكول إصلاح الروابط الميتة ذاتياً.
+              implementation: "WARC archiving + link repair protocol"
+              
+        hathitrust:
+          name: "HathiTrust Digital Library"
+          url: "https://www.hathitrust.org"
+          content: "ملايين الكتب المرقمنة"
+          format: "pdf, txt"
+          quality: "عالية"
+          license: "أكاديمي"
+          
+        wikisource:
+          name: "Wikisource Arabic"
+          url: "https://ar.wikisource.org"
+          content: "نصوص محققة"
+          format: "wiki, txt"
+          quality: "عالية"
+          license: "CC"
+          
+      # ─────────────────────────────────────────────────────────────────────
+      # المشاريع الأكاديمية المفتوحة
+      # ─────────────────────────────────────────────────────────────────────
+      
+      academic_open_projects:
+        
+        openiti:
+          name: "Open Islamicate Texts Initiative"
+          url: "https://openiti.org"
+          maintainer: "University of Maryland / Aga Khan University"
+          content: "4,300+ نص تراثي مهيكل"
+          format: "mARkdown, txt"
+          quality: "عالية جداً"
+          license: "Open"
+          uri_system: "OpenITI URI (e.g., 0728IbnTaymiyya)"
+          lessons:
+            - source: "Maxim Romanov"
+              field: "Computational History & Data History"
+              lesson: |
+                المعايير الموحدة (URI): منح رقم هوية موحد لكل عالم وكتاب.
+                مثل: 0728IbnTaymiyya
+              implementation: "Adopt OpenITI URI system"
+            - source: "Maxim Romanov"
+              lesson: |
+                التنظيف أولاً: البيانات التراثية فوضوية.
+                استثمر 80% من الجهد في تنظيف النصوص.
+              implementation: "Strict ETL pipelines"
+              
+        kitab_project:
+          name: "KITAB Project"
+          url: "https://kitab-project.org"
+          maintainer: "Aga Khan University"
+          content: "تحليل التناص والاستخدام النصي"
+          format: "Passim alignments, CSV"
+          quality: "عالية جداً"
+          license: "Academic"
+          lessons:
+            - source: "Sarah Bowen Savant"
+              field: "Digital Philology & Textual Genealogy"
+              lesson: |
+                الجينوم النصي: تتبع الجملة كجين ينتقل من كتاب لآخر.
+                خوارزمية Passim لمحاذاة النصوص.
+              implementation: "Integrate Passim algorithm"
+            - source: "Sarah Bowen Savant"
+              lesson: |
+                إعادة بناء المفقود: كثرة النقل من كتاب مفقود 
+                تمكّن من إعادة بنائه رقمياً.
+              implementation: "Lost Book Reconstructor agent"
+              
+        al_thurayya:
+          name: "al-Thurayya Gazetteer"
+          url: "https://althurayya.github.io"
+          maintainer: "Maxim Romanov"
+          content: "أماكن تاريخية بإحداثيات"
+          format: "GeoJSON"
+          quality: "عالية"
+          license: "Open"
+          lessons:
+            - source: "Maxim Romanov"
+              lesson: |
+                الجغرافيا التاريخية: ربط الأماكن المذكورة 
+                في الكتب بإحداثيات GPS.
+              implementation: "Historical GeoJSON integration"
+              
+        quranic_corpus:
+          name: "Quranic Arabic Corpus"
+          url: "https://corpus.quran.com"
+          maintainer: "University of Leeds"
+          content: "تحليل لغوي للقرآن"
+          format: "XML, JSON"
+          quality: "عالية جداً"
+          license: "Academic"
+          
+        corpus_coranicum:
+          name: "Corpus Coranicum"
+          url: "https://corpuscoranicum.de"
+          maintainer: "Berlin-Brandenburg Academy"
+          content: "تاريخ القرآن + مقارنات"
+          format: "TEI-XML"
+          quality: "عالية جداً"
+          license: "Academic"
+          
+        tanzil:
+          name: "Tanzil Quran Navigator"
+          url: "https://tanzil.net"
+          content: "نص قرآني موثق"
+          format: "XML, JSON, txt"
+          quality: "عالية جداً"
+          license: "Open"
+          
+        sunnah_com:
+          name: "Sunnah.com"
+          url: "https://sunnah.com"
+          content: "كتب الحديث التسعة"
+          format: "API, JSON"
+          quality: "عالية"
+          license: "Open"
+          
+      # ─────────────────────────────────────────────────────────────────────
+      # قواعد البيانات الأكاديمية المفتوحة
+      # ─────────────────────────────────────────────────────────────────────
+      
+      open_academic_databases:
+        
+        openalex:
+          name: "OpenAlex"
+          url: "https://openalex.org"
+          maintainer: "OurResearch"
+          content: "250+ مليون عمل أكاديمي"
+          format: "API, S3 dumps"
+          quality: "عالية"
+          license: "CC0"
+          lessons:
+            - source: "Jason Priem"
+              field: "Open Research Infrastructure"
+              lesson: |
+                البديل المفتوح للفهارس التجارية.
+                استخدم OpenAlex كمصدر رئيسي للبيانات الوصفية.
+              implementation: "Primary metadata source"
+            - source: "Jason Priem"
+              lesson: |
+                Unpaywall: قبل شراء أي ورقة، استعلم Unpaywall.
+                52% من الأوراق لها نسخة مجانية قانونية.
+              implementation: "Unpaywall check before purchase"
+              
+        semantic_scholar:
+          name: "Semantic Scholar"
+          url: "https://www.semanticscholar.org"
+          maintainer: "Allen AI"
+          content: "214+ مليون ورقة بحثية"
+          format: "API, S2AG dataset"
+          quality: "عالية"
+          license: "Academic"
+          lessons:
+            - source: "Oren Etzioni"
+              field: "AI & Scientific Knowledge"
+              lesson: |
+                لا تجمع أوراقاً معزولة - ابنِ رسماً معرفياً 
+                يربط كل ورقة بسياقها: من كتبها؟ من استشهد بها؟
+              implementation: "Knowledge graph of citations"
+              
+        core:
+          name: "CORE"
+          url: "https://core.ac.uk"
+          maintainer: "Open University UK"
+          content: "300+ مليون ورقة مفتوحة"
+          format: "API"
+          quality: "جيدة"
+          license: "Open"
+          
+        oatd:
+          name: "Open Access Theses and Dissertations"
+          url: "https://oatd.org"
+          content: "6+ مليون أطروحة"
+          format: "Metadata + links"
+          quality: "متفاوتة"
+          license: "Open"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # الطبقة الثانية: المصادر المقيدة
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  tier_2_restricted:
+    name: "Restricted Access Sources"
+    name_ar: "المصادر المقيدة"
+    priority: "MEDIUM"
+    cost: "REGISTRATION/REQUEST"
+    
+    categories:
+      
+      manuscript_databases:
+        
+        fihrist:
+          name: "Fihrist"
+          url: "https://fihrist.org.uk"
+          content: "فهرس مخطوطات إسلامية"
+          access: "مفتوح جزئياً"
+          
+        hmml:
+          name: "Hill Museum & Manuscript Library"
+          url: "https://hmml.org"
+          content: "مخطوطات مرقمنة"
+          access: "تسجيل مطلوب"
+          
+        furqan:
+          name: "Furqan Islamic Heritage Foundation"
+          url: "https://www.furqan.org.uk"
+          content: "فهرس المخطوطات الإسلامية"
+          access: "اشتراك"
+          
+      specialized_projects:
+        
+        ismi:
+          name: "Islamic Scientific Manuscripts Initiative"
+          url: "https://ismi.mpiwg-berlin.mpg.de"
+          content: "مخطوطات علمية إسلامية"
+          access: "طلب أكاديمي"
+          
+        pne:
+          name: "Prosopography of the Neo-Assyrian Empire"
+          content: "نخب الإدارة التاريخية"
+          access: "طلب أكاديمي"
+          
+      national_libraries:
+        
+        king_fahd:
+          name: "King Fahd National Library"
+          name_ar: "مكتبة الملك فهد الوطنية"
+          content: "مخطوطات سعودية"
+          access: "جزئي"
+          
+        al_azhar:
+          name: "Al-Azhar Library"
+          name_ar: "مكتبة الأزهر"
+          content: "تراث أزهري"
+          access: "مقيد"
+          
+        bnf_gallica:
+          name: "BnF Gallica"
+          url: "https://gallica.bnf.fr"
+          content: "مخطوطات عربية"
+          access: "مفتوح"
+          
+        bodleian:
+          name: "Bodleian Library"
+          url: "https://www.bodleian.ox.ac.uk"
+          content: "مخطوطات شرقية"
+          access: "رقمي جزئي"
+          
+        chester_beatty:
+          name: "Chester Beatty Library"
+          url: "https://chesterbeatty.ie"
+          content: "مخطوطات إسلامية"
+          access: "رقمي جزئي"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # الطبقة الثالثة: المصادر المدفوعة
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  tier_3_paid:
+    name: "Paid Access Sources"
+    name_ar: "المصادر المدفوعة"
+    priority: "LOW - USE AFTER GREEN OA CHECK"
+    cost: "$$ - $$$$"
+    
+    lessons:
+      - source: "Anurag Acharya"
+        field: "Academic Search (Google Scholar)"
+        lesson: |
+          البحث عن النسخ الخضراء (Green OA) قبل الشراء.
+          تتبع المراجع بشكل تكراري لبناء شجرة المصادر.
+        implementation: "Green OA check protocol"
+      - source: "Tim O'Reilly"
+        field: "Digital Publishing Economics"
+        lesson: |
+          Cost_Per_Use = Price / Expected_Queries
+          إذا كان الكتاب مطلوباً لمرة واحدة → شراء منفرد.
+          إذا كان الطلب مرتفعاً → اشتراك مؤسسي.
+        implementation: "PDA (Patron Driven Acquisition)"
+        
+    categories:
+      
+      academic_databases:
+        
+        brill_online:
+          name: "Brill Online"
+          content: "دراسات إسلامية"
+          cost: "$$$"
+          
+        ei_online:
+          name: "Encyclopaedia of Islam Online"
+          content: "موسوعة الإسلام"
+          cost: "$$$$"
+          
+        jstor:
+          name: "JSTOR"
+          content: "دوريات أكاديمية"
+          cost: "$$"
+          
+        cambridge_core:
+          name: "Cambridge Core"
+          content: "كتب ودوريات"
+          cost: "$$$"
+          
+        de_gruyter:
+          name: "De Gruyter"
+          content: "مراجع"
+          cost: "$$"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                    الكوربسات الحضارية المتصلة
+# ═══════════════════════════════════════════════════════════════════════════════
+
+civilizational_corpora:
+  
+  description: |
+    الكوربسات اللازمة لفهم الجذور والانتقالات الحضارية.
+    "لا نفهم المتكلمين دون فهم آباء الكنيسة"
+    "لا نفهم الفلاسفة دون فهم اليونان"
+    
+  greek_latin_heritage:
+    
+    tlg:
+      name: "Thesaurus Linguae Graecae"
+      content: "كل الأدب اليوناني من هومير إلى البيزنطية"
+      importance: "مصدر الفلسفة والمنطق والعلوم"
+      access: "اشتراك"
+      
+    perseus:
+      name: "Perseus Digital Library"
+      url: "https://www.perseus.tufts.edu"
+      content: "النصوص اليونانية واللاتينية"
+      access: "مفتوح"
+      
+    loeb:
+      name: "Loeb Classical Library"
+      content: "النصوص الكلاسيكية مع ترجمة"
+      access: "اشتراك"
+      
+  christian_heritage:
+    
+    patrologia_graeca:
+      name: "Patrologia Graeca"
+      content: "آباء الكنيسة اليونانية"
+      importance: "فهم علم الكلام"
+      
+    patrologia_latina:
+      name: "Patrologia Latina"
+      content: "آباء الكنيسة اللاتينية"
+      importance: "الانتقال الغربي"
+      
+    csco:
+      name: "Corpus Scriptorum Christianorum Orientalium"
+      content: "المسيحية الشرقية (سريانية، قبطية)"
+      importance: "الوسيط في الترجمة"
+      
+  jewish_heritage:
+    
+    sefaria:
+      name: "Sefaria"
+      url: "https://www.sefaria.org"
+      content: "التوراة، التلمود، المدراش"
+      access: "مفتوح + APIs"
+      
+    bar_ilan:
+      name: "Bar-Ilan Responsa Project"
+      content: "الأدب الحاخامي الكامل"
+      access: "اشتراك"
+      
+  medieval_european:
+    
+    mgh:
+      name: "Monumenta Germaniae Historica"
+      content: "تاريخ أوروبا الوسطى"
+      
+    corpus_thomisticum:
+      name: "Corpus Thomisticum"
+      url: "https://www.corpusthomisticum.org"
+      content: "أعمال توما الأكويني كاملة"
+      importance: "أثر ابن رشد في اللاهوت المسيحي"
+      access: "مفتوح"
+      
+    dare:
+      name: "Digital Averroes Research Environment"
+      content: "ابن رشد بالعربية واللاتينية والعبرية"
+      importance: "تتبع الانتقال الحضاري"
+      
+  eastern_traditions:
+    
+    gretil:
+      name: "GRETIL (Göttingen)"
+      content: "النصوص السنسكريتية"
+      access: "مفتوح"
+      
+    bdrc:
+      name: "Buddhist Digital Resource Center"
+      content: "النصوص البوذية"
+      access: "مفتوح"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                    بروتوكولات الاقتناء
+# ═══════════════════════════════════════════════════════════════════════════════
+
+acquisition_protocols:
+  
+  priority_order:
+    1: "Check OpenITI first"
+    2: "Search Shamela/Waqfeya"
+    3: "Check KITAB for alignments"
+    4: "Search OpenAlex for papers"
+    5: "Use Unpaywall for Green OA"
+    6: "Request from restricted sources"
+    7: "Purchase only if necessary (PDA)"
+    
+  quality_assessment:
+    levels:
+      - level: "A"
+        criteria: "محقق أكاديمياً، مراجع، نص موثق"
+      - level: "B"
+        criteria: "طبعة جيدة، غير محققة تحقيقاً علمياً"
+      - level: "C"
+        criteria: "نص تجميعي، جودة متوسطة"
+      - level: "D"
+        criteria: "نص غير موثق، يحتاج مراجعة"
+        
+  archiving_standard:
+    format: "WARC"
+    source: "Brewster Kahle - Internet Archive"
+    requirements:
+      - "حفظ السياق الرقمي الكامل"
+      - "تسجيل تاريخ الاقتناء"
+      - "توثيق الحقوق"
+      - "إصلاح الروابط الميتة ذاتياً"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              الجداول المرتبطة
+# ═══════════════════════════════════════════════════════════════════════════════
+
+related_tables:
+  
+  sources:
+    description: "سجل المصادر الأصلية"
+    fields:
+      - source_id
+      - name
+      - type
+      - url
+      - tier
+      - license
+      - quality_level
+      - last_sync
+      
+  acquisition_log:
+    description: "سجل الاقتناء"
+    fields:
+      - acquisition_id
+      - source_id
+      - doc_id
+      - acquired_at
+      - method
+      - cost
+      - rights_status
+      
+  corpus_versions:
+    description: "إصدارات الكوربسات"
+    fields:
+      - corpus_id
+      - version
+      - release_date
+      - doc_count
+      - changes_summary
+
+# ═══════════════════════════════════════════════════════════════════════════════

@@ -1,0 +1,760 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#                         Recipe Library (مكتبة الوصفات)
+#                    IQRA-12 Dynamic Composition Engine
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# الغرض: قوالب جاهزة ومُحسَّنة لأنماط الأسئلة الشائعة
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+component:
+  name: "Recipe Library"
+  name_ar: "مكتبة الوصفات"
+  version: "1.0.0"
+  
+  purpose: |
+    توفير قوالب جاهزة (Recipes) لأنماط الأسئلة الشائعة
+    كل وصفة = pipeline محسَّن ومُختبَر
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              هيكل الوصفة
+# ═══════════════════════════════════════════════════════════════════════════════
+
+recipe_schema:
+  recipe_id: string
+  name_ar: string
+  name_en: string
+  version: string
+  
+  applicability:
+    question_type: QuestionType
+    question_subtypes: array[string]
+    required_entities: array[EntityType]
+    required_concepts: array[string]
+    scope_constraints: object
+    
+  pipeline:
+    phases: array[Phase]
+    total_operations: integer
+    estimated_cost: CostEstimate
+    
+  customization_points:
+    description: "نقاط يمكن تعديلها حسب السؤال"
+    points: array[CustomizationPoint]
+    
+  quality_requirements:
+    mandatory_gates: array[string]
+    optional_checks: array[string]
+    
+  tested_examples:
+    type: array
+    items:
+      question: string
+      success_rate: float
+      average_duration: string
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              الوصفات
+# ═══════════════════════════════════════════════════════════════════════════════
+
+recipes:
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # وصفة 1: تتبع انتقال مفهوم عبر الثقافات
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  concept_cross_cultural_tracing:
+    recipe_id: "RCP_TRACE_CONCEPT_001"
+    name_ar: "تتبع انتقال مفهوم عبر الثقافات"
+    name_en: "Cross-Cultural Concept Tracing"
+    version: "1.0.0"
+    
+    description: |
+      وصفة لتتبع رحلة مفهوم فلسفي أو ديني من ثقافة إلى أخرى
+      مثال: تتبع مفهوم "الجوهر" من اليونانية إلى العربية
+    
+    applicability:
+      question_type: "TRACING"
+      question_subtypes: ["concept_transfer", "translation_history", "semantic_evolution"]
+      required_entities:
+        - PERSON  # optional: philosophers, translators
+        - CONCEPT  # required: the traced concept
+      required_concepts:
+        - source_concept
+        - target_concept
+      scope_constraints:
+        cross_linguistic: true
+        min_temporal_span: "100 years"
+        
+    pipeline:
+      phases:
+        
+        - phase: 1
+          name: "البحث والاستخراج الأولي"
+          operations:
+            - operation: "E1"
+              params:
+                query: "{concept} in {source_language} AND {target_language}"
+                corpora: ["philosophy", "translations", "kalam"]
+              parallel_group: 1
+              
+            - operation: "E2"
+              params:
+                concept: "{concept}"
+                languages: ["{source_language}", "{target_language}"]
+              parallel_group: 1
+              
+        - phase: 2
+          name: "استخراج الكيانات والمصطلحات"
+          depends_on: [1]
+          operations:
+            - operation: "E3"
+              params:
+                types: ["PERSON", "WORK", "SCHOOL"]
+              parallel_group: 2
+              
+            - operation: "E6"
+              params:
+                domain: "philosophy"
+                extract_definitions: true
+              parallel_group: 2
+              
+        - phase: 3
+          name: "التتبع المعجمي"
+          depends_on: [2]
+          operations:
+            - operation: "T1"
+              params:
+                source_term: "{source_term}"
+                target_term: "{target_term}"
+                intermediate_languages: "{intermediaries}"
+              checkpoint_after: true
+              
+        - phase: 4
+          name: "الربط المفاهيمي"
+          depends_on: [2, 3]
+          operations:
+            - operation: "L2"
+              params:
+                track_semantic_shift: true
+              parallel_group: 3
+              
+            - operation: "L4"
+              params:
+                detect_text_reuse: true
+              parallel_group: 3
+              
+        - phase: 5
+          name: "التتبع المفاهيمي والجينالوجي"
+          depends_on: [4]
+          operations:
+            - operation: "T2"
+              params:
+                track_transformations: true
+                identify_controversies: true
+                
+            - operation: "T3"
+              params:
+                trace_type: "INTELLECTUAL"
+              optional: true
+              
+        - phase: 6
+          name: "البناء"
+          depends_on: [5]
+          operations:
+            - operation: "C1"
+              params:
+                include_counter_evidence: true
+                
+            - operation: "C2"
+              params:
+                claim_type: "CAUSAL"
+                require_qualifications: true
+                
+        - phase: 7
+          name: "التركيب"
+          depends_on: [6]
+          operations:
+            - operation: "S1"
+              params:
+                narrative_type: "INTELLECTUAL"
+                include_uncertainty: true
+                
+            - operation: "S4"
+              params:
+                dual_calendar: true
+              optional: true
+              
+        - phase: 8
+          name: "التحقق"
+          depends_on: [7]
+          operations:
+            - operation: "V1"
+              gate: true
+            - operation: "V2"
+              gate: true
+              
+      total_operations: 14
+      estimated_cost:
+        tokens: 30000
+        time: "8-12 minutes"
+        monetary: "$0.70"
+        
+    customization_points:
+      - point: "intermediate_languages"
+        description: "اللغات الوسيطة (مثل السريانية)"
+        default: ["syriac"]
+        
+      - point: "include_timeline"
+        description: "تضمين جدول زمني"
+        default: true
+        
+      - point: "trace_type"
+        description: "نوع التتبع الجينالوجي"
+        options: ["INTELLECTUAL", "TEXTUAL", "INSTITUTIONAL"]
+        default: "INTELLECTUAL"
+        
+    quality_requirements:
+      mandatory_gates: ["V1", "V2"]
+      optional_checks: ["V4"]
+      
+    tested_examples:
+      - question: "كيف انتقل مفهوم الجوهر من أرسطو إلى علم الكلام؟"
+        success_rate: 0.92
+        average_duration: "9 minutes"
+        
+      - question: "تتبع رحلة مفهوم 'العدالة' من اليونانية إلى الفقه الإسلامي"
+        success_rate: 0.88
+        average_duration: "11 minutes"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # وصفة 2: مقارنة مواقف المدارس الكلامية
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  school_position_comparison:
+    recipe_id: "RCP_COMPARE_SCHOOLS_001"
+    name_ar: "مقارنة مواقف المدارس الكلامية"
+    name_en: "Theological School Position Comparison"
+    version: "1.0.0"
+    
+    description: |
+      وصفة لمقارنة مواقف مدرستين أو أكثر من مسألة كلامية
+      مثال: مقارنة موقف الأشاعرة والمعتزلة من الصفات الإلهية
+    
+    applicability:
+      question_type: "COMPARATIVE"
+      question_subtypes: ["school_positions", "doctrinal_comparison"]
+      required_entities:
+        - SCHOOL  # at least 2
+      scope_constraints:
+        min_schools: 2
+        max_schools: 5
+        
+    pipeline:
+      phases:
+        
+        - phase: 1
+          name: "البحث في مواقف المدارس"
+          operations:
+            - operation: "E1"
+              for_each: "school"
+              params:
+                query: "{school} {topic}"
+              parallel_group: 1
+              
+            - operation: "E2"
+              params:
+                concept: "{topic}"
+              parallel_group: 1
+              
+        - phase: 2
+          name: "استخراج الكيانات والاستشهادات"
+          depends_on: [1]
+          operations:
+            - operation: "E3"
+              params:
+                types: ["PERSON", "SCHOOL"]
+                
+            - operation: "E5"
+              params:
+                citation_types: ["QURAN", "HADITH", "QUOTE"]
+              parallel_group: 2
+              
+            - operation: "E6"
+              params:
+                domain: "kalam"
+              parallel_group: 2
+              
+        - phase: 3
+          name: "تحليل المواقف"
+          depends_on: [2]
+          operations:
+            - operation: "A6"
+              for_each: "school"
+              params:
+                extract_nuances: true
+                track_evolution: true
+                
+            - operation: "A3"
+              params:
+                comparison_type: "SYNCHRONIC"
+                
+        - phase: 4
+          name: "تحليل التناقضات (إن وجدت)"
+          depends_on: [3]
+          operations:
+            - operation: "A4"
+              params:
+                within_school: true
+                between_schools: true
+              optional: true
+              
+        - phase: 5
+          name: "التركيب المقارني"
+          depends_on: [3, 4]
+          operations:
+            - operation: "S5"
+              params:
+                output_format: "TABLE"
+                include_analysis: true
+                
+        - phase: 6
+          name: "التحقق"
+          depends_on: [5]
+          operations:
+            - operation: "V1"
+              gate: true
+              
+      total_operations: 10
+      estimated_cost:
+        tokens: 18000
+        time: "5-8 minutes"
+        monetary: "$0.45"
+        
+    customization_points:
+      - point: "include_historical_evolution"
+        description: "تتبع تطور الموقف تاريخياً"
+        default: false
+        
+      - point: "output_format"
+        description: "شكل المخرج"
+        options: ["TABLE", "NARRATIVE", "BOTH"]
+        default: "TABLE"
+        
+    tested_examples:
+      - question: "قارن بين موقف الأشاعرة والمعتزلة من الصفات الإلهية"
+        success_rate: 0.95
+        average_duration: "6 minutes"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # وصفة 3: تحليل موقف عالم من مسألة
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  scholar_position_analysis:
+    recipe_id: "RCP_POSITION_001"
+    name_ar: "تحليل موقف عالم من مسألة"
+    name_en: "Scholar Position Analysis"
+    version: "1.0.0"
+    
+    description: |
+      وصفة لتحليل موقف عالم محدد من مسألة معينة
+      مع استخراج الأدلة والتطور والتفاصيل الدقيقة
+    
+    applicability:
+      question_type: "POSITION"
+      required_entities:
+        - PERSON
+      required_concepts:
+        - topic
+        
+    pipeline:
+      phases:
+        
+        - phase: 1
+          name: "البحث في كتابات العالم"
+          operations:
+            - operation: "E1"
+              params:
+                query: "{scholar} {topic}"
+                corpora: ["{scholar_works}"]
+                
+            - operation: "E2"
+              params:
+                focus: "{scholar}"
+                concept: "{topic}"
+                
+        - phase: 2
+          name: "استخراج الاستشهادات والحجج"
+          depends_on: [1]
+          operations:
+            - operation: "E5"
+              params:
+                from_scholar: true
+                
+            - operation: "A1"
+              params:
+                model: "ISLAMIC_MANTIQ"
+              parallel_group: 1
+              
+        - phase: 3
+          name: "تحليل الموقف"
+          depends_on: [2]
+          operations:
+            - operation: "A6"
+              params:
+                person: "{scholar}"
+                topic: "{topic}"
+                extract_nuances: true
+                track_evolution: true
+                
+        - phase: 4
+          name: "البناء"
+          depends_on: [3]
+          operations:
+            - operation: "C1"
+              params:
+                primary_source: "{scholar}"
+                
+        - phase: 5
+          name: "التحقق"
+          depends_on: [4]
+          operations:
+            - operation: "V1"
+              gate: true
+              
+      total_operations: 7
+      estimated_cost:
+        tokens: 12000
+        time: "4-6 minutes"
+        monetary: "$0.30"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # وصفة 4: رسم شبكة التلاميذ والشيوخ
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  scholarly_network_mapping:
+    recipe_id: "RCP_NETWORK_001"
+    name_ar: "رسم شبكة التلاميذ والشيوخ"
+    name_en: "Scholarly Network Mapping"
+    version: "1.0.0"
+    
+    description: |
+      وصفة لرسم شبكة العلاقات العلمية حول شخص أو مدرسة
+      تشمل علاقات التتلمذ والتأثير
+    
+    applicability:
+      question_type: "NETWORK"
+      required_entities:
+        - PERSON | SCHOOL
+        
+    pipeline:
+      phases:
+        
+        - phase: 1
+          name: "البحث عن العلاقات"
+          operations:
+            - operation: "E1"
+              params:
+                query: "{entity} تلاميذ شيوخ"
+                
+            - operation: "E3"
+              params:
+                types: ["PERSON"]
+                roles: ["student", "teacher", "colleague"]
+                
+        - phase: 2
+          name: "استخراج العلاقات"
+          depends_on: [1]
+          operations:
+            - operation: "E4"
+              params:
+                relation_types: ["TAUGHT", "STUDIED_WITH", "INFLUENCED"]
+                
+        - phase: 3
+          name: "حل الهوية والتتبع"
+          depends_on: [2]
+          operations:
+            - operation: "L1"
+              params:
+                disambiguation: true
+                
+            - operation: "T3"
+              params:
+                trace_type: "PEDAGOGICAL"
+              parallel_group: 1
+              
+        - phase: 4
+          name: "التركيب"
+          depends_on: [3]
+          operations:
+            - operation: "S3"
+              params:
+                map_type: "INFLUENCE_NETWORK"
+                include_metadata: true
+                
+      total_operations: 7
+      estimated_cost:
+        tokens: 10000
+        time: "4-6 minutes"
+        monetary: "$0.25"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # وصفة 5: تعريف مصطلح مع تطوره
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  term_definition_with_evolution:
+    recipe_id: "RCP_DEFINE_001"
+    name_ar: "تعريف مصطلح مع تطوره"
+    name_en: "Term Definition with Evolution"
+    version: "1.0.0"
+    
+    description: |
+      وصفة لتعريف مصطلح تقني مع تتبع تطور معناه
+    
+    applicability:
+      question_type: "DEFINITION"
+      required_concepts:
+        - term
+        
+    pipeline:
+      phases:
+        
+        - phase: 1
+          name: "البحث عن التعريفات"
+          operations:
+            - operation: "E1"
+              params:
+                query: "{term} تعريف معنى"
+                
+            - operation: "E6"
+              params:
+                extract_definitions: true
+                
+        - phase: 2
+          name: "التتبع المعجمي"
+          depends_on: [1]
+          operations:
+            - operation: "T1"
+              params:
+                include_etymology: true
+              optional: true
+              
+        - phase: 3
+          name: "البناء"
+          depends_on: [1, 2]
+          operations:
+            - operation: "C5"
+              params:
+                style: "SCHOLARLY"
+                include_usage: true
+                
+      total_operations: 5
+      estimated_cost:
+        tokens: 6000
+        time: "2-4 minutes"
+        monetary: "$0.15"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # وصفة 6: اكتشاف الفجوات البحثية
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  research_gap_discovery:
+    recipe_id: "RCP_GAP_001"
+    name_ar: "اكتشاف الفجوات البحثية"
+    name_en: "Research Gap Discovery"
+    version: "1.0.0"
+    
+    description: |
+      وصفة لاكتشاف المواضيع المهملة والفجوات في الأبحاث
+      أساس عمل وكيل الثروة المهملة
+    
+    applicability:
+      question_type: "GAP_DISCOVERY"
+      required_entities: []
+      scope_constraints:
+        domain_required: true
+        
+    pipeline:
+      phases:
+        
+        - phase: 1
+          name: "مسح الميدان"
+          operations:
+            - operation: "E1"
+              params:
+                broad_search: true
+                
+            - operation: "E2"
+              params:
+                coverage_analysis: true
+                
+        - phase: 2
+          name: "تحليل الفجوات"
+          depends_on: [1]
+          operations:
+            - operation: "A5"
+              params:
+                gap_types: ["UNSTUDIED_TOPICS", "MISSING_CONNECTIONS", "UNUSED_FIELDS"]
+                prioritize: true
+                
+      total_operations: 3
+      estimated_cost:
+        tokens: 4000
+        time: "2-3 minutes"
+        monetary: "$0.10"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # وصفة 7: كتابة ورقة بحثية كاملة
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  full_research_paper:
+    recipe_id: "RCP_SYNTH_PAPER_001"
+    name_ar: "كتابة ورقة بحثية كاملة"
+    name_en: "Full Research Paper Synthesis"
+    version: "1.0.0"
+    
+    description: |
+      وصفة شاملة لإنتاج ورقة بحثية كاملة
+      من السؤال إلى الورقة المنشورة
+    
+    applicability:
+      question_type: "SYNTHESIS"
+      question_subtypes: ["research_paper", "academic_article"]
+      scope_constraints:
+        min_complexity: "MEDIUM"
+        
+    pipeline:
+      phases:
+        
+        - phase: 1
+          name: "البحث الشامل"
+          operations:
+            - operation: "E1"
+              params:
+                exhaustive: true
+            - operation: "E2"
+            - operation: "E3"
+            - operation: "E5"
+            - operation: "E6"
+            
+        - phase: 2
+          name: "التحليل"
+          depends_on: [1]
+          operations:
+            - operation: "A1"
+            - operation: "A2"
+            - operation: "A6"
+            
+        - phase: 3
+          name: "البناء"
+          depends_on: [2]
+          operations:
+            - operation: "C1"
+            - operation: "C2"
+            - operation: "C3"  # إلزامي
+            - operation: "C4"
+            
+        - phase: 4
+          name: "التركيب"
+          depends_on: [3]
+          operations:
+            - operation: "S2"
+              params:
+                report_type: "RESEARCH_PAPER"
+                
+        - phase: 5
+          name: "الكتابة"
+          depends_on: [4]
+          operations:
+            - operation: "W1"
+            - operation: "W2"
+            - operation: "W3"
+            - operation: "W5"
+            
+        - phase: 6
+          name: "التحقق الشامل"
+          depends_on: [5]
+          operations:
+            - operation: "V1"
+              gate: true
+            - operation: "V2"
+              gate: true
+            - operation: "V3"
+            - operation: "V4"
+              gate: true
+            - operation: "V5"
+            
+      total_operations: 22
+      estimated_cost:
+        tokens: 80000
+        time: "20-40 minutes"
+        monetary: "$2.00"
+        
+    quality_requirements:
+      mandatory_gates: ["V1", "V2", "V4"]
+      optional_checks: ["V3", "V5"]
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              فهرس الوصفات
+# ═══════════════════════════════════════════════════════════════════════════════
+
+recipe_index:
+  by_question_type:
+    TRACING:
+      - concept_cross_cultural_tracing
+    COMPARATIVE:
+      - school_position_comparison
+    POSITION:
+      - scholar_position_analysis
+    NETWORK:
+      - scholarly_network_mapping
+    DEFINITION:
+      - term_definition_with_evolution
+    GAP_DISCOVERY:
+      - research_gap_discovery
+    SYNTHESIS:
+      - full_research_paper
+      
+  by_complexity:
+    LOW:
+      - term_definition_with_evolution
+      - research_gap_discovery
+    MEDIUM:
+      - scholar_position_analysis
+      - scholarly_network_mapping
+      - school_position_comparison
+    HIGH:
+      - concept_cross_cultural_tracing
+      - full_research_paper
+      
+  by_output_type:
+    narrative:
+      - concept_cross_cultural_tracing
+      - scholar_position_analysis
+    table:
+      - school_position_comparison
+    graph:
+      - scholarly_network_mapping
+    glossary:
+      - term_definition_with_evolution
+    report:
+      - full_research_paper
+      - research_gap_discovery
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              إحصائيات
+# ═══════════════════════════════════════════════════════════════════════════════
+
+statistics:
+  total_recipes: 7
+  average_operations_per_recipe: 9
+  coverage:
+    question_types_covered: 7
+    question_types_total: 9
+    coverage_percentage: 78%
+  most_used_operations:
+    - E1: "in all recipes"
+    - E3: "in 6 recipes"
+    - V1: "in 5 recipes"
+
+# ═══════════════════════════════════════════════════════════════════════════════

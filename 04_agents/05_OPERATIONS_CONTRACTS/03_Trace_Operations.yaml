@@ -1,0 +1,1131 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#                    الفئة الثالثة: التتبع (Trace)
+#                    IQRA-12 Core Operations Layer
+# ═══════════════════════════════════════════════════════════════════════════════
+# 
+# الغرض: رسم المسارات عبر الزمان والمكان والثقافات
+# العمليات: T1-T5
+# 
+# المبدأ الحاكم:
+# "كل تتبع = محطات + انتقالات + تحولات + فاعلون"
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+category:
+  id: "TRACE"
+  name_ar: "التتبع"
+  name_en: "Trace"
+  purpose: "رسم مسارات الانتقال والتحول عبر الزمان والمكان والثقافات"
+  golden_rule: "كل تتبع = محطات + انتقالات + تحولات + فاعلون"
+  operations_count: 5
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# T1: التتبع المعجمي (Lexical Tracing)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+operations:
+
+  - id: "T1"
+    name_ar: "التتبع المعجمي"
+    name_en: "Lexical Tracing"
+    category: "Trace"
+    version: "1.0.0"
+    
+    purpose: |
+      تتبع رحلة الكلمة أو المصطلح عبر اللغات والأزمنة
+      من أصلها إلى تحولاتها المختلفة في الثقافات المتعاقبة
+    
+    inputs:
+      required:
+        - name: term
+          type: string
+          description: "الكلمة أو المصطلح المراد تتبعه"
+          
+        - name: source_language
+          type: string
+          description: "لغة المصدر"
+          values: [arabic, greek, syriac, persian, hebrew, latin, sanskrit, turkish, urdu]
+          
+      optional:
+        - name: target_languages
+          type: array[string]
+          default: ["all_connected"]
+          description: "اللغات المستهدفة للتتبع"
+          
+        - name: time_range
+          type: object
+          schema:
+            start: string  # "500 BCE" or "100 AH"
+            end: string
+            
+        - name: semantic_focus
+          type: boolean
+          default: true
+          description: "تتبع التحول الدلالي وليس الصوتي فقط"
+          
+        - name: include_cognates
+          type: boolean
+          default: true
+          description: "تضمين الكلمات ذات الأصل المشترك"
+          
+        - name: include_calques
+          type: boolean
+          default: true
+          description: "تضمين الترجمات الحرفية"
+    
+    outputs:
+      primary:
+        name: lexical_journey
+        type: LexicalJourney
+        schema:
+          term: string
+          origin:
+            language: string
+            form: string
+            meaning: string
+            earliest_attestation:
+              source: string
+              date: string
+              context: string
+          stages:
+            type: array
+            items:
+              order: integer
+              language: string
+              script: string
+              form: string
+              transliteration: string
+              meaning: string
+              semantic_field: string
+              period:
+                start: string
+                end: string
+              attestations:
+                type: array
+                items:
+                  source: string
+                  date: string
+                  quote: string
+                  context: string
+              transmission:
+                from_language: string
+                mechanism: enum[BORROWING, CALQUE, SEMANTIC_EXTENSION, PHONETIC_ADAPTATION]
+                intermediary: string
+                agents: array[string]  # المترجمون، الوسطاء
+              phonetic_changes:
+                type: array
+                items:
+                  from: string
+                  to: string
+                  rule: string
+              semantic_changes:
+                type: array
+                items:
+                  from_meaning: string
+                  to_meaning: string
+                  change_type: enum[NARROWING, BROADENING, AMELIORATION, PEJORATION, METAPHOR, METONYMY]
+                  context: string
+          branches:
+            type: array
+            description: "تفرعات المصطلح في لغات مختلفة"
+            items:
+              language: string
+              forms: array[string]
+              divergence_point: string
+          modern_reflexes:
+            type: object
+            description: "الأشكال المعاصرة في اللغات الحية"
+          scholarly_notes:
+            type: array
+            description: "ملاحظات من الأبحاث اللغوية"
+            
+      secondary:
+        - name: lexical_tree
+          type: object
+          format: "tree_structure"
+          
+        - name: cognate_network
+          type: object
+          description: "شبكة الكلمات ذات الصلة"
+          
+        - name: disputed_etymologies
+          type: array
+          description: "اشتقاقات متنازع عليها"
+    
+    tools:
+      internal:
+        - name: Etymology Database
+          type: lookup
+          
+        - name: Historical Phonology Engine
+          type: rule_based
+          
+        - name: Cross-lingual Aligner
+          type: ml_model
+          
+        - name: Semantic Change Detector
+          type: diachronic_embeddings
+          
+      external:
+        - name: Wiktionary API
+          purpose: "etymological data"
+          
+        - name: Perseus Digital Library
+          purpose: "Greek attestations"
+    
+    resources:
+      knowledge_bases:
+        - multilingual_etymology_db
+        - historical_dictionaries
+        - loanword_databases
+        - translation_movement_records
+      corpora:
+        - dated_multilingual_corpora
+    
+    guardrails:
+      pre_conditions:
+        - condition: "term exists in source language lexicon"
+          error_code: "T1_UNKNOWN_TERM"
+          
+      post_conditions:
+        - condition: "every stage has attestation evidence"
+          error_code: "T1_UNATTESTED_STAGE"
+          
+        - condition: "chronology is internally consistent"
+          error_code: "T1_ANACHRONISM"
+          
+      forbidden:
+        - "inventing intermediate forms without attestation"
+        - "claiming direct borrowing when intermediary is known"
+        - "ignoring disputed etymologies"
+    
+    quality_metrics:
+      - name: attestation_coverage
+        description: "نسبة المراحل الموثقة"
+        target: ">= 0.9"
+        
+      - name: chronological_accuracy
+        target: ">= 0.95"
+        
+      - name: semantic_precision
+        target: ">= 0.85"
+    
+    cost_profile:
+      compute: "MEDIUM"
+      tokens: "LOW-MEDIUM"
+      external_api_calls: "variable"
+      estimated_cost_per_call: "$0.02 - $0.10"
+    
+    autonomy_level: "L0"
+    autonomy_description: "قراءة وتجميع فقط"
+    
+    example:
+      input:
+        term: "فلسفة"
+        source_language: "arabic"
+        target_languages: ["greek", "syriac", "latin", "persian"]
+        semantic_focus: true
+        
+      output:
+        lexical_journey:
+          term: "فلسفة"
+          origin:
+            language: "greek"
+            form: "φιλοσοφία"
+            meaning: "حب الحكمة"
+            earliest_attestation:
+              source: "Heraclitus fragments"
+              date: "500 BCE"
+          stages:
+            - order: 1
+              language: "greek"
+              form: "φιλοσοφία"
+              transliteration: "philosophia"
+              meaning: "حب الحكمة، السعي وراء المعرفة"
+              period: {start: "500 BCE", end: "300 CE"}
+              
+            - order: 2
+              language: "syriac"
+              script: "syriac"
+              form: "ܦܝܠܣܦܘܬܐ"
+              transliteration: "filosofutha"
+              meaning: "الحكمة اليونانية"
+              period: {start: "200 CE", end: "800 CE"}
+              transmission:
+                from_language: "greek"
+                mechanism: "BORROWING"
+                agents: ["مترجمو الرها", "مدرسة نصيبين"]
+                
+            - order: 3
+              language: "arabic"
+              form: "فلسفة"
+              meaning: "علم البحث في الموجودات بما هي موجودة"
+              period: {start: "750 CE", end: "present"}
+              transmission:
+                from_language: "syriac"
+                mechanism: "BORROWING"
+                intermediary: "السريانية"
+                agents: ["حنين بن إسحاق", "حركة الترجمة"]
+              semantic_changes:
+                - from_meaning: "حب الحكمة (عام)"
+                  to_meaning: "علم أرسطو وتفريعاته"
+                  change_type: "NARROWING"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# T2: التتبع المفاهيمي (Conceptual Tracing)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "T2"
+    name_ar: "التتبع المفاهيمي"
+    name_en: "Conceptual Tracing"
+    category: "Trace"
+    version: "1.0.0"
+    
+    purpose: |
+      تتبع تطور المفهوم عبر الزمن والسياقات والمدارس
+      مع رصد التحولات والتنويعات والصراعات حوله
+    
+    inputs:
+      required:
+        - name: concept
+          type: string
+          description: "المفهوم المراد تتبعه"
+          
+        - name: starting_point
+          type: object
+          schema:
+            tradition: string
+            period: string
+            key_text: string
+            
+      optional:
+        - name: end_point
+          type: object
+          description: "نقطة النهاية إن وجدت"
+          
+        - name: traditions_scope
+          type: array[string]
+          default: ["all"]
+          description: "التقاليد/المدارس المستهدفة"
+          
+        - name: include_controversies
+          type: boolean
+          default: true
+          description: "تضمين الجدالات والخلافات"
+          
+        - name: include_alternatives
+          type: boolean
+          default: true
+          description: "تضمين المفاهيم البديلة المتنافسة"
+    
+    outputs:
+      primary:
+        name: concept_trajectory
+        type: ConceptTrajectory
+        schema:
+          concept: string
+          trajectory_type: enum[LINEAR, BRANCHING, CYCLICAL, SPIRAL]
+          origin:
+            definition: string
+            context: string
+            key_text: string
+            author: string
+            date: string
+          phases:
+            type: array
+            items:
+              id: string
+              name: string
+              period:
+                start: string
+                end: string
+              definition: string
+              key_features:
+                type: array
+                items:
+                  feature: string
+                  evidence: string
+              key_texts:
+                type: array
+                items:
+                  work_id: string
+                  title: string
+                  author: string
+                  contribution: string
+              key_figures:
+                type: array
+                items:
+                  person_id: string
+                  name: string
+                  role: enum[FOUNDER, DEVELOPER, CRITIC, SYNTHESIZER]
+              schools:
+                type: array
+              geographic_centers: array[string]
+              transition_to_next:
+                trigger: string
+                mechanism: string
+                key_innovation: string
+          transformations:
+            type: array
+            items:
+              from_phase: string
+              to_phase: string
+              type: enum[REFINEMENT, EXPANSION, RESTRICTION, REVERSAL, SYNTHESIS, REJECTION]
+              description: string
+              evidence: array
+              agents_of_change: array[string]
+          controversies:
+            type: array
+            items:
+              period: string
+              parties: array
+              issue: string
+              resolution: string
+              lasting_impact: string
+          competing_concepts:
+            type: array
+            items:
+              concept: string
+              relation: enum[ALTERNATIVE, COMPLEMENT, OPPOSITION]
+              periods_of_competition: array
+          current_status:
+            active: boolean
+            contemporary_forms: array
+            scholarly_consensus: string
+            
+      secondary:
+        - name: concept_timeline
+          type: object
+          format: "timeline_visualization"
+          
+        - name: influence_map
+          type: object
+          description: "خريطة التأثير والتأثر"
+          
+        - name: bibliography
+          type: array
+          description: "ببليوغرافيا الدراسات حول المفهوم"
+    
+    tools:
+      internal:
+        - name: Concept Evolution Tracker
+          type: temporal_analysis
+          
+        - name: School Position Extractor
+          type: nlp
+          
+        - name: Controversy Detector
+          type: discourse_analysis
+          
+      external: []
+    
+    resources:
+      knowledge_bases:
+        - concept_history_db
+        - philosophical_schools_db
+        - theological_schools_db
+    
+    guardrails:
+      pre_conditions:
+        - condition: "concept has identifiable origin or earliest attestation"
+          error_code: "T2_NO_ORIGIN"
+          
+      post_conditions:
+        - condition: "phases are chronologically ordered"
+          error_code: "T2_DISORDERED_PHASES"
+          
+        - condition: "transformations have evidence"
+          error_code: "T2_UNSUPPORTED_TRANSFORMATION"
+          
+      forbidden:
+        - "teleological reading of history"
+        - "ignoring minority positions"
+        - "presenting contested interpretations as consensus"
+    
+    quality_metrics:
+      - name: phase_coverage
+        target: ">= 0.9"
+        
+      - name: transformation_documentation
+        target: ">= 0.85"
+        
+      - name: controversy_balance
+        description: "توازن عرض الخلافات"
+        target: ">= 0.8"
+    
+    cost_profile:
+      compute: "HIGH"
+      tokens: "MEDIUM-HIGH"
+      estimated_cost_per_call: "$0.05 - $0.20"
+    
+    autonomy_level: "L1"
+    autonomy_description: "يقترح المسار، خاضع للمراجعة"
+    
+    example:
+      input:
+        concept: "الاجتهاد"
+        starting_point:
+          tradition: "islamic_jurisprudence"
+          period: "early_islam"
+          key_text: "أحاديث الاجتهاد"
+        include_controversies: true
+        
+      output:
+        concept_trajectory:
+          concept: "الاجتهاد"
+          trajectory_type: "BRANCHING"
+          phases:
+            - id: "phase_1"
+              name: "الاجتهاد النبوي والصحابي"
+              period: {start: "1 AH", end: "100 AH"}
+              definition: "بذل الوسع في استنباط الحكم"
+              
+            - id: "phase_2"
+              name: "تأسيس المذاهب"
+              period: {start: "100 AH", end: "300 AH"}
+              key_figures:
+                - {name: "الشافعي", role: "FOUNDER"}
+                
+            - id: "phase_3"
+              name: "نظرية سد باب الاجتهاد"
+              period: {start: "400 AH", end: "1200 AH"}
+              controversies:
+                - issue: "هل أُغلق باب الاجتهاد؟"
+                  parties: ["المجيزون", "المانعون"]
+                  
+            - id: "phase_4"
+              name: "الدعوة لفتح باب الاجتهاد"
+              period: {start: "1200 AH", end: "present"}
+              key_figures:
+                - {name: "الشوكاني", role: "DEVELOPER"}
+                - {name: "محمد عبده", role: "DEVELOPER"}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# T3: التتبع الجينالوجي (Genealogical Tracing)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "T3"
+    name_ar: "التتبع الجينالوجي"
+    name_en: "Genealogical Tracing"
+    category: "Trace"
+    version: "1.0.0"
+    
+    purpose: |
+      تتبع سلاسل النقل والتأثير للنصوص والأفكار والممارسات
+      من الأصل إلى الفروع عبر الأجيال
+    
+    inputs:
+      required:
+        - name: target
+          type: object
+          schema:
+            type: enum[TEXT, IDEA, PRACTICE, INSTITUTION, METHODOLOGY, ISNAD]
+            id: string
+            name: string
+            description: string
+            
+      optional:
+        - name: trace_type
+          type: enum
+          values: [
+            ISNAD,           # سلسلة إسناد الحديث/الرواية
+            TEXTUAL,         # سلسلة نقل النص
+            INTELLECTUAL,    # سلسلة التأثير الفكري
+            INSTITUTIONAL,   # سلسلة المؤسسات
+            PEDAGOGICAL      # سلسلة التلمذة
+          ]
+          default: "INTELLECTUAL"
+          
+        - name: direction
+          type: enum
+          values: [UPSTREAM, DOWNSTREAM, BOTH]
+          default: "BOTH"
+          
+        - name: max_generations
+          type: integer
+          default: 10
+    
+    outputs:
+      primary:
+        name: genealogy_chain
+        type: GenealogyChain
+        schema:
+          target: object
+          chain_type: string
+          root:
+            id: string
+            name: string
+            date: string
+            location: string
+          generations:
+            type: array
+            items:
+              generation_number: integer
+              nodes:
+                type: array
+                items:
+                  id: string
+                  name: string
+                  type: string
+                  dates:
+                    birth: string
+                    death: string
+                    active: string
+                  location: string
+                  role: enum[ORIGINATOR, TRANSMITTER, DEVELOPER, CRITIC, SYNTHESIZER]
+                  received_from:
+                    type: array
+                    items:
+                      node_id: string
+                      mode: enum[ORAL, WRITTEN, IJAZA, READING, HEARING]
+                      date: string
+                      location: string
+                      evidence: string
+                  transmitted_to: array
+                  contributions: array[string]
+                  modifications: array[string]
+          breaks:
+            type: array
+            description: "انقطاعات أو فجوات في السلسلة"
+            items:
+              between: array[string]
+              type: enum[TEMPORAL_GAP, GEOGRAPHIC_GAP, UNKNOWN_LINK]
+              notes: string
+          branches:
+            type: array
+            description: "تفرعات السلسلة"
+            items:
+              branch_point: string
+              branch_id: string
+              branch_name: string
+              distinctive_features: array
+          reunifications:
+            type: array
+            description: "نقاط التقاء الفروع"
+          reliability_assessment:
+            overall_grade: enum[SAHIH, HASAN, DAIF, MUNQATI, UNKNOWN]
+            notes: string
+            
+      secondary:
+        - name: genealogy_graph
+          type: object
+          format: "directed_acyclic_graph"
+          
+        - name: generation_statistics
+          type: object
+          
+        - name: geographic_trajectory
+          type: array
+    
+    tools:
+      internal:
+        - name: Isnad Analyzer
+          type: specialized
+          
+        - name: Teacher-Student Network Builder
+          type: graph_algorithm
+          
+        - name: Transmission Route Mapper
+          type: geographic
+          
+      external: []
+    
+    resources:
+      knowledge_bases:
+        - rijal_database  # رجال الحديث
+        - ulama_database  # تراجم العلماء
+        - ijazat_database # الإجازات العلمية
+        - tabaqat_database # طبقات العلماء
+    
+    guardrails:
+      pre_conditions:
+        - condition: "target has known origin or earliest attestation"
+          error_code: "T3_UNKNOWN_ORIGIN"
+          
+      post_conditions:
+        - condition: "no cycles in genealogy (DAG property)"
+          error_code: "T3_CIRCULAR_GENEALOGY"
+          
+        - condition: "temporal order preserved"
+          error_code: "T3_TEMPORAL_VIOLATION"
+          
+      forbidden:
+        - "hiding breaks in chain"
+        - "inventing links without evidence"
+        - "ignoring known criticisms of transmitters"
+    
+    quality_metrics:
+      - name: chain_completeness
+        target: ">= 0.85"
+        
+      - name: link_documentation
+        target: ">= 0.9"
+        
+      - name: reliability_accuracy
+        target: ">= 0.95"
+    
+    cost_profile:
+      compute: "MEDIUM-HIGH"
+      tokens: "MEDIUM"
+      estimated_cost_per_call: "$0.03 - $0.15"
+    
+    autonomy_level: "L1"
+    
+    example:
+      input:
+        target:
+          type: "ISNAD"
+          name: "سند حديث الأعمال بالنيات"
+        trace_type: "ISNAD"
+        direction: "UPSTREAM"
+        
+      output:
+        genealogy_chain:
+          chain_type: "ISNAD"
+          root:
+            name: "النبي ﷺ"
+          generations:
+            - generation_number: 1
+              nodes:
+                - name: "عمر بن الخطاب"
+                  role: "TRANSMITTER"
+            - generation_number: 2
+              nodes:
+                - name: "علقمة بن وقاص الليثي"
+                  received_from:
+                    - node_id: "umar"
+                      mode: "HEARING"
+          reliability_assessment:
+            overall_grade: "SAHIH"
+            notes: "متفق على صحته، تفرد به يحيى بن سعيد"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# T4: التتبع الجغرافي (Geographic Tracing)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "T4"
+    name_ar: "التتبع الجغرافي"
+    name_en: "Geographic Tracing"
+    category: "Trace"
+    version: "1.0.0"
+    
+    purpose: |
+      تتبع الانتشار الجغرافي للأفكار والممارسات والمؤسسات
+      عبر المناطق والحضارات مع رصد طرق الانتقال وفاعليه
+    
+    inputs:
+      required:
+        - name: target
+          type: object
+          schema:
+            type: enum[IDEA, PRACTICE, INSTITUTION, TEXT, SCHOOL, TECHNOLOGY]
+            id: string
+            name: string
+            origin_location: string
+            origin_date: string
+            
+      optional:
+        - name: time_range
+          type: object
+          schema:
+            start: string
+            end: string
+            
+        - name: geographic_scope
+          type: array[string]
+          default: ["all"]
+          description: "المناطق المستهدفة"
+          
+        - name: include_routes
+          type: boolean
+          default: true
+          description: "تضمين طرق الانتقال"
+          
+        - name: include_agents
+          type: boolean
+          default: true
+          description: "تضمين فاعلي الانتقال (تجار، علماء، جيوش...)"
+          
+        - name: include_barriers
+          type: boolean
+          default: true
+          description: "تضمين العوائق والحدود"
+    
+    outputs:
+      primary:
+        name: geographic_diffusion
+        type: GeographicDiffusion
+        schema:
+          target: object
+          origin:
+            location:
+              name: string
+              coordinates: {lat: float, lng: float}
+              region: string
+            date: string
+            context: string
+          diffusion_pattern: enum[RADIAL, LINEAR, NETWORK, HIERARCHICAL, CONTAGION]
+          waves:
+            type: array
+            description: "موجات الانتشار"
+            items:
+              wave_number: integer
+              period:
+                start: string
+                end: string
+              locations_reached:
+                type: array
+                items:
+                  location:
+                    name: string
+                    coordinates: object
+                    region: string
+                  arrival_date: string
+                  arrival_context: string
+                  adaptation_notes: string
+                  local_development: string
+                  key_figures: array[string]
+                  institutions_established: array[string]
+              routes:
+                type: array
+                items:
+                  from: string
+                  to: string
+                  route_type: enum[LAND, SEA, TRADE, PILGRIMAGE, CONQUEST, SCHOLARLY]
+                  route_name: string  # طريق الحرير، طريق الحج
+                  duration: string
+              agents:
+                type: array
+                items:
+                  type: enum[SCHOLAR, MERCHANT, ARMY, MISSIONARY, PILGRIM, REFUGEE]
+                  examples: array[string]
+                  role: string
+              drivers:
+                type: array
+                description: "دوافع الانتشار"
+              barriers:
+                type: array
+                items:
+                  type: enum[POLITICAL, GEOGRAPHIC, LINGUISTIC, RELIGIOUS]
+                  description: string
+                  impact: string
+          regional_variations:
+            type: object
+            description: "التنويعات الإقليمية"
+          current_distribution:
+            type: array
+            description: "التوزيع الحالي"
+            
+      secondary:
+        - name: diffusion_map
+          type: object
+          format: "geojson"
+          
+        - name: timeline_with_locations
+          type: array
+          
+        - name: network_analysis
+          type: object
+          description: "تحليل شبكة الانتشار"
+    
+    tools:
+      internal:
+        - name: Geographic Diffusion Modeler
+          type: spatial_analysis
+          
+        - name: Route Reconstructor
+          type: historical_geography
+          
+        - name: Agent Network Analyzer
+          type: network_analysis
+          
+      external:
+        - name: Historical GIS
+          purpose: "historical geographic data"
+    
+    resources:
+      knowledge_bases:
+        - historical_gazetteer
+        - trade_routes_db
+        - scholarly_travel_records
+        - conquest_timeline_db
+    
+    guardrails:
+      post_conditions:
+        - condition: "locations are historically accurate"
+          error_code: "T4_ANACHRONISTIC_LOCATION"
+          
+        - condition: "routes are plausible for the period"
+          error_code: "T4_IMPLAUSIBLE_ROUTE"
+          
+      forbidden:
+        - "using modern borders for historical periods"
+        - "ignoring known barriers"
+        - "assuming linear diffusion without evidence"
+    
+    quality_metrics:
+      - name: location_accuracy
+        target: ">= 0.95"
+        
+      - name: route_plausibility
+        target: ">= 0.9"
+        
+      - name: dating_accuracy
+        target: ">= 0.85"
+    
+    cost_profile:
+      compute: "MEDIUM"
+      tokens: "LOW-MEDIUM"
+      estimated_cost_per_call: "$0.02 - $0.10"
+    
+    autonomy_level: "L0-L1"
+    
+    example:
+      input:
+        target:
+          type: "SCHOOL"
+          name: "المذهب المالكي"
+          origin_location: "المدينة المنورة"
+          origin_date: "179 AH"
+        time_range:
+          start: "179 AH"
+          end: "600 AH"
+        include_routes: true
+        
+      output:
+        geographic_diffusion:
+          diffusion_pattern: "NETWORK"
+          origin:
+            location:
+              name: "المدينة المنورة"
+              region: "الحجاز"
+            date: "179 AH"
+          waves:
+            - wave_number: 1
+              period: {start: "179 AH", end: "250 AH"}
+              locations_reached:
+                - location: {name: "القيروان", region: "إفريقية"}
+                  arrival_date: "184 AH"
+                  key_figures: ["سحنون", "أسد بن الفرات"]
+                  
+                - location: {name: "الأندلس", region: "المغرب"}
+                  arrival_date: "199 AH"
+                  key_figures: ["يحيى بن يحيى الليثي"]
+              routes:
+                - from: "المدينة"
+                  to: "القيروان"
+                  route_type: "SCHOLARLY"
+                  route_name: "طريق الحج"
+              agents:
+                - type: "SCHOLAR"
+                  examples: ["تلاميذ مالك"]
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# T5: التتبع المؤسسي (Institutional Tracing)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "T5"
+    name_ar: "التتبع المؤسسي"
+    name_en: "Institutional Tracing"
+    category: "Trace"
+    version: "1.0.0"
+    
+    purpose: |
+      تتبع تطور المؤسسات والممارسات المنظمة عبر الزمن
+      من النشأة إلى التحولات والاستمرارية أو الاندثار
+    
+    inputs:
+      required:
+        - name: institution
+          type: object
+          schema:
+            type: enum[EDUCATIONAL, LEGAL, RELIGIOUS, ECONOMIC, ADMINISTRATIVE, CHARITABLE]
+            name: string
+            earliest_form: string
+            origin_context: string
+            
+      optional:
+        - name: trace_aspects
+          type: array[string]
+          default: ["all"]
+          values: [STRUCTURE, FUNCTION, PERSONNEL, FUNDING, CURRICULUM, RITUAL, LEGAL_STATUS]
+          
+        - name: compare_with
+          type: array[string]
+          description: "مؤسسات للمقارنة"
+          
+        - name: include_predecessors
+          type: boolean
+          default: true
+          
+        - name: include_successors
+          type: boolean
+          default: true
+    
+    outputs:
+      primary:
+        name: institutional_evolution
+        type: InstitutionalEvolution
+        schema:
+          institution: string
+          institution_type: string
+          predecessors:
+            type: array
+            items:
+              name: string
+              tradition: string
+              influence_type: enum[DIRECT, PARTIAL, CONCEPTUAL]
+              evidence: string
+          origin:
+            date: string
+            location: string
+            founder: string
+            context: string
+            original_purpose: string
+          evolutionary_phases:
+            type: array
+            items:
+              phase_name: string
+              period:
+                start: string
+                end: string
+              characteristics:
+                structure: string
+                function: string
+                personnel: string
+                funding: string
+                legal_status: string
+              key_developments:
+                type: array
+                items:
+                  development: string
+                  date: string
+                  agent: string
+                  impact: string
+              exemplar_instances:
+                type: array
+                items:
+                  name: string
+                  location: string
+                  notable_features: array
+              geographic_spread: array[string]
+              transition_to_next:
+                trigger: string
+                mechanism: string
+          transformations:
+            type: array
+            items:
+              from_phase: string
+              to_phase: string
+              transformation_type: enum[REFORM, EXPANSION, CONTRACTION, MERGER, SPLIT, SECULARIZATION, REVIVAL]
+              key_actors: array
+              external_factors: array
+          successors:
+            type: array
+            description: "المؤسسات اللاحقة المتأثرة"
+          modern_forms:
+            type: array
+          comparative_notes:
+            type: object
+            description: "مقارنات مع مؤسسات مشابهة"
+            
+      secondary:
+        - name: institutional_timeline
+          type: array
+          
+        - name: organizational_charts
+          type: array
+          description: "هياكل تنظيمية عبر المراحل"
+          
+        - name: bibliography
+          type: array
+    
+    tools:
+      internal:
+        - name: Institutional Historian
+          type: temporal_analysis
+          
+        - name: Comparative Institutionalist
+          type: comparative_analysis
+          
+      external: []
+    
+    resources:
+      knowledge_bases:
+        - institutions_registry
+        - waqf_documents
+        - administrative_records
+    
+    guardrails:
+      post_conditions:
+        - condition: "phases are non-overlapping and continuous"
+          error_code: "T5_PHASE_OVERLAP"
+          
+        - condition: "transformations have causal evidence"
+          error_code: "T5_UNEXPLAINED_CHANGE"
+          
+      forbidden:
+        - "anachronistic terminology"
+        - "projecting modern concepts onto historical institutions"
+    
+    quality_metrics:
+      - name: phase_documentation
+        target: ">= 0.85"
+        
+      - name: transformation_clarity
+        target: ">= 0.9"
+        
+      - name: comparative_accuracy
+        target: ">= 0.8"
+    
+    cost_profile:
+      compute: "HIGH"
+      tokens: "MEDIUM-HIGH"
+      estimated_cost_per_call: "$0.05 - $0.20"
+    
+    autonomy_level: "L1"
+    
+    example:
+      input:
+        institution:
+          type: "EDUCATIONAL"
+          name: "المدرسة"
+          earliest_form: "المدرسة النظامية"
+          origin_context: "بغداد السلجوقية"
+        include_predecessors: true
+        compare_with: ["الجامعة الأوروبية"]
+        
+      output:
+        institutional_evolution:
+          institution: "المدرسة"
+          predecessors:
+            - name: "حلقات المساجد"
+              tradition: "islamic"
+              influence_type: "DIRECT"
+            - name: "مدارس نيسابور المبكرة"
+              influence_type: "DIRECT"
+          origin:
+            date: "459 AH"
+            location: "بغداد"
+            founder: "نظام الملك"
+            original_purpose: "تعليم الفقه الشافعي ومواجهة الإسماعيلية"
+          evolutionary_phases:
+            - phase_name: "التأسيس السلجوقي"
+              period: {start: "459 AH", end: "550 AH"}
+              characteristics:
+                structure: "وقف مستقل بمبنى مخصص"
+                function: "تعليم الفقه والحديث"
+                funding: "الوقف السلطاني"
+                
+            - phase_name: "الانتشار والتنوع"
+              period: {start: "550 AH", end: "900 AH"}
+              
+          comparative_notes:
+            with_university:
+              similarities: ["التخصص", "الإجازات"]
+              differences: ["الشخصية الاعتبارية", "البرنامج الموحد"]
+              possible_influence: "نقل عبر الأندلس وصقلية"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              نهاية ملف التتبع
+# ═══════════════════════════════════════════════════════════════════════════════

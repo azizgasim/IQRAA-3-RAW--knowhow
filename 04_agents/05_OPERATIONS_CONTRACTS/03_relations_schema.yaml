@@ -1,0 +1,535 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#                    IQRA-12 Relations Schema
+#                        هيكل العلاقات
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# "العلاقة بلا دليل = شائعة"
+#
+# الدروس الحاكمة:
+# - Ruth Ahnert: تحليل الشبكات التاريخية والمركزية البينية
+# - Sarah Bowen Savant: الأسانيد كشبكات لا قوائم
+# - Luc Moreau: كل علاقة مربوطة بدليل
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+metadata:
+  component: "Relations Schema"
+  component_ar: "هيكل العلاقات"
+  version: "1.0.0"
+  purpose: "تعريف أنواع العلاقات بين الكيانات وبنيتها"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              المبادئ الحاكمة
+# ═══════════════════════════════════════════════════════════════════════════════
+
+governing_principles:
+
+  principle_1:
+    name: "No Relation Without Evidence"
+    name_ar: "لا علاقة بلا دليل"
+    rule: |
+      كل علاقة في الـ Graph يجب أن ترتبط بـ evidence_id.
+      العلاقة بلا دليل = شائعة.
+    implementation: "Mandatory evidence_id in edges table"
+    
+  principle_2:
+    name: "Interpretive vs Factual"
+    name_ar: "التأويلي مقابل الواقعي"
+    rule: |
+      تمييز العلاقات الواقعية عن العلاقات التأويلية.
+      "درس عند" = واقعي.
+      "تأثر بـ" = تأويلي.
+    implementation: "is_interpretive flag"
+    
+  principle_3:
+    name: "Temporal Context"
+    name_ar: "السياق الزمني"
+    source: "Ian Gregory"
+    rule: |
+      العلاقات تتغير عبر الزمن.
+      "كان تلميذاً" في فترة، "صار شيخاً" في فترة أخرى.
+    implementation: "time_start, time_end fields"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              فئات العلاقات
+# ═══════════════════════════════════════════════════════════════════════════════
+
+relation_categories:
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # علاقات الأشخاص
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  PERSON_RELATIONS:
+    
+    academic:
+      description: "العلاقات العلمية"
+      types:
+        - STUDIED_UNDER:
+            ar: "درس عند"
+            inverse: "TAUGHT"
+            is_interpretive: false
+            
+        - TAUGHT:
+            ar: "درّس"
+            inverse: "STUDIED_UNDER"
+            is_interpretive: false
+            
+        - TRANSMITTED_FROM:
+            ar: "روى عن"
+            inverse: "TRANSMITTED_TO"
+            is_interpretive: false
+            specific_to: "hadith"
+            
+        - IJAZA_FROM:
+            ar: "أجازه"
+            inverse: "IJAZA_TO"
+            is_interpretive: false
+            
+        - DEBATED_WITH:
+            ar: "ناظر"
+            inverse: "DEBATED_WITH"
+            is_interpretive: false
+            
+    intellectual:
+      description: "العلاقات الفكرية (تأويلية)"
+      types:
+        - INFLUENCED_BY:
+            ar: "تأثر بـ"
+            inverse: "INFLUENCED"
+            is_interpretive: true
+            requires_justification: true
+            
+        - INFLUENCED:
+            ar: "أثّر في"
+            inverse: "INFLUENCED_BY"
+            is_interpretive: true
+            requires_justification: true
+            
+        - AGREED_WITH:
+            ar: "وافق"
+            inverse: "AGREED_WITH"
+            is_interpretive: false
+            on_what: "claim_id"
+            
+        - DISAGREED_WITH:
+            ar: "خالف"
+            inverse: "DISAGREED_WITH"
+            is_interpretive: false
+            on_what: "claim_id"
+            
+        - REFUTED:
+            ar: "ردّ على"
+            inverse: "REFUTED_BY"
+            is_interpretive: false
+            
+        - FOLLOWED:
+            ar: "تبع"
+            inverse: "FOLLOWED_BY"
+            is_interpretive: true
+            
+    social:
+      description: "العلاقات الاجتماعية"
+      types:
+        - CONTEMPORARY_OF:
+            ar: "عاصر"
+            inverse: "CONTEMPORARY_OF"
+            is_interpretive: false
+            
+        - MET:
+            ar: "التقى"
+            inverse: "MET"
+            is_interpretive: false
+            
+        - CORRESPONDED_WITH:
+            ar: "راسل"
+            inverse: "CORRESPONDED_WITH"
+            is_interpretive: false
+            
+        - PATRONIZED_BY:
+            ar: "رعاه"
+            inverse: "PATRONIZED"
+            is_interpretive: false
+            
+    family:
+      description: "العلاقات العائلية"
+      types:
+        - PARENT_OF:
+            ar: "أب/أم"
+            inverse: "CHILD_OF"
+            is_interpretive: false
+            
+        - CHILD_OF:
+            ar: "ابن/ابنة"
+            inverse: "PARENT_OF"
+            is_interpretive: false
+            
+        - SIBLING_OF:
+            ar: "أخ/أخت"
+            inverse: "SIBLING_OF"
+            is_interpretive: false
+            
+    lessons:
+      - source: "Ruth Ahnert"
+        field: "Historical Network Analysis"
+        lesson: |
+          المركزية البينية (Betweenness Centrality):
+          كشف العلماء الذين لعبوا دور الجسور بين المذاهب.
+          غالباً مهملون في السرديات التقليدية.
+        implementation: "Centrality metrics on person network"
+        
+      - source: "Sarah Bowen Savant"
+        field: "Digital Philology"
+        lesson: |
+          الأسانيد كشبكات: السند ليس قائمة خطية، بل شبكة معقدة.
+          تحليله كرسم بياني يكشف مدار الحديث.
+        implementation: "Isnad Graph analysis"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # علاقات الأعمال (الكتب)
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  WORK_RELATIONS:
+    
+    authorship:
+      description: "علاقات التأليف"
+      types:
+        - AUTHORED_BY:
+            ar: "من تأليف"
+            inverse: "AUTHORED"
+            is_interpretive: false
+            
+        - COMMENTED_ON:
+            ar: "شرح"
+            inverse: "COMMENTED_BY"
+            is_interpretive: false
+            
+        - SUMMARIZED:
+            ar: "لخّص"
+            inverse: "SUMMARIZED_BY"
+            is_interpretive: false
+            
+        - TRANSLATED:
+            ar: "ترجم"
+            inverse: "TRANSLATION_OF"
+            is_interpretive: false
+            from_language: "required"
+            to_language: "required"
+            
+        - EDITED:
+            ar: "حقّق"
+            inverse: "EDITED_BY"
+            is_interpretive: false
+            
+    textual:
+      description: "علاقات نصية"
+      types:
+        - QUOTES_FROM:
+            ar: "ينقل عن"
+            inverse: "QUOTED_BY"
+            is_interpretive: false
+            alignment_type: "VERBATIM | PARAPHRASE | SUMMARY"
+            
+        - REFERENCES:
+            ar: "يشير إلى"
+            inverse: "REFERENCED_BY"
+            is_interpretive: false
+            
+        - RESPONDS_TO:
+            ar: "يرد على"
+            inverse: "RESPONDED_BY"
+            is_interpretive: false
+            
+        - VERSION_OF:
+            ar: "نسخة من"
+            inverse: "HAS_VERSION"
+            is_interpretive: false
+            
+        - ABRIDGMENT_OF:
+            ar: "مختصر من"
+            inverse: "ABRIDGED_TO"
+            is_interpretive: false
+            
+    lessons:
+      - source: "Sarah Bowen Savant"
+        field: "KITAB Project"
+        lesson: |
+          الجينوم النصي: تتبع الجملة كجين ينتقل من كتاب لآخر.
+          من الطبري إلى ابن كثير.
+        implementation: "Passim text reuse detection"
+        
+      - source: "Sarah Bowen Savant"
+        lesson: |
+          إعادة بناء المفقود: كثرة النقل من كتاب مفقود 
+          تمكّن من إعادة بنائه رقمياً.
+        implementation: "Lost book reconstruction from quotes"
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # علاقات المفاهيم
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  CONCEPT_RELATIONS:
+    
+    hierarchical:
+      description: "علاقات هرمية"
+      types:
+        - BROADER_THAN:
+            ar: "أعم من"
+            inverse: "NARROWER_THAN"
+            is_interpretive: false
+            
+        - NARROWER_THAN:
+            ar: "أخص من"
+            inverse: "BROADER_THAN"
+            is_interpretive: false
+            
+        - PART_OF:
+            ar: "جزء من"
+            inverse: "HAS_PART"
+            is_interpretive: false
+            
+    semantic:
+      description: "علاقات دلالية"
+      types:
+        - SYNONYM_OF:
+            ar: "مرادف لـ"
+            inverse: "SYNONYM_OF"
+            is_interpretive: false
+            context_dependent: true
+            
+        - ANTONYM_OF:
+            ar: "ضد"
+            inverse: "ANTONYM_OF"
+            is_interpretive: false
+            
+        - RELATED_TO:
+            ar: "مرتبط بـ"
+            inverse: "RELATED_TO"
+            is_interpretive: true
+            
+    historical:
+      description: "علاقات تاريخية"
+      types:
+        - EVOLVED_FROM:
+            ar: "تطور من"
+            inverse: "EVOLVED_TO"
+            is_interpretive: true
+            requires_justification: true
+            
+        - TRANSLATED_FROM:
+            ar: "مترجم من"
+            inverse: "TRANSLATED_TO"
+            is_interpretive: false
+            original_language: "required"
+            
+        - REPLACES:
+            ar: "يحل محل"
+            inverse: "REPLACED_BY"
+            is_interpretive: true
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # علاقات الأماكن
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  PLACE_RELATIONS:
+    
+    types:
+      - LOCATED_IN:
+          ar: "يقع في"
+          inverse: "CONTAINS"
+          is_interpretive: false
+          
+      - NEAR:
+          ar: "قرب"
+          inverse: "NEAR"
+          is_interpretive: false
+          
+      - ROUTE_TO:
+          ar: "طريق إلى"
+          inverse: "ROUTE_FROM"
+          is_interpretive: false
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # علاقات المدارس الفكرية
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  SCHOOL_RELATIONS:
+    
+    types:
+      - BRANCH_OF:
+          ar: "فرع من"
+          inverse: "HAS_BRANCH"
+          is_interpretive: false
+          
+      - OPPOSED_TO:
+          ar: "معارض لـ"
+          inverse: "OPPOSED_TO"
+          is_interpretive: true
+          
+      - SYNTHESIZED_FROM:
+          ar: "جمع بين"
+          inverse: "CONTRIBUTED_TO"
+          is_interpretive: true
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              بنية جدول العلاقات
+# ═══════════════════════════════════════════════════════════════════════════════
+
+edges_table:
+  
+  name: "edges"
+  description: "جدول العلاقات الرئيسي"
+  
+  fields:
+    - edge_id:
+        type: "STRING"
+        description: "معرّف العلاقة"
+        required: true
+        
+    - source_entity_id:
+        type: "STRING"
+        description: "الكيان المصدر"
+        required: true
+        
+    - source_entity_type:
+        type: "STRING"
+        description: "نوع الكيان المصدر"
+        required: true
+        
+    - relation_type:
+        type: "STRING"
+        description: "نوع العلاقة من القاموس"
+        required: true
+        
+    - target_entity_id:
+        type: "STRING"
+        description: "الكيان الهدف"
+        required: true
+        
+    - target_entity_type:
+        type: "STRING"
+        description: "نوع الكيان الهدف"
+        required: true
+        
+    - is_interpretive:
+        type: "BOOLEAN"
+        description: "هل العلاقة تأويلية"
+        required: true
+        
+    - confidence:
+        type: "FLOAT"
+        description: "درجة الثقة (0-1)"
+        required: true
+        
+    - time_start:
+        type: "DATE"
+        description: "بداية العلاقة"
+        required: false
+        
+    - time_end:
+        type: "DATE"
+        description: "نهاية العلاقة"
+        required: false
+        
+    - context:
+        type: "STRING"
+        description: "سياق إضافي"
+        required: false
+        
+    - evidence_count:
+        type: "INTEGER"
+        description: "عدد الأدلة المرتبطة"
+        required: true
+        
+    - created_by_agent_id:
+        type: "STRING"
+        description: "الوكيل المنشئ"
+        required: true
+        
+    - created_by_run_id:
+        type: "STRING"
+        description: "التشغيل المنشئ"
+        required: true
+        
+    - corpus_version:
+        type: "STRING"
+        description: "إصدار الكوربس"
+        required: true
+        
+    - status:
+        type: "STRING"
+        description: "DRAFT | REVIEWED | APPROVED"
+        required: true
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              ربط العلاقات بالأدلة
+# ═══════════════════════════════════════════════════════════════════════════════
+
+edge_evidence_map:
+  
+  name: "edge_evidence_map"
+  description: "ربط كل علاقة بأدلتها"
+  
+  fields:
+    - map_id: "معرّف الربط"
+    - edge_id: "معرّف العلاقة"
+    - evidence_id: "معرّف الدليل"
+    - evidence_type: "PRIMARY | SUPPORTING | CORROBORATING"
+    - strength: "قوة الدليل (0-1)"
+    - notes: "ملاحظات"
+    
+  rule: |
+    كل edge يجب أن يرتبط بـ evidence_id واحد على الأقل.
+    العلاقة بلا دليل = شائعة.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              تحليل الشبكات
+# ═══════════════════════════════════════════════════════════════════════════════
+
+network_analysis:
+  
+  description: |
+    مقاييس الشبكات لتحليل العلاقات.
+    
+  metrics:
+    
+    degree_centrality:
+      description: "عدد العلاقات المباشرة"
+      use: "كشف الشخصيات الأكثر ارتباطاً"
+      
+    betweenness_centrality:
+      description: "المركزية البينية"
+      use: "كشف الجسور بين المجتمعات"
+      lesson:
+        source: "Ruth Ahnert"
+        text: |
+          كشف العلماء الذين لعبوا دور الجسور بين المذاهب.
+          غالباً مهملون في السرديات التقليدية.
+          
+    community_detection:
+      description: "كشف المجتمعات"
+      use: "اكتشاف المدارس والعناقيد العلمية"
+      algorithms: ["Louvain", "Label Propagation"]
+      
+    path_analysis:
+      description: "تحليل المسارات"
+      use: "تتبع انتقال المعرفة"
+      example: "كيف انتقلت فكرة X من A إلى Z"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              قواعد الجودة
+# ═══════════════════════════════════════════════════════════════════════════════
+
+quality_rules:
+
+  mandatory:
+    - "كل علاقة تأويلية تتطلب تبرير (justification_claim_id)"
+    - "كل علاقة مربوطة بـ evidence_id واحد على الأقل"
+    - "العلاقات المتناقضة تُعلّم للمراجعة"
+    
+  validation:
+    - "التحقق من وجود الكيانات المربوطة"
+    - "التحقق من صحة نوع العلاقة"
+    - "التحقق من التوافق الزمني"
+
+# ═══════════════════════════════════════════════════════════════════════════════

@@ -1,0 +1,457 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#                    IQRA-12 Autonomy Ladder
+#                        سلم الاستقلالية
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# "الاستقلالية ليست ميزة، بل سياسة"
+#                        — Ben Shneiderman
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+metadata:
+  component: "Autonomy Ladder"
+  component_ar: "سلم الاستقلالية"
+  version: "1.0.0"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              المبدأ الحاكم
+# ═══════════════════════════════════════════════════════════════════════════════
+
+governing_principle:
+  
+  source: "Ben Shneiderman - Human-Centered AI"
+  
+  statement: |
+    الجمع بين الأتمتة والتحكم البشري.
+    الاستقلالية تُمنح وفق سياسة محددة، لا وفق قدرات الوكيل.
+    
+  golden_rule: |
+    كلما زادت خطورة القرار، قلّت استقلالية الوكيل.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              مستويات الاستقلالية
+# ═══════════════════════════════════════════════════════════════════════════════
+
+levels:
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # المستوى 0: قراءة فقط
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  L0:
+    name: "Read Only"
+    name_ar: "قراءة فقط"
+    code: "L0"
+    color: "#4CAF50"  # Green
+    
+    description: |
+      يستعلم ويعرض أدلة دون تغيير بيانات.
+      أدنى مستوى من المخاطر.
+    
+    permissions:
+      allowed:
+        - "قراءة من جميع الجداول المصرح بها"
+        - "تنفيذ استعلامات بحث"
+        - "عرض النتائج للمستخدم"
+        - "اقتراح خطوات تالية"
+      forbidden:
+        - "إنشاء سجلات جديدة"
+        - "تعديل سجلات موجودة"
+        - "حذف أي بيانات"
+        - "استدعاء APIs خارجية"
+    
+    human_involvement: "لا يحتاج"
+    
+    example_agents:
+      - name: "Search Agent"
+        name_ar: "وكيل البحث"
+        task: "البحث في الكوربس وعرض النتائج"
+      - name: "Evidence Browser"
+        name_ar: "متصفح الأدلة"
+        task: "عرض الشواهد والسياقات"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # المستوى 1: اقتراح
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  L1:
+    name: "Suggest"
+    name_ar: "اقتراح"
+    code: "L1"
+    color: "#2196F3"  # Blue
+    
+    description: |
+      يقترح ربطاً أو دمجاً أو مراجعاً دون تنفيذ.
+      الاقتراحات تُخزن في جدول منفصل للمراجعة.
+    
+    permissions:
+      allowed:
+        - "كل صلاحيات L0"
+        - "إنشاء اقتراحات في جداول _proposals"
+        - "تصنيف وترتيب الاقتراحات بالأولوية"
+        - "شرح مبررات الاقتراح"
+      forbidden:
+        - "تنفيذ الاقتراحات مباشرة"
+        - "تعديل بيانات الإنتاج"
+        - "اعتماد أي ادعاء"
+    
+    human_involvement: "مراجعة الاقتراحات قبل التنفيذ"
+    
+    output_tables:
+      - "entity_merge_proposals"
+      - "relation_proposals"
+      - "claim_draft_proposals"
+    
+    example_agents:
+      - name: "Entity Extractor"
+        name_ar: "مستخرج الكيانات"
+        task: "اقتراح كيانات جديدة من النص"
+      - name: "Relation Proposer"
+        name_ar: "مقترح العلاقات"
+        task: "اقتراح علاقات بين كيانات"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # المستوى 2: تنفيذ مراقب
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  L2:
+    name: "Supervised Execute"
+    name_ar: "تنفيذ مراقب"
+    code: "L2"
+    color: "#FF9800"  # Orange
+    
+    description: |
+      ينفذ بعد موافقة بشرية صريحة.
+      كل تنفيذ يتطلب approval_id.
+    
+    permissions:
+      allowed:
+        - "كل صلاحيات L1"
+        - "تنفيذ الاقتراحات المعتمدة"
+        - "إنشاء سجلات في جداول الإنتاج"
+        - "تحديث سجلات موجودة"
+      forbidden:
+        - "التنفيذ بدون approval_id"
+        - "حذف البيانات"
+        - "تعديل بيانات تاريخية (archived)"
+    
+    human_involvement: "موافقة قبل كل تنفيذ"
+    
+    approval_workflow:
+      step_1: "الوكيل يُعد الإجراء"
+      step_2: "يُعرض على المراجع مع التفاصيل"
+      step_3: "المراجع يوافق/يرفض/يطلب تعديل"
+      step_4: "عند الموافقة: approval_id يُصدر"
+      step_5: "الوكيل ينفذ مع تسجيل approval_id"
+    
+    example_agents:
+      - name: "Entity Merger"
+        name_ar: "دامج الكيانات"
+        task: "دمج كيانات مكررة بعد الموافقة"
+      - name: "Claim Promoter"
+        name_ar: "مُرقّي الادعاءات"
+        task: "ترقية claim من draft إلى reviewed"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # المستوى 3: تنفيذ مشروط
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  L3:
+    name: "Conditional Execute"
+    name_ar: "تنفيذ مشروط"
+    code: "L3"
+    color: "#9C27B0"  # Purple
+    
+    description: |
+      ينفذ تلقائياً داخل شروط صارمة.
+      أي انتهاك للشروط يُوقف التنفيذ ويُخطر البشر.
+    
+    permissions:
+      allowed:
+        - "كل صلاحيات L2"
+        - "التنفيذ التلقائي ضمن الشروط"
+        - "تشغيل دفعات (batch operations)"
+      forbidden:
+        - "تجاوز سقف التكلفة"
+        - "العمل خارج النطاق المحدد"
+        - "تعديل الإعدادات أو السياسات"
+    
+    human_involvement: "مراقبة + تدخل عند الاستثناء"
+    
+    constraints:
+      cost_limit:
+        description: "سقف التكلفة لكل تشغيل"
+        default: "$10"
+        escalation: "إيقاف + إخطار عند 80%"
+        
+      scope_limit:
+        description: "النطاق المسموح"
+        types:
+          - "corpus_ids محددة"
+          - "date_range محدد"
+          - "operation_types محددة"
+          
+      rate_limit:
+        description: "معدل التنفيذ"
+        default: "100 operations/hour"
+        
+      quality_threshold:
+        description: "حد أدنى للجودة"
+        default: "confidence >= 0.8"
+    
+    guardrails:
+      - name: "Cost Breaker"
+        trigger: "cost > limit"
+        action: "STOP + NOTIFY"
+        
+      - name: "Scope Breaker"
+        trigger: "target outside scope"
+        action: "SKIP + LOG"
+        
+      - name: "Quality Breaker"
+        trigger: "confidence < threshold"
+        action: "QUEUE_FOR_REVIEW"
+    
+    example_agents:
+      - name: "Auto Segmenter"
+        name_ar: "المقطّع الآلي"
+        task: "تقطيع النصوص تلقائياً ضمن معايير"
+      - name: "Dedup Scanner"
+        name_ar: "ماسح التكرار"
+        task: "كشف التكرارات تلقائياً"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # المستوى 4: طيار محدود
+  # ─────────────────────────────────────────────────────────────────────────────
+  
+  L4:
+    name: "Limited Autopilot"
+    name_ar: "طيار محدود"
+    code: "L4"
+    color: "#F44336"  # Red
+    
+    description: |
+      للأعمال الإدارية والروتينية فقط.
+      لا يمس الادعاءات النهائية أو البيانات الحساسة.
+    
+    restrictions:
+      - "فحوصات روتينية فقط"
+      - "لا يمس claims بحالة reviewed أو published"
+      - "لا يمس entities معتمدة"
+      - "لا يغير علاقات semantic"
+    
+    allowed_operations:
+      - "مراقبة الجودة الدورية"
+      - "تحديث مؤشرات الأداء"
+      - "إرسال تنبيهات"
+      - "أرشفة البيانات القديمة"
+      - "تنظيف البيانات المؤقتة"
+    
+    human_involvement: "مراجعة دورية (يومية/أسبوعية)"
+    
+    audit_requirements:
+      - "سجل كامل لكل عملية"
+      - "تقرير يومي ملخص"
+      - "تنبيه فوري عند أي anomaly"
+    
+    example_agents:
+      - name: "Quality Monitor"
+        name_ar: "مراقب الجودة"
+        task: "فحص دوري لمؤشرات الجودة"
+      - name: "Cost Tracker"
+        name_ar: "متتبع التكلفة"
+        task: "مراقبة وتنبيه عن التكاليف"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              قواعد الترقية والتخفيض
+# ═══════════════════════════════════════════════════════════════════════════════
+
+promotion_demotion_rules:
+
+  promotion_criteria:
+    from_L0_to_L1:
+      requirements:
+        - "Agent Card مكتملة 100%"
+        - "اجتياز 50 eval cases بنجاح >90%"
+        - "موافقة Owner + Governance"
+        
+    from_L1_to_L2:
+      requirements:
+        - "1000 اقتراح بمعدل قبول >85%"
+        - "لا أخطاء حرجة في آخر 30 يوم"
+        - "موافقة Senior Reviewer"
+        
+    from_L2_to_L3:
+      requirements:
+        - "5000 تنفيذ بمعدل نجاح >95%"
+        - "drift score < 0.1"
+        - "موافقة Governance Committee"
+        
+    from_L3_to_L4:
+      requirements:
+        - "6 أشهر في L3 بدون حوادث"
+        - "تدقيق أمني كامل"
+        - "موافقة Admin + Governance"
+
+  demotion_triggers:
+    
+    immediate_demotion:
+      description: "تخفيض فوري بدرجة واحدة أو أكثر"
+      triggers:
+        - "خطأ حرج يؤثر على البيانات"
+        - "تجاوز سقف التكلفة بأكثر من 50%"
+        - "انتهاك حقوق الوصول"
+        - "drift score > 0.3"
+        
+    gradual_demotion:
+      description: "تخفيض تدريجي مع إنذار"
+      triggers:
+        - "معدل خطأ > 10% لمدة أسبوع"
+        - "drift score بين 0.1 و 0.3"
+        - "شكاوى متكررة من المراجعين"
+
+  special_cases:
+    
+    new_agent:
+      rule: "يبدأ دائماً من L0"
+      minimum_time: "أسبوع واحد قبل الترقية"
+      
+    agent_update:
+      rule: "أي تحديث جوهري يُعيد إلى L0"
+      definition: "تحديث جوهري = تغيير >20% من السلوك"
+      
+    incomplete_card:
+      rule: "بطاقة غير مكتملة = L0 إجباري"
+      action: "لا ترقية حتى الاكتمال"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              مصفوفة الصلاحيات
+# ═══════════════════════════════════════════════════════════════════════════════
+
+permissions_matrix:
+
+  tables:
+    documents:
+      L0: "READ"
+      L1: "READ"
+      L2: "READ"
+      L3: "READ, UPDATE (metadata only)"
+      L4: "READ, UPDATE (metadata only)"
+      
+    passages:
+      L0: "READ"
+      L1: "READ"
+      L2: "READ, CREATE (segmentation)"
+      L3: "READ, CREATE, UPDATE"
+      L4: "READ"
+      
+    entities:
+      L0: "READ"
+      L1: "READ, PROPOSE"
+      L2: "READ, PROPOSE, CREATE (approved)"
+      L3: "READ, PROPOSE, CREATE, MERGE (approved)"
+      L4: "READ"
+      
+    claims:
+      L0: "READ"
+      L1: "READ, DRAFT"
+      L2: "READ, DRAFT, PROMOTE (to reviewed)"
+      L3: "READ, DRAFT, PROMOTE"
+      L4: "READ"
+      
+    evidence_bundles:
+      L0: "READ"
+      L1: "READ, CREATE"
+      L2: "READ, CREATE, UPDATE"
+      L3: "READ, CREATE, UPDATE"
+      L4: "READ"
+      
+    decision_log:
+      L0: "READ"
+      L1: "READ"
+      L2: "READ, CREATE (own decisions)"
+      L3: "READ, CREATE"
+      L4: "READ, CREATE"
+
+  operations:
+    search:
+      L0: "✓ Unlimited"
+      L1: "✓ Unlimited"
+      L2: "✓ Unlimited"
+      L3: "✓ Unlimited"
+      L4: "✓ Limited to monitoring"
+      
+    create_proposal:
+      L0: "✗"
+      L1: "✓"
+      L2: "✓"
+      L3: "✓"
+      L4: "✗"
+      
+    execute_proposal:
+      L0: "✗"
+      L1: "✗"
+      L2: "✓ With approval"
+      L3: "✓ Within constraints"
+      L4: "✗"
+      
+    batch_operations:
+      L0: "✗"
+      L1: "✗"
+      L2: "✗"
+      L3: "✓ Within constraints"
+      L4: "✓ Maintenance only"
+      
+    modify_settings:
+      L0: "✗"
+      L1: "✗"
+      L2: "✗"
+      L3: "✗"
+      L4: "✗"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              جداول BigQuery
+# ═══════════════════════════════════════════════════════════════════════════════
+
+bigquery_tables:
+
+  agent_autonomy_log:
+    description: "سجل تغييرات الاستقلالية"
+    columns:
+      - log_id: "معرّف السجل"
+      - agent_id: "معرّف الوكيل"
+      - previous_level: "المستوى السابق"
+      - new_level: "المستوى الجديد"
+      - change_type: "PROMOTION | DEMOTION | RESET"
+      - reason: "السبب"
+      - approved_by: "المعتمِد"
+      - effective_date: "تاريخ السريان"
+      - created_at: "تاريخ الإنشاء"
+
+  autonomy_violations:
+    description: "سجل انتهاكات الاستقلالية"
+    columns:
+      - violation_id: "معرّف الانتهاك"
+      - agent_id: "معرّف الوكيل"
+      - run_id: "معرّف التشغيل"
+      - violation_type: "نوع الانتهاك"
+      - attempted_action: "الإجراء المحاول"
+      - blocked: "هل تم الحظر"
+      - severity: "LOW | MEDIUM | HIGH | CRITICAL"
+      - created_at: "تاريخ الحدوث"
+
+  approval_requests:
+    description: "طلبات الموافقة للـ L2"
+    columns:
+      - request_id: "معرّف الطلب"
+      - agent_id: "معرّف الوكيل"
+      - run_id: "معرّف التشغيل"
+      - action_type: "نوع الإجراء"
+      - action_details: "تفاصيل الإجراء"
+      - status: "PENDING | APPROVED | REJECTED | MODIFIED"
+      - reviewer_id: "معرّف المراجع"
+      - approval_id: "معرّف الموافقة"
+      - created_at: "تاريخ الإنشاء"
+      - resolved_at: "تاريخ الحل"
+
+# ═══════════════════════════════════════════════════════════════════════════════

@@ -1,0 +1,86 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://iqra.ai/schemas/data/concept_card.schema.json",
+  "title": "Concept Card Schema",
+  "description": "بطاقة المفهوم - IQRA v1.3",
+  "type": "object",
+  "required": ["concept_id", "term_ar", "definitions", "created_by"],
+  "properties": {
+    "concept_id": {
+      "type": "string",
+      "pattern": "^CONC-[A-Z0-9]{8}$"
+    },
+    "term_ar": {"type": "string", "description": "المصطلح بالعربية"},
+    "term_normalized": {"type": "string", "description": "المصطلح المُطبَّع"},
+    "term_en": {"type": "string"},
+    "root_ar": {"type": "string", "description": "الجذر الثلاثي"},
+    "morphological_pattern": {"type": "string", "description": "الوزن الصرفي"},
+    "definitions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["definition_ar", "source_evidence_id"],
+        "properties": {
+          "definition_id": {"type": "string"},
+          "definition_ar": {"type": "string"},
+          "definition_en": {"type": "string"},
+          "source_evidence_id": {"type": "string"},
+          "definer_scholar_id": {"type": "string"},
+          "definition_type": {
+            "type": "string",
+            "enum": ["linguistic", "technical", "contextual", "modern"]
+          },
+          "school_of_thought": {"type": "string"},
+          "confidence_score": {"type": "number", "minimum": 0, "maximum": 1}
+        }
+      }
+    },
+    "semantic_field": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "الحقل الدلالي"
+    },
+    "related_concepts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "concept_id": {"type": "string"},
+          "relation_type": {
+            "type": "string",
+            "enum": ["synonym", "antonym", "hypernym", "hyponym", "related", "derived_from", "leads_to"]
+          }
+        }
+      }
+    },
+    "historical_evolution": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "period": {"type": "string"},
+          "meaning_shift": {"type": "string"},
+          "evidence_ids": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    },
+    "usage_contexts": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["fiqh", "aqeedah", "tasawwuf", "philosophy", "linguistics", "hadith", "tafsir", "usul"]
+      }
+    },
+    "created_by": {"type": "string"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"},
+    "version": {"type": "integer", "default": 1},
+    "status": {
+      "type": "string",
+      "enum": ["draft", "review", "approved", "archived"],
+      "default": "draft"
+    },
+    "review_notes": {"type": "string"}
+  }
+}

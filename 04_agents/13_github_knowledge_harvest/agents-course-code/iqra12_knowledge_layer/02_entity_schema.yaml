@@ -1,0 +1,444 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#                    IQRA-12 Entity Schema
+#                        هيكل الكيانات
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# "الكيان ليس اسماً، بل هوية تحمل أسماء متعددة"
+#
+# الدروس الحاكمة:
+# - Aristotle: التفريق بين الجوهر (الهوية) والعَرَض (الاسم)
+# - Nicola Guarino (DOLCE): التمييز بين الجواهر والأحداث
+# - Maxim Romanov: المعرّفات الموحدة (URI) لكل عالم وكتاب
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+metadata:
+  component: "Entity Schema"
+  component_ar: "هيكل الكيانات"
+  version: "1.0.0"
+  purpose: "تعريف أنواع الكيانات وبنيتها ومعرّفاتها"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              المبادئ الحاكمة
+# ═══════════════════════════════════════════════════════════════════════════════
+
+governing_principles:
+
+  principle_1:
+    name: "Identity vs Names"
+    name_ar: "الهوية مقابل الأسماء"
+    source: "Aristotle"
+    field: "Logic & Metaphysics of Categories"
+    rule: |
+      الهوية جوهر، والاسم عَرَض يتغير.
+      الجداول تفصل بين "الهوية" و"الأسماء".
+    implementation:
+      - "جداول entities للهوية"
+      - "جداول entity_names للأسماء المتعددة"
+      
+  principle_2:
+    name: "Endurants vs Perdurants"
+    name_ar: "الجواهر مقابل الأحداث"
+    source: "Nicola Guarino"
+    field: "Formal Ontology (DOLCE)"
+    rule: |
+      الجواهر (Endurants): توجد بكليتها في كل لحظة (العلماء، الكتب).
+      الأحداث (Perdurants): تمتد في الزمن (المعارك، الرحلات).
+    implementation:
+      - "فصل جداول entities عن events"
+      - "منع القول: 'زيد حدث في 500' بل 'زيد شارك في حدث'"
+      
+  principle_3:
+    name: "Rigid vs Role"
+    name_ar: "الصفات الصلبة مقابل الأدوار"
+    source: "Nicola Guarino"
+    field: "Formal Ontology (DOLCE)"
+    rule: |
+      إنسان = صفة صلبة (لا تتغير).
+      خليفة = دور في فترة زمنية (يتغير).
+    implementation:
+      - "حقل entity_type للصفات الصلبة"
+      - "جدول roles للأدوار المتغيرة"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              أنواع الكيانات
+# ═══════════════════════════════════════════════════════════════════════════════
+
+entity_types:
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # الأشخاص
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  PERSON:
+    name_ar: "شخص"
+    description: "عالم، مؤلف، راوٍ، حاكم، أو أي فرد"
+    
+    core_fields:
+      - person_id: "معرّف فريد"
+      - canonical_name: "الاسم الأشهر"
+      - birth_year_hijri: "سنة الولادة هجري"
+      - birth_year_gregorian: "سنة الولادة ميلادي"
+      - death_year_hijri: "سنة الوفاة هجري"
+      - death_year_gregorian: "سنة الوفاة ميلادي"
+      - death_century: "قرن الوفاة (للتقسيم)"
+      - gender: "الجنس"
+      - primary_location: "المكان الرئيسي"
+      - primary_school: "المذهب الرئيسي"
+      
+    uri_format:
+      pattern: "iqraa:person:{death_year}{CanonicalName}"
+      example: "iqraa:person:0728IbnTaymiyya"
+      source: "Maxim Romanov - OpenITI URI system"
+      
+    external_links:
+      - viaf_id: "Virtual International Authority File"
+      - wikidata_id: "Wikidata Q-number"
+      - isni_id: "International Standard Name Identifier"
+      - openiti_uri: "OpenITI URI"
+      
+    lessons:
+      - source: "Maxim Romanov"
+        lesson: |
+          التراجم كبيانات: تحويل سير أعلام النبلاء 
+          من نص سردي إلى جدول (الاسم، الوفاة، الشيوخ، التلاميذ).
+        implementation: "Structured biography extraction"
+        
+  # ═══════════════════════════════════════════════════════════════════════════
+  # الأعمال (الكتب)
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  WORK:
+    name_ar: "عمل / كتاب"
+    description: "عمل تجريدي يندرج تحته طبعات ونسخ"
+    
+    core_fields:
+      - work_id: "معرّف العمل التجريدي"
+      - canonical_title: "العنوان الأشهر"
+      - author_id: "معرّف المؤلف"
+      - composition_year: "سنة التأليف"
+      - subject_primary: "الموضوع الرئيسي"
+      - language: "لغة التأليف"
+      - is_extant: "هل موجود أم مفقود"
+      
+    uri_format:
+      pattern: "iqraa:work:{author_death_year}{AuthorName}.{WorkName}"
+      example: "iqraa:work:0505Ghazali.IhyaUlumDin"
+      
+    lessons:
+      - source: "Sarah Bowen Savant"
+        lesson: |
+          الكتاب ككائن حي: الكتاب التراثي ينمو ويتغير مع كل ناسخ.
+          التعامل مع "إصدارات" لا "كتاب واحد".
+        implementation: "Separate Work from Edition tables"
+        
+  # ═══════════════════════════════════════════════════════════════════════════
+  # الطبعات والنسخ
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  EDITION:
+    name_ar: "طبعة / نسخة"
+    description: "تحقق مادي للعمل التجريدي"
+    
+    core_fields:
+      - edition_id: "معرّف الطبعة"
+      - work_id: "معرّف العمل الأصلي"
+      - edition_type: "MANUSCRIPT | PRINTED | DIGITAL"
+      - editor: "المحقق"
+      - publisher: "الناشر"
+      - publication_year: "سنة النشر"
+      - place: "مكان النشر"
+      - volumes: "عدد المجلدات"
+      - quality_level: "A | B | C | D"
+      - source_id: "مصدر الاقتناء"
+      
+    lessons:
+      - source: "Sarah Bowen Savant"
+        lesson: |
+          النص السائل (Fluid Text): لا توجد نسخة نهائية واحدة.
+          تاريخ الطبري له عدة روايات.
+        implementation: "Version comparison (Diff Analysis)"
+        
+  # ═══════════════════════════════════════════════════════════════════════════
+  # المفاهيم والمصطلحات
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  CONCEPT:
+    name_ar: "مفهوم / مصطلح"
+    description: "مفهوم أو مصطلح علمي"
+    
+    core_fields:
+      - concept_id: "معرّف المفهوم"
+      - canonical_term: "المصطلح الأشهر"
+      - domain: "المجال (فقه، كلام، فلسفة...)"
+      - definition_operational: "التعريف التشغيلي"
+      - first_appearance_work: "أول ظهور موثق"
+      - etymology: "أصل المصطلح"
+      
+    uri_format:
+      pattern: "iqraa:concept:{domain}:{canonical_term}"
+      example: "iqraa:concept:kalam:jawhar"
+      
+    multilingual_tracking:
+      description: "تتبع المصطلح عبر اللغات"
+      fields:
+        - arabic_term: "المصطلح العربي"
+        - greek_original: "الأصل اليوناني"
+        - syriac_intermediate: "الوسيط السرياني"
+        - latin_translation: "الترجمة اللاتينية"
+        - hebrew_parallel: "المقابل العبري"
+        
+    lessons:
+      - source: "Sarah Bowen Savant"
+        lesson: |
+          تتبع تغير المصطلح عبر الزمن.
+          من الجويني إلى الغزالي إلى الرازي.
+        implementation: "Concept evolution tracking"
+        
+  # ═══════════════════════════════════════════════════════════════════════════
+  # الأماكن
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  PLACE:
+    name_ar: "مكان"
+    description: "مدينة، منطقة، مسجد، مدرسة..."
+    
+    core_fields:
+      - place_id: "معرّف المكان"
+      - canonical_name: "الاسم الأشهر"
+      - place_type: "CITY | REGION | MOSQUE | MADRASA | OTHER"
+      - parent_place_id: "المكان الأعلى"
+      - latitude: "خط العرض"
+      - longitude: "خط الطول"
+      - time_start: "بداية الوجود"
+      - time_end: "نهاية الوجود"
+      
+    lessons:
+      - source: "Ian Gregory"
+        field: "Historical GIS & Spatial Humanities"
+        lesson: |
+          الأماكن الضبابية (Fuzzy Polygons): 
+          الأماكن مساحات تتغير عبر الزمن، ليست إحداثيات ثابتة.
+        implementation: "Temporal-spatial polygons"
+      - source: "Maxim Romanov"
+        lesson: |
+          الجغرافيا التاريخية: ربط الأماكن بإحداثيات GPS 
+          مع الاحتفاظ بالسياق الزمني.
+        implementation: "al-Thurayya gazetteer integration"
+        
+  # ═══════════════════════════════════════════════════════════════════════════
+  # المؤسسات
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  INSTITUTION:
+    name_ar: "مؤسسة"
+    description: "مدرسة، جامعة، خانقاه، ديوان..."
+    
+    core_fields:
+      - institution_id: "معرّف المؤسسة"
+      - canonical_name: "الاسم الأشهر"
+      - institution_type: "MADRASA | KHANQAH | DIWAN | COURT | OTHER"
+      - location_id: "المكان"
+      - founder_id: "المؤسس"
+      - founding_year: "سنة التأسيس"
+      - dissolution_year: "سنة الانتهاء"
+      
+  # ═══════════════════════════════════════════════════════════════════════════
+  # المدارس الفكرية
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  SCHOOL:
+    name_ar: "مدرسة فكرية"
+    description: "مذهب فقهي، فرقة كلامية، تيار فلسفي..."
+    
+    core_fields:
+      - school_id: "معرّف المدرسة"
+      - canonical_name: "الاسم الأشهر"
+      - school_type: "FIQH | KALAM | FALSAFA | TASAWWUF | OTHER"
+      - founder_id: "المؤسس"
+      - founding_period: "فترة التأسيس"
+      - parent_school_id: "المدرسة الأم"
+      
+  # ═══════════════════════════════════════════════════════════════════════════
+  # الأحداث (Perdurants)
+  # ═══════════════════════════════════════════════════════════════════════════
+  
+  EVENT:
+    name_ar: "حدث"
+    description: "واقعة تمتد في الزمن"
+    
+    core_fields:
+      - event_id: "معرّف الحدث"
+      - event_type: "BATTLE | COUNCIL | DEBATE | JOURNEY | COMPOSITION | OTHER"
+      - name: "اسم الحدث"
+      - start_date: "تاريخ البداية"
+      - end_date: "تاريخ النهاية"
+      - location_id: "المكان"
+      - description: "وصف مختصر"
+      
+    lessons:
+      - source: "Nicola Guarino"
+        lesson: |
+          الأحداث (Perdurants) تمتد في الزمن ولها أجزاء زمنية.
+          "المعركة" لها بداية ونهاية ومراحل.
+        implementation: "Event decomposition with temporal parts"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              جداول الأسماء والألقاب
+# ═══════════════════════════════════════════════════════════════════════════════
+
+name_tables:
+
+  entity_names:
+    description: "الأسماء المتعددة للكيان الواحد"
+    fields:
+      - name_id: "معرّف الاسم"
+      - entity_id: "معرّف الكيان"
+      - entity_type: "نوع الكيان"
+      - name_text: "نص الاسم"
+      - name_type: "CANONICAL | ALIAS | NISBA | LAQAB | KUNYA | FOREIGN"
+      - language: "لغة الاسم"
+      - script: "نظام الكتابة"
+      - source_id: "مصدر الاسم"
+      - is_primary: "هل هو الاسم الرئيسي"
+      
+  person_aliases:
+    description: "أسماء الأشخاص المتعددة"
+    examples:
+      - entity: "ابن تيمية"
+        names:
+          - type: "CANONICAL"
+            text: "ابن تيمية"
+          - type: "FULL"
+            text: "تقي الدين أحمد بن عبد الحليم بن عبد السلام"
+          - type: "KUNYA"
+            text: "أبو العباس"
+          - type: "LAQAB"
+            text: "شيخ الإسلام"
+          - type: "LATIN"
+            text: "Ibn Taymiyyah"
+            
+  work_titles:
+    description: "عناوين العمل المتعددة"
+    examples:
+      - entity: "إحياء علوم الدين"
+        titles:
+          - type: "CANONICAL"
+            text: "إحياء علوم الدين"
+          - type: "SHORT"
+            text: "الإحياء"
+          - type: "LATIN"
+            text: "Ihya Ulum al-Din"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              إدارة الالتباس
+# ═══════════════════════════════════════════════════════════════════════════════
+
+disambiguation:
+
+  description: |
+    إدارة حالات الالتباس والتشابه بين الكيانات.
+    
+  status_levels:
+    - DRAFT: "مقترح، لم يُراجع"
+    - CONFIRMED: "مؤكد بأدلة"
+    - CONTESTED: "متنازع عليه"
+    - MERGED: "تم دمجه مع كيان آخر"
+    - SPLIT: "تم فصله عن كيان آخر"
+    
+  fields:
+    - entity_id: "الكيان"
+    - disambiguation_status: "حالة التوضيح"
+    - confidence_score: "درجة الثقة (0-1)"
+    - evidence_ids: "الأدلة المستخدمة"
+    - review_required: "هل يحتاج مراجعة"
+    - last_reviewed_by: "آخر مراجع"
+    - last_reviewed_at: "تاريخ المراجعة"
+    
+  lessons:
+    - source: "Luc Moreau"
+      field: "Data Provenance"
+      lesson: |
+        كل قرار دمج/فصل يُوثَّق كنشاط.
+        القرار نفسه "نشاط" يجب توثيقه.
+      implementation: "Disambiguation as provenance activity"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              الأدوار المتغيرة
+# ═══════════════════════════════════════════════════════════════════════════════
+
+roles:
+
+  description: |
+    الأدوار التي يلعبها الشخص في فترات زمنية مختلفة.
+    الدور ≠ الهوية. الدور يتغير، الهوية تبقى.
+    
+  role_types:
+    - CALIPH: "خليفة"
+    - SULTAN: "سلطان"
+    - WAZIR: "وزير"
+    - QADI: "قاضٍ"
+    - MUFTI: "مفتٍ"
+    - SHAYKH: "شيخ"
+    - TEACHER: "مدرّس"
+    - STUDENT: "طالب"
+    
+  fields:
+    - role_id: "معرّف الدور"
+    - person_id: "الشخص"
+    - role_type: "نوع الدور"
+    - institution_id: "المؤسسة"
+    - location_id: "المكان"
+    - start_date: "بداية الدور"
+    - end_date: "نهاية الدور"
+    - appointment_by: "من عيّنه"
+    - evidence_id: "الدليل"
+    
+  lessons:
+    - source: "Nicola Guarino"
+      lesson: |
+        هارون الرشيد (Person) يلعب دور (Caliph) في فترة محددة.
+        "الخليفة مات" لا يعني "نهاية الخلافة".
+      implementation: "Role Pattern in ontology"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              الجداول في BigQuery
+# ═══════════════════════════════════════════════════════════════════════════════
+
+bigquery_tables:
+
+  entities:
+    description: "الجدول الرئيسي للكيانات"
+    partition_by: "entity_type"
+    cluster_by: ["entity_type", "primary_location", "death_century"]
+    
+  entity_names:
+    description: "الأسماء المتعددة"
+    cluster_by: ["entity_id", "name_type", "language"]
+    
+  entity_attributes:
+    description: "الصفات الإضافية"
+    cluster_by: ["entity_id", "attribute_type"]
+    
+  roles:
+    description: "الأدوار المتغيرة"
+    partition_by: "start_date"
+    cluster_by: ["person_id", "role_type"]
+    
+  events:
+    description: "الأحداث"
+    partition_by: "start_date"
+    cluster_by: ["event_type", "location_id"]
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              الإحصائيات المتوقعة
+# ═══════════════════════════════════════════════════════════════════════════════
+
+expected_statistics:
+  entity_types: 8
+  person_records: "100,000+"
+  work_records: "50,000+"
+  concept_records: "10,000+"
+  place_records: "5,000+"
+  
+# ═══════════════════════════════════════════════════════════════════════════════

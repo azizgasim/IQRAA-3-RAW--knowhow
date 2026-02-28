@@ -1,0 +1,241 @@
+# =============================================================================
+# IQRA System v1.3 Configuration
+# =============================================================================
+
+# Google Cloud Settings
+gcp:
+  project_id: "${GCP_PROJECT_ID}"
+  region: "me-central1"  # Middle East (Riyadh)
+  
+# Vertex AI Settings
+vertex_ai:
+  enabled: true
+  models:
+    default: "gemini-1.5-pro"
+    fast: "gemini-1.5-flash"
+    embedding: "text-multilingual-embedding-002"
+  
+# BigQuery Settings
+bigquery:
+  datasets:
+    ops_logs: "ops_logs"
+    kb_store: "kb_store"
+  location: "ME"  # Middle East multi-region
+
+# Agent Engine / ADK Settings
+agent_engine:
+  enabled: true
+  memory_bank:
+    enabled: true
+    ttl_hours: 168  # 7 days
+  sessions:
+    enabled: true
+    max_per_user: 10
+
+# Agents Configuration
+agents:
+  linguist:
+    agent_id: "AGT-01-LINGUIST"
+    enabled: true
+    model: "gemini-1.5-pro"
+    temperature: 0.1
+    timeout_seconds: 60
+    
+  orchestrator:
+    agent_id: "AGT-02-ORCHESTRATOR"
+    enabled: true
+    model: "gemini-1.5-pro"
+    temperature: 0.3
+    timeout_seconds: 30
+    
+  guardian:
+    agent_id: "AGT-03-GUARDIAN"
+    enabled: true
+    model: "gemini-1.5-flash"
+    temperature: 0.2
+    timeout_seconds: 30
+    
+  archivist:
+    agent_id: "AGT-04-ARCHIVIST"
+    enabled: true
+    model: null  # No LLM
+    timeout_seconds: 30
+    
+  evidencer:
+    agent_id: "AGT-05-EVIDENCER"
+    enabled: true
+    model: "gemini-1.5-pro"
+    temperature: 0.2
+    timeout_seconds: 60
+    
+  analyst:
+    agent_id: "AGT-06-ANALYST"
+    enabled: true
+    model: "gemini-1.5-pro"
+    temperature: 0.4
+    timeout_seconds: 90
+    
+  genealogist:
+    agent_id: "AGT-07-GENEALOGIST"
+    enabled: true
+    model: "gemini-1.5-pro"
+    temperature: 0.5
+    timeout_seconds: 120
+    
+  scout:
+    agent_id: "AGT-08-SCOUT"
+    enabled: true
+    model: "gemini-1.5-pro"  # 2M context
+    temperature: 0.7
+    timeout_seconds: 180
+    
+  theorist:
+    agent_id: "AGT-09-THEORIST"
+    enabled: true
+    model: "gemini-1.5-pro"
+    temperature: 0.6
+    timeout_seconds: 180
+    
+  purifier:
+    agent_id: "AGT-10-PURIFIER"
+    enabled: true
+    model: "gemini-1.5-pro"
+    temperature: 0.3
+    timeout_seconds: 120
+    
+  improver:
+    agent_id: "AGT-11-IMPROVER"
+    enabled: true
+    model: "gemini-1.5-pro"
+    temperature: 0.3
+    timeout_seconds: 120
+    triggers:
+      scheduled_interval_hours: 24
+      error_threshold: 10
+
+# Gates Configuration
+gates:
+  g0_input:
+    enabled: true
+    on_fail: "block"
+  g1_evidence:
+    enabled: true
+    on_fail: "block"
+    min_evidence_count: 2
+    min_confidence: 0.7
+  g2_falsification:
+    enabled: true
+    on_fail: "flag"
+  g3_purification:
+    enabled: true
+    on_fail: "block"
+  g4_theory:
+    enabled: true
+    on_fail: "flag"
+  g5_export:
+    enabled: true
+    on_fail: "block"
+
+# Human-in-the-Loop Settings
+hitl:
+  enabled: true
+  escalation_matrix:
+    low_confidence_threshold: 0.7
+    mandatory_review_threshold: 0.5
+    sensitive_topics:
+      - "عقيدة"
+      - "فقه"
+      - "حكم شرعي"
+  review_levels:
+    level_1:
+      name: "Junior Reviewer"
+      timeout_hours: 24
+    level_2:
+      name: "Domain Expert"
+      timeout_hours: 48
+    level_3:
+      name: "Senior Scholar"
+      timeout_hours: 72
+
+# RAG Pipeline Settings
+rag:
+  enabled: true
+  indexing:
+    chunk_size: 512
+    overlap: 50
+    embedding_model: "text-multilingual-embedding-002"
+  retrieval:
+    top_k: 20
+    min_score: 0.7
+    hybrid_weight:
+      semantic: 0.7
+      keyword: 0.3
+  reranking:
+    enabled: true
+    model: "cross-encoder/ms-marco-MiniLM-L-12-v2"
+    output_k: 10
+  context:
+    max_tokens: 8000
+    priority: ["recency", "relevance", "authority"]
+
+# Caching Strategy
+cache:
+  l1_hot:
+    backend: "redis"
+    ttl_seconds: 3600  # 1 hour
+  l2_warm:
+    backend: "memorystore"
+    ttl_seconds: 86400  # 24 hours
+  l3_cold:
+    backend: "cloud_storage"
+    ttl_seconds: 604800  # 7 days
+  invalidation:
+    on_source_update: true
+    alert_miss_rate_threshold: 0.3
+
+# Observability Settings
+observability:
+  tracing:
+    enabled: true
+    provider: "cloud_trace"
+    sampling_rate: 1.0
+  metrics:
+    enabled: true
+    provider: "cloud_monitoring"
+  logging:
+    enabled: true
+    level: "INFO"
+    provider: "cloud_logging"
+
+# Security Settings
+security:
+  dlp:
+    enabled: true
+    inspect_arabic_pii: true
+  policy_tags:
+    - name: "PII"
+      columns: ["author_name", "reviewer_name"]
+    - name: "SENSITIVE_RELIGIOUS"
+      columns: ["fatwa_text", "aqeedah_content"]
+    - name: "RESTRICTED_ACCESS"
+      columns: ["unpublished_manuscripts"]
+  audit:
+    enabled: true
+    retention_days: 365
+  encryption:
+    at_rest: "google_managed"
+    in_transit: "tls_1_3"
+
+# Cost Management
+cost:
+  max_per_query_usd: 2.0
+  alert_threshold_usd: 1.5
+  daily_limit_usd: 100.0
+
+# Feature Flags
+features:
+  arabic_nlp: true
+  frbr_citations: true
+  error_learning: true
+  human_in_loop: true
+  rag_pipeline: true

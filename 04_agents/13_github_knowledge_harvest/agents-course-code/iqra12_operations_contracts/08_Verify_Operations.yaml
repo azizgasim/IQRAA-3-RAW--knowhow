@@ -1,0 +1,983 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#                    الفئة الثامنة: التحقق (Verify)
+#                    IQRA-12 Core Operations Layer
+# ═══════════════════════════════════════════════════════════════════════════════
+# 
+# الغرض: ضمان الجودة والاتساق والموثوقية
+# العمليات: V1-V6
+# 
+# المبدأ الحاكم:
+# "لا نشر بدون V1 + V2 + V4 ناجحة"
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+category:
+  id: "VERIFY"
+  name_ar: "التحقق"
+  name_en: "Verify"
+  purpose: "ضمان الجودة والاتساق والموثوقية قبل النشر"
+  golden_rule: "لا نشر بدون اجتياز V1 (استشهادات) + V2 (اتساق) + V4 (أصل)"
+  operations_count: 6
+  
+  critical_note: |
+    ⚠️ بوابات الجودة الإلزامية
+    كل منتج يخرج من النظام يجب أن يمر عبر سلسلة التحقق
+    الفشل في أي بوابة = عودة للمراجعة
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# V1: تدقيق الاستشهادات (Citation Audit)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+operations:
+
+  - id: "V1"
+    name_ar: "تدقيق الاستشهادات"
+    name_en: "Citation Audit"
+    category: "Verify"
+    version: "1.0.0"
+    
+    purpose: |
+      التحقق من صحة واكتمال واتساق جميع الاستشهادات في الوثيقة
+      ⚠️ بوابة إلزامية - لا نشر بدون اجتيازها
+    
+    is_mandatory_gate: true
+    
+    inputs:
+      required:
+        - name: document
+          type: object
+          description: "الوثيقة المراد تدقيقها"
+          schema:
+            document_id: string
+            content: string
+            citations: array
+            bibliography: array
+            
+      optional:
+        - name: audit_level
+          type: enum
+          values: [BASIC, STANDARD, RIGOROUS, PUBLICATION_READY]
+          default: "STANDARD"
+          description: |
+            BASIC: تحقق من الوجود فقط
+            STANDARD: تحقق من الصحة والاتساق
+            RIGOROUS: تحقق من المصادر الأصلية
+            PUBLICATION_READY: معايير النشر الأكاديمي
+            
+        - name: citation_style
+          type: string
+          description: "أسلوب الاستشهاد المطلوب"
+          
+        - name: verify_sources
+          type: boolean
+          default: true
+          description: "التحقق من المصادر الأصلية"
+    
+    outputs:
+      primary:
+        name: citation_audit_report
+        type: CitationAuditReport
+        schema:
+          audit_id: string
+          document_id: string
+          audit_level: string
+          timestamp: timestamp
+          overall_status: enum[PASS, PASS_WITH_WARNINGS, FAIL]
+          summary:
+            total_citations: integer
+            verified: integer
+            warnings: integer
+            errors: integer
+            pass_rate: float
+          citation_checks:
+            type: array
+            items:
+              citation_id: string
+              location_in_document: integer
+              cited_text: string
+              checks:
+                exists_in_bibliography:
+                  status: enum[PASS, FAIL]
+                  details: string
+                format_correct:
+                  status: enum[PASS, FAIL, WARNING]
+                  expected: string
+                  actual: string
+                source_verified:
+                  status: enum[PASS, FAIL, UNVERIFIABLE, SKIPPED]
+                  verification_method: string
+                  details: string
+                quote_accurate:
+                  status: enum[PASS, FAIL, PARTIAL, NOT_APPLICABLE]
+                  original_text: string
+                  differences: array
+                page_number_correct:
+                  status: enum[PASS, FAIL, UNVERIFIABLE]
+                  details: string
+              overall_status: enum[PASS, WARNING, ERROR]
+              issues: array[string]
+              suggestions: array[string]
+          bibliography_checks:
+            type: array
+            items:
+              entry_id: string
+              checks:
+                format_correct: object
+                all_fields_present: object
+                cited_in_text: object
+                duplicate_check: object
+              status: enum[PASS, WARNING, ERROR]
+          cross_reference_checks:
+            orphan_citations: array  # في النص لكن ليس في الببليوغرافيا
+            orphan_bibliography: array  # في الببليوغرافيا لكن ليس في النص
+            duplicate_citations: array
+          style_consistency:
+            consistent: boolean
+            inconsistencies: array
+          recommendations:
+            must_fix: array
+            should_fix: array
+            optional: array
+          gate_decision:
+            passed: boolean
+            blocking_issues: array
+            
+      secondary:
+        - name: detailed_verification_log
+          type: array
+          
+        - name: source_availability_report
+          type: object
+    
+    tools:
+      internal:
+        - name: Citation Parser
+          type: pattern_recognition
+          
+        - name: Bibliography Matcher
+          type: matching
+          
+        - name: Source Verifier
+          type: lookup
+          uses: ["L3"]
+          
+        - name: Quote Comparator
+          type: diff
+          
+        - name: Style Checker
+          type: rule_based
+          
+      external:
+        - name: CrossRef API
+          purpose: "DOI verification"
+          
+        - name: Shamela Verifier
+          purpose: "Islamic sources verification"
+    
+    resources:
+      knowledge_bases:
+        - citation_style_rules
+        - source_registry
+    
+    guardrails:
+      post_conditions:
+        - condition: "every citation is checked"
+          error_code: "V1_INCOMPLETE_AUDIT"
+          
+        - condition: "source verification attempted for verifiable sources"
+          error_code: "V1_SKIPPED_VERIFICATION"
+          
+      forbidden:
+        - "marking unverified as verified"
+        - "ignoring errors"
+        - "auto-passing without checks"
+    
+    quality_metrics:
+      - name: citation_accuracy
+        target: "1.0 for PASS"
+        
+      - name: verification_coverage
+        target: ">= 0.9"
+        
+      - name: false_positive_rate
+        target: "< 0.01"
+    
+    cost_profile:
+      compute: "MEDIUM"
+      tokens: "LOW"
+      external_api_calls: "variable"
+      estimated_cost_per_call: "$0.02 - $0.15"
+    
+    autonomy_level: "L0"
+    autonomy_description: "تدقيق آلي، النتائج نهائية"
+    
+    gate_requirements:
+      to_pass:
+        - "zero errors"
+        - "all citations verified or marked unverifiable with reason"
+        - "no orphan citations"
+        - "style consistency >= 95%"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# V2: تدقيق الاتساق (Consistency Audit)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "V2"
+    name_ar: "تدقيق الاتساق"
+    name_en: "Consistency Audit"
+    category: "Verify"
+    version: "1.0.0"
+    
+    purpose: |
+      اكتشاف التناقضات الداخلية في الوثيقة أو مجموعة الادعاءات
+      ⚠️ بوابة إلزامية - لا نشر بدون اجتيازها
+    
+    is_mandatory_gate: true
+    
+    inputs:
+      required:
+        - name: content
+          type: union[document, claims_set, knowledge_base_update]
+          description: "المحتوى المراد تدقيقه"
+          
+      optional:
+        - name: consistency_types
+          type: array[string]
+          default: ["all"]
+          values: [
+            LOGICAL,           # تناقض منطقي
+            FACTUAL,           # تناقض في الحقائق
+            TERMINOLOGICAL,    # تناقض في المصطلحات
+            CHRONOLOGICAL,     # تناقض زمني
+            NUMERICAL,         # تناقض رقمي
+            POSITIONAL         # تناقض في المواقف
+          ]
+          
+        - name: reference_baseline
+          type: string
+          description: "قاعدة مرجعية للمقارنة"
+          
+        - name: tolerance_level
+          type: enum
+          values: [STRICT, NORMAL, LENIENT]
+          default: "NORMAL"
+    
+    outputs:
+      primary:
+        name: consistency_audit_report
+        type: ConsistencyAuditReport
+        schema:
+          audit_id: string
+          content_id: string
+          timestamp: timestamp
+          overall_status: enum[CONSISTENT, MINOR_ISSUES, MAJOR_ISSUES, INCONSISTENT]
+          summary:
+            total_checks: integer
+            passed: integer
+            warnings: integer
+            contradictions: integer
+          contradictions_found:
+            type: array
+            items:
+              contradiction_id: string
+              type: string
+              severity: enum[MINOR, MODERATE, MAJOR, CRITICAL]
+              statement_a:
+                text: string
+                location: object
+                claim_id: string
+              statement_b:
+                text: string
+                location: object
+                claim_id: string
+              nature:
+                description: string
+                logical_form: string
+              analysis:
+                is_real_contradiction: boolean
+                possible_resolution: string
+                requires_human_review: boolean
+              recommendation: string
+          terminology_consistency:
+            consistent_terms: array
+            inconsistent_terms:
+              type: array
+              items:
+                term: string
+                variations: array
+                locations: array
+                recommendation: string
+          chronological_consistency:
+            timeline_valid: boolean
+            issues: array
+          numerical_consistency:
+            calculations_valid: boolean
+            issues: array
+          cross_reference_consistency:
+            valid: boolean
+            broken_references: array
+          recommendations:
+            must_resolve: array
+            should_review: array
+          gate_decision:
+            passed: boolean
+            blocking_issues: array
+            
+      secondary:
+        - name: consistency_matrix
+          type: object
+          description: "مصفوفة التناقضات"
+    
+    tools:
+      internal:
+        - name: Contradiction Detector
+          type: logic
+          uses: ["A4"]
+          
+        - name: Terminology Tracker
+          type: nlp
+          
+        - name: Chronology Validator
+          type: temporal
+          
+        - name: Cross-reference Checker
+          type: structural
+          
+      external: []
+    
+    guardrails:
+      post_conditions:
+        - condition: "all potential contradictions analyzed"
+          error_code: "V2_INCOMPLETE_ANALYSIS"
+          
+        - condition: "severity ratings are justified"
+          error_code: "V2_UNJUSTIFIED_SEVERITY"
+          
+      forbidden:
+        - "ignoring contradictions"
+        - "auto-resolving without human review for major issues"
+    
+    quality_metrics:
+      - name: detection_accuracy
+        target: ">= 0.95"
+        
+      - name: false_positive_rate
+        target: "< 0.05"
+    
+    cost_profile:
+      compute: "MEDIUM-HIGH"
+      tokens: "MEDIUM"
+      estimated_cost_per_call: "$0.03 - $0.15"
+    
+    autonomy_level: "L0-L1"
+    
+    gate_requirements:
+      to_pass:
+        - "zero critical contradictions"
+        - "major contradictions reviewed and resolved"
+        - "terminology consistent or variations documented"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# V3: تدقيق التغطية (Coverage Audit)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "V3"
+    name_ar: "تدقيق التغطية"
+    name_en: "Coverage Audit"
+    category: "Verify"
+    version: "1.0.0"
+    
+    purpose: |
+      التحقق من أن الوثيقة تغطي ما وعدت به
+      وأن لا فجوات في التغطية مقارنة بالمخطط أو المعيار
+    
+    inputs:
+      required:
+        - name: document
+          type: object
+          description: "الوثيقة المراد تدقيقها"
+          
+        - name: baseline
+          type: object
+          description: "المعيار المرجعي (مخطط، خطة، توقعات)"
+          schema:
+            type: enum[OUTLINE, RESEARCH_PLAN, TOPIC_SCOPE, CHECKLIST]
+            content: object
+            
+      optional:
+        - name: coverage_dimensions
+          type: array[string]
+          default: ["all"]
+          values: [
+            CLAIMS,            # تغطية الادعاءات
+            TOPICS,            # تغطية المواضيع
+            SOURCES,           # تغطية المصادر
+            PERSPECTIVES,      # تغطية وجهات النظر
+            TEMPORAL,          # التغطية الزمنية
+            GEOGRAPHIC         # التغطية الجغرافية
+          ]
+    
+    outputs:
+      primary:
+        name: coverage_audit_report
+        type: CoverageAuditReport
+        schema:
+          audit_id: string
+          document_id: string
+          baseline_id: string
+          overall_coverage: float
+          status: enum[COMPLETE, ADEQUATE, PARTIAL, INSUFFICIENT]
+          by_dimension:
+            claims:
+              expected: array
+              covered: array
+              missing: array
+              coverage_rate: float
+            topics:
+              expected: array
+              covered: array
+              missing: array
+              unexpected_additions: array
+              coverage_rate: float
+            sources:
+              expected_types: array
+              actual_types: array
+              primary_sources_rate: float
+              source_diversity: float
+            perspectives:
+              expected: array
+              covered: array
+              missing: array
+              balance_score: float
+            temporal:
+              expected_range: object
+              actual_range: object
+              gaps: array
+            geographic:
+              expected_regions: array
+              covered_regions: array
+              missing_regions: array
+          gaps_analysis:
+            type: array
+            items:
+              gap_id: string
+              dimension: string
+              description: string
+              severity: enum[MINOR, MODERATE, SIGNIFICANT, CRITICAL]
+              impact: string
+              suggestion: string
+          unexpected_content:
+            type: array
+            description: "محتوى لم يكن في المخطط"
+          recommendations:
+            must_add: array
+            should_add: array
+            could_remove: array
+            
+      secondary:
+        - name: coverage_heatmap
+          type: object
+    
+    tools:
+      internal:
+        - name: Coverage Calculator
+          type: matching
+          
+        - name: Gap Detector
+          type: comparison
+          
+        - name: Balance Analyzer
+          type: statistical
+          
+      external: []
+    
+    guardrails:
+      post_conditions:
+        - condition: "all baseline items checked"
+          error_code: "V3_INCOMPLETE_CHECK"
+          
+      forbidden:
+        - "ignoring significant gaps"
+    
+    quality_metrics:
+      - name: baseline_coverage
+        target: ">= 0.9 for adequate"
+        
+      - name: gap_identification
+        target: ">= 0.95"
+    
+    cost_profile:
+      compute: "LOW-MEDIUM"
+      tokens: "LOW"
+      estimated_cost_per_call: "$0.01 - $0.05"
+    
+    autonomy_level: "L0"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# V4: تدقيق الأصل (Provenance Audit)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "V4"
+    name_ar: "تدقيق الأصل"
+    name_en: "Provenance Audit"
+    category: "Verify"
+    version: "1.0.0"
+    
+    purpose: |
+      التحقق من سلسلة إنتاج كل عنصر في الوثيقة
+      من المصدر الأصلي إلى الشكل النهائي
+      ⚠️ بوابة إلزامية - لا نشر بدون اجتيازها
+    
+    is_mandatory_gate: true
+    
+    inputs:
+      required:
+        - name: artifact
+          type: object
+          description: "المنتج المراد تدقيق أصله"
+          schema:
+            artifact_id: string
+            type: string
+            content: any
+            
+      optional:
+        - name: depth
+          type: enum
+          values: [SHALLOW, STANDARD, DEEP, FORENSIC]
+          default: "STANDARD"
+          description: |
+            SHALLOW: تحقق من وجود provenance فقط
+            STANDARD: تحقق من الاتساق
+            DEEP: تحقق من المصادر
+            FORENSIC: تحقيق كامل
+    
+    outputs:
+      primary:
+        name: provenance_audit_report
+        type: ProvenanceAuditReport
+        schema:
+          audit_id: string
+          artifact_id: string
+          timestamp: timestamp
+          overall_status: enum[VERIFIED, PARTIAL, UNVERIFIED, SUSPICIOUS]
+          provenance_chain:
+            type: array
+            items:
+              step_number: integer
+              operation: string
+              operation_id: string
+              timestamp: timestamp
+              input_ids: array
+              output_id: string
+              parameters: object
+              status: enum[VERIFIED, UNVERIFIED, MISSING, SUSPICIOUS]
+              verification:
+                method: string
+                result: string
+                confidence: float
+          components_audit:
+            type: array
+            items:
+              component_id: string
+              component_type: string
+              source_chain:
+                complete: boolean
+                steps: array
+                missing_links: array
+              original_source:
+                identified: boolean
+                source_id: string
+                verification_status: string
+          integrity_checks:
+            all_inputs_accounted: boolean
+            no_orphan_data: boolean
+            no_circular_references: boolean
+            timestamps_consistent: boolean
+          traceability:
+            forward: boolean  # من المصدر للمنتج
+            backward: boolean  # من المنتج للمصدر
+          issues:
+            type: array
+            items:
+              issue_id: string
+              type: enum[MISSING_LINK, UNVERIFIED_SOURCE, SUSPICIOUS_MODIFICATION, TIMESTAMP_ANOMALY]
+              severity: enum[LOW, MEDIUM, HIGH, CRITICAL]
+              location: string
+              description: string
+              recommendation: string
+          gate_decision:
+            passed: boolean
+            blocking_issues: array
+            
+      secondary:
+        - name: provenance_graph
+          type: object
+          format: "DAG"
+          
+        - name: detailed_trace_log
+          type: array
+    
+    tools:
+      internal:
+        - name: Provenance Tracer
+          type: graph_traversal
+          
+        - name: Operation Validator
+          type: log_analysis
+          
+        - name: Source Verifier
+          type: lookup
+          
+        - name: Integrity Checker
+          type: validation
+          
+      external: []
+    
+    resources:
+      knowledge_bases:
+        - operation_logs
+        - source_registry
+    
+    guardrails:
+      post_conditions:
+        - condition: "every component traced to source"
+          error_code: "V4_INCOMPLETE_TRACE"
+          
+        - condition: "no suspicious gaps"
+          error_code: "V4_SUSPICIOUS_GAP"
+          
+      forbidden:
+        - "skipping verification steps"
+        - "ignoring suspicious patterns"
+    
+    quality_metrics:
+      - name: trace_completeness
+        target: "1.0 for VERIFIED"
+        
+      - name: source_verification_rate
+        target: ">= 0.95"
+    
+    cost_profile:
+      compute: "MEDIUM"
+      tokens: "LOW"
+      estimated_cost_per_call: "$0.02 - $0.10"
+    
+    autonomy_level: "L0"
+    
+    gate_requirements:
+      to_pass:
+        - "complete provenance chain"
+        - "all sources verified or marked with reason"
+        - "no critical integrity issues"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# V5: تدقيق الحقوق (Rights Audit)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "V5"
+    name_ar: "تدقيق الحقوق"
+    name_en: "Rights Audit"
+    category: "Verify"
+    version: "1.0.0"
+    
+    purpose: |
+      التحقق من حالة حقوق النشر والاستخدام لكل مكون
+      وتحديد ما يمكن نشره وما لا يمكن
+    
+    inputs:
+      required:
+        - name: content
+          type: object
+          description: "المحتوى المراد تدقيق حقوقه"
+          
+      optional:
+        - name: intended_use
+          type: enum
+          values: [
+            INTERNAL_RESEARCH,
+            ACADEMIC_PUBLICATION,
+            COMMERCIAL_PUBLICATION,
+            OPEN_ACCESS,
+            EDUCATIONAL,
+            ARCHIVAL
+          ]
+          default: "ACADEMIC_PUBLICATION"
+          
+        - name: jurisdiction
+          type: string
+          default: "international"
+    
+    outputs:
+      primary:
+        name: rights_audit_report
+        type: RightsAuditReport
+        schema:
+          audit_id: string
+          content_id: string
+          intended_use: string
+          overall_status: enum[CLEAR, MOSTLY_CLEAR, RESTRICTED, BLOCKED]
+          components:
+            type: array
+            items:
+              component_id: string
+              component_type: enum[TEXT, IMAGE, DATA, CODE, TRANSLATION]
+              source: string
+              rights_status:
+                status: enum[PUBLIC_DOMAIN, CC_LICENSE, FAIR_USE, RESTRICTED, UNKNOWN]
+                license: string
+                expiry_date: string
+                restrictions: array
+              for_intended_use:
+                permitted: boolean
+                conditions: array
+                attribution_required: string
+              issues: array
+          quotation_analysis:
+            total_quoted_words: integer
+            by_source:
+              type: array
+              items:
+                source: string
+                words_quoted: integer
+                percentage_of_source: float
+                fair_use_assessment: string
+          required_permissions:
+            type: array
+            items:
+              source: string
+              permission_type: string
+              status: enum[OBTAINED, PENDING, NOT_REQUESTED, NOT_REQUIRED]
+              contact: string
+          required_attributions:
+            type: array
+            items:
+              source: string
+              attribution_text: string
+              location: string
+          recommendations:
+            can_publish: array
+            needs_permission: array
+            must_remove: array
+            must_attribute: array
+            
+      secondary:
+        - name: license_summary
+          type: object
+    
+    tools:
+      internal:
+        - name: Rights Classifier
+          type: rule_based
+          
+        - name: Fair Use Analyzer
+          type: legal_analysis
+          
+        - name: License Parser
+          type: pattern_recognition
+          
+      external:
+        - name: Copyright Registry
+          purpose: "copyright status lookup"
+    
+    guardrails:
+      post_conditions:
+        - condition: "every component has rights status"
+          error_code: "V5_INCOMPLETE_AUDIT"
+          
+      forbidden:
+        - "ignoring restricted content"
+        - "publishing without required attribution"
+    
+    quality_metrics:
+      - name: rights_coverage
+        target: "1.0"
+        
+      - name: attribution_accuracy
+        target: "1.0"
+    
+    cost_profile:
+      compute: "LOW"
+      tokens: "LOW"
+      estimated_cost_per_call: "$0.01 - $0.05"
+    
+    autonomy_level: "L0-L1"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# V6: اختبار النسق (Schema/Ontology Testing)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+  - id: "V6"
+    name_ar: "اختبار النسق"
+    name_en: "Schema/Ontology Testing"
+    category: "Verify"
+    version: "1.0.0"
+    
+    purpose: |
+      اختبار تماسك ومنطقية الأنطولوجيات والمخططات
+      والتأكد من خلوها من التناقضات والدورات
+    
+    inputs:
+      required:
+        - name: schema
+          type: object
+          description: "النسق أو الأنطولوجيا المراد اختبارها"
+          schema:
+            type: enum[ONTOLOGY, DATABASE_SCHEMA, API_SCHEMA, DATA_MODEL]
+            content: object
+            
+      optional:
+        - name: test_types
+          type: array[string]
+          default: ["all"]
+          values: [
+            LOGICAL_CONSISTENCY,    # اتساق منطقي
+            STRUCTURAL_INTEGRITY,   # سلامة البنية
+            COMPLETENESS,           # اكتمال
+            REDUNDANCY,             # تكرار
+            NAMING_CONVENTIONS,     # اتفاقيات التسمية
+            DOCUMENTATION          # التوثيق
+          ]
+          
+        - name: competency_questions
+          type: array[string]
+          description: "أسئلة لاختبار قدرة النسق على الإجابة"
+    
+    outputs:
+      primary:
+        name: schema_test_report
+        type: SchemaTestReport
+        schema:
+          test_id: string
+          schema_id: string
+          schema_type: string
+          timestamp: timestamp
+          overall_status: enum[PASS, PASS_WITH_WARNINGS, FAIL]
+          tests:
+            logical_consistency:
+              status: enum[PASS, FAIL]
+              contradictions: array
+              cycles: array
+              satisfiability: boolean
+            structural_integrity:
+              status: enum[PASS, FAIL]
+              orphan_classes: array
+              invalid_references: array
+              missing_definitions: array
+            completeness:
+              status: enum[PASS, WARNING, FAIL]
+              coverage_score: float
+              missing_concepts: array
+              missing_relations: array
+            redundancy:
+              status: enum[PASS, WARNING]
+              duplicate_definitions: array
+              redundant_relations: array
+            naming_conventions:
+              status: enum[PASS, WARNING, FAIL]
+              violations: array
+            documentation:
+              status: enum[PASS, WARNING, FAIL]
+              undocumented_elements: array
+              documentation_coverage: float
+          competency_questions_results:
+            type: array
+            items:
+              question: string
+              answerable: boolean
+              explanation: string
+          statistics:
+            classes: integer
+            relations: integer
+            axioms: integer
+            instances: integer
+            depth: integer
+          recommendations:
+            must_fix: array
+            should_fix: array
+            suggestions: array
+            
+      secondary:
+        - name: visualization
+          type: object
+          
+        - name: detailed_test_log
+          type: array
+    
+    tools:
+      internal:
+        - name: Consistency Reasoner
+          type: logic_reasoner
+          
+        - name: Structure Validator
+          type: graph_analysis
+          
+        - name: Naming Convention Checker
+          type: pattern_based
+          
+        - name: Query Tester
+          type: query_engine
+          
+      external:
+        - name: OWL Reasoner
+          purpose: "ontology reasoning"
+    
+    guardrails:
+      post_conditions:
+        - condition: "all test types executed"
+          error_code: "V6_INCOMPLETE_TESTING"
+          
+      forbidden:
+        - "ignoring logical inconsistencies"
+        - "passing with cycles"
+    
+    quality_metrics:
+      - name: logical_soundness
+        target: "1.0"
+        
+      - name: structural_validity
+        target: "1.0"
+        
+      - name: competency_coverage
+        target: ">= 0.9"
+    
+    cost_profile:
+      compute: "MEDIUM-HIGH"
+      tokens: "LOW"
+      estimated_cost_per_call: "$0.02 - $0.15"
+    
+    autonomy_level: "L0"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              بوابات الجودة
+# ═══════════════════════════════════════════════════════════════════════════════
+
+quality_gates:
+  
+  pre_publish_gate:
+    name: "بوابة ما قبل النشر"
+    required_verifications:
+      - V1  # تدقيق الاستشهادات
+      - V2  # تدقيق الاتساق
+      - V4  # تدقيق الأصل
+    pass_criteria:
+      - "V1.gate_decision.passed == true"
+      - "V2.gate_decision.passed == true"
+      - "V4.gate_decision.passed == true"
+    on_failure:
+      action: "BLOCK_AND_RETURN"
+      notify: ["author", "reviewer"]
+      
+  pre_integration_gate:
+    name: "بوابة ما قبل الدمج في قاعدة المعرفة"
+    required_verifications:
+      - V2  # تدقيق الاتساق (مع القاعدة الموجودة)
+      - V4  # تدقيق الأصل
+      - V6  # اختبار النسق
+    pass_criteria:
+      - "no conflicts with existing knowledge"
+      - "provenance complete"
+      - "schema compatible"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#                              نهاية ملف التحقق
+# ═══════════════════════════════════════════════════════════════════════════════
